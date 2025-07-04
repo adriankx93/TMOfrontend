@@ -11,7 +11,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
 import EditUserPage from './pages/EditUserPage';
-import CurrentMonthPage from './pages/CurrentMonthPage'; // Assuming this page exists
+import CurrentMonthPage from './pages/CurrentMonthPage';
 
 export default function App() {
   return (
@@ -32,4 +32,3 @@ export default function App() {
     </div>
   );
 }
-```
