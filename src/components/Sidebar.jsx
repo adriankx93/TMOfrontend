@@ -1,10 +1,15 @@
 export default function Sidebar() {
   return (
-    <aside className="h-full w-56 bg-gradient-to-b from-blue-900 to-blue-700 text-white flex flex-col p-6 gap-6 shadow-2xl rounded-2xl mr-8">
-      <div className="font-extrabold text-2xl mb-6">TMO</div>
-      <a href="#panel" className="py-2 px-4 rounded-xl hover:bg-blue-800 transition">Panel</a>
-      <a href="#users" className="py-2 px-4 rounded-xl hover:bg-blue-800 transition">Użytkownicy</a>
-      <a href="#settings" className="py-2 px-4 rounded-xl hover:bg-blue-800 transition">Ustawienia</a>
+    <aside className="hidden md:flex flex-col w-64 bg-gradient-to-br from-blue-900 to-blue-700 text-white min-h-screen py-10 px-6 gap-6 shadow-2xl">
+      <div className="font-extrabold text-2xl mb-12 tracking-wide">TMO</div>
+      <nav className="flex flex-col gap-2">
+        <a href="#" className="py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition">Dashboard</a>
+        <a href="#" className="py-3 px-4 rounded-xl hover:bg-white/10 transition">Technicy</a>
+        <a href="#" className="py-3 px-4 rounded-xl hover:bg-white/10 transition">Zgłoszenia</a>
+        <a href="#" className="py-3 px-4 rounded-xl hover:bg-white/10 transition">Ustawienia</a>
+      </nav>
+      <div className="flex-1" />
+      <div className="text-white/60 text-xs">© {new Date().getFullYear()} TMO</div>
     </aside>
   );
 }
