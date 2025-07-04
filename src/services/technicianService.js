@@ -5,7 +5,8 @@ export const technicianService = {
   getAllTechnicians: async () => {
     try {
       const response = await API.get('/technicians');
-      return response.data;
+      // Ensure we always return an array, even if the API response is not an array
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching technicians:', error);
       return [];
@@ -60,7 +61,7 @@ export const technicianService = {
   getTechnicianTasks: async (technicianId) => {
     try {
       const response = await API.get(`/technicians/${technicianId}/tasks`);
-      return response.data;
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching technician tasks:', error);
       return [];
