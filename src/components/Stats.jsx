@@ -35,13 +35,13 @@ function StatCard({ icon, title, value, trend, trendValue, color = "orange" }) {
   );
 }
 
-export default function Stats() {
+export default function Stats({ stats }) {
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
       <StatCard 
         icon="👷" 
-        title="Technicy na zmianie" 
-        value="6" 
+        title="Technicy aktywni" 
+        value={stats?.activeTechnicians || 0}
         trend="up" 
         trendValue="+1" 
         color="orange"
@@ -49,7 +49,7 @@ export default function Stats() {
       <StatCard 
         icon="📋" 
         title="Zadania w toku" 
-        value="12" 
+        value={stats?.currentTasks || 0}
         trend="down" 
         trendValue="-3%" 
         color="blue"
@@ -57,7 +57,7 @@ export default function Stats() {
       <StatCard 
         icon="🔄" 
         title="Pula zadań" 
-        value="8" 
+        value={stats?.poolTasks || 0}
         trend="up" 
         trendValue="+2" 
         color="amber"
@@ -65,7 +65,7 @@ export default function Stats() {
       <StatCard 
         icon="✅" 
         title="Wykonane dziś" 
-        value="24" 
+        value={stats?.completedToday || 0}
         trend="up" 
         trendValue="+15%" 
         color="emerald"

@@ -58,7 +58,10 @@ export default function TasksPage() {
 
       {/* Create Task Modal */}
       {showCreateModal && (
-        <CreateTaskModal onClose={() => setShowCreateModal(false)} />
+        <CreateTaskModal 
+          onClose={() => setShowCreateModal(false)} 
+          onTaskCreated={() => setShowCreateModal(false)}
+        />
       )}
     </div>
   );

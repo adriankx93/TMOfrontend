@@ -1,29 +1,53 @@
+import { useTechnicians } from "../hooks/useTechnicians";
+import { useTasks } from "../hooks/useTasks";
+
 export default function ShiftOverview() {
+  const { technicians } = useTechnicians();
+  const { tasks } = useTasks();
+  
   const currentHour = new Date().getHours();
   const isDay = currentHour >= 7 && currentHour < 19;
-  
-  const dayShift = {
-    name: "Zmiana dzienna",
-    time: "07:00 - 19:00",
-    technicians: [
-      { name: "Jan Kowalski", status: "active", tasks: 3 },
-      { name: "Anna Nowak", status: "active", tasks: 2 },
-      { name: "Piotr Wiśniewski", status: "break", tasks: 1 }
-    ]
+
+  const dayTechnicians = technicians.filter(t => t.shift === 'Dzienna');
+  const nightTechnicians = technicians.filter(t => t.shift === 'Nocna');
+
+  const getDayTasks = () => {
+    return tasks.filter(task => 
+      task.shift === 'Dzienna' && 
+      ['assigned', 'in_progress'].includes(task.status)
+    ).length;
   };
 
-  const nightShift = {
-    name: "Zmiana nocna", 
-    time: "19:00 - 07:00",
-    technicians: [
-      { name: "Marek Zieliński", status: "active", tasks: 2 },
-      { name: "Katarzyna Lewandowska", status: "active", tasks: 1 },
-      { name: "Tomasz Dąbrowski", status: "inactive", tasks: 0 }
-    ]
+  const getNightTasks = () => {
+    return tasks.filter(task => 
+      task.shift === 'Nocna' && 
+      ['assigned', 'in_progress'].includes(task.status)
+    ).length;
   };
 
-  const currentShift = isDay ? dayShift : nightShift;
-  const nextShift = isDay ? nightShift : dayShift;
+  const getShiftTechnicians = (shift) => {
+    return technicians.filter(t => t.shift === shift).map(tech => ({
+      ...tech,
+      tasks: tasks.filter(task => 
+        task.assignedTo === tech._id && 
+        ['assigned', 'in_progress'].includes(task.status)
+      ).length
+    }));
+  };
+
+  const currentShift = {
+    name: isDay ? "Zmiana dzienna" : "Zmiana nocna",
+    time: isDay ? "07:00 - 19:00" : "19:00 - 07:00",
+    technicians: getShiftTechnicians(isDay ? 'Dzienna' : 'Nocna'),
+    active: true
+  };
+
+  const nextShift = {
+    name: isDay ? "Zmiana nocna" : "Zmiana dzienna", 
+    time: isDay ? "19:00 - 07:00" : "07:00 - 19:00",
+    technicians: getShiftTechnicians(isDay ? 'Nocna' : 'Dzienna'),
+    active: false
+  };
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -68,22 +92,28 @@ export default function ShiftOverview() {
         </div>
 
         <div className="space-y-3">
-          {currentShift.technicians.map((tech, index) => (
-            <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                  {tech.name.split(' ').map(n => n[0]).join('')}
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-800">{tech.name}</div>
-                  <div className="text-sm text-slate-600">{tech.tasks} zadań</div>
-                </div>
-              </div>
-              <span className={`px-3 py-1 rounded-xl text-sm font-semibold ${getStatusColor(tech.status)}`}>
-                {getStatusLabel(tech.status)}
-              </span>
+          {currentShift.technicians.length === 0 ? (
+            <div className="text-center py-4 text-slate-500">
+              Brak techników na tej zmianie
             </div>
-          ))}
+          ) : (
+            currentShift.technicians.map((tech) => (
+              <div key={tech._id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    {tech.firstName[0]}{tech.lastName[0]}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-800">{tech.firstName} {tech.lastName}</div>
+                    <div className="text-sm text-slate-600">{tech.tasks} zadań • {tech.specialization}</div>
+                  </div>
+                </div>
+                <span className={`px-3 py-1 rounded-xl text-sm font-semibold ${getStatusColor(tech.status)}`}>
+                  {getStatusLabel(tech.status)}
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -100,7 +130,25 @@ export default function ShiftOverview() {
         </div>
 
         <div className="text-sm text-slate-600">
-          Technicy: {nextShift.technicians.map(t => t.name).join(', ')}
+          {nextShift.technicians.length === 0 ? (
+            <div>Brak techników przypisanych do następnej zmiany</div>
+          ) : (
+            <div>
+              Technicy ({nextShift.technicians.length}): {nextShift.technicians.map(t => `${t.firstName} ${t.lastName}`).join(', ')}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="mt-6 grid grid-cols-2 gap-4">
+        <div className="text-center p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+          <div className="text-2xl font-bold text-yellow-800">{getDayTasks()}</div>
+          <div className="text-sm text-yellow-600">Zadania dzienna</div>
+        </div>
+        <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+          <div className="text-2xl font-bold text-blue-800">{getNightTasks()}</div>
+          <div className="text-sm text-blue-600">Zadania nocna</div>
         </div>
       </div>
     </div>
