@@ -5,7 +5,8 @@ export const taskService = {
   getAllTasks: async () => {
     try {
       const response = await API.get('/tasks');
-      return response.data;
+      // Ensure we always return an array
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching tasks:', error);
       return [];
