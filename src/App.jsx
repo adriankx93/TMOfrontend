@@ -1,8 +1,57 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
 
-// ... (NavBar, Hero, Footer bez zmian)
+// Navbar
+function NavBar() {
+  return (
+    <nav className="flex gap-6 bg-blue-700 text-white px-6 py-3 mb-6 shadow-lg">
+      <Link to="/" className="font-bold text-lg">TMO</Link>
+      <Link to="/">Panel</Link>
+      <Link to="/login">Logowanie</Link>
+    </nav>
+  );
+}
 
+// Hero section
+function Hero() {
+  return (
+    <section className="bg-gradient-to-br from-blue-700 via-blue-400 to-slate-300 pt-20 pb-28 px-4 text-center shadow-xl relative">
+      <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-lg">Technologiczny Panel TMO</h1>
+      <p className="text-lg md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-sm">
+        Nowoczesny system do zarządzania techniką obiektów. Szybko, wygodnie, bezpiecznie.
+      </p>
+      <button className="bg-blue-900 hover:bg-blue-800 transition text-white font-semibold py-4 px-12 rounded-2xl shadow-xl text-lg">
+        Dowiedz się więcej
+      </button>
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] blur-3xl opacity-40 bg-gradient-to-r from-blue-500 via-blue-400 to-slate-200 rounded-full -z-10" />
+    </section>
+  );
+}
+
+// Footer
+function Footer() {
+  return (
+    <footer className="bg-blue-900 text-white text-center py-6 mt-16 rounded-t-2xl shadow-2xl">
+      &copy; {new Date().getFullYear()} TMO. Wszystkie prawa zastrzeżone.
+    </footer>
+  );
+}
+
+// Dashboard
+function Dashboard() {
+  return (
+    <>
+      <Hero />
+      <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-lg p-8 mt-8">
+        <h1 className="text-2xl font-bold mb-2">Panel TMO</h1>
+        <p className="text-slate-700">Witaj w systemie TMO! To jest przykładowy pulpit.</p>
+      </div>
+      <Footer />
+    </>
+  );
+}
+
+// Logowanie (musi być osobny komponent do użycia useNavigate!)
 function LoginPage({ onLogin }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -10,7 +59,6 @@ function LoginPage({ onLogin }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    // tutaj możesz dodać prawdziwe sprawdzenie loginu z backendem!
     if (login === "admin" && password === "adrian128") {
       onLogin();
       navigate("/");
@@ -47,6 +95,7 @@ function LoginPage({ onLogin }) {
   );
 }
 
+// App
 export default function App() {
   const [isLogged, setIsLogged] = useState(false);
 
@@ -60,7 +109,7 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={isLogged ? <Dashboard /> : <Navigate to="/login" />}
+          element={isLogged ? <Dashboard /> : <Navigate to="/login" replace />}
         />
         <Route
           path="/login"
@@ -71,5 +120,3 @@ export default function App() {
     </Router>
   );
 }
-
-// ...i reszta komponentów Hero, Footer, Dashboard – jak wcześniej
