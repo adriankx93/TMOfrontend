@@ -28,7 +28,7 @@ export default function Sidebar() {
             <div className="text-xs text-slate-400 font-medium">System TMO</div>
           </div>
         </div>
-        
+
         {/* Current Shift Info */}
         <div className="mt-4 p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
           <div className="flex items-center justify-between">

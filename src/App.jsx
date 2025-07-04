@@ -3,10 +3,14 @@ import { Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import TasksPage from "./pages/TasksPage";
+import ShiftsPage from './pages/ShiftsPage';
+import ShiftChartPage from './pages/ShiftChartPage';
 import TechniciansPage from "./pages/TechniciansPage";
-import ShiftsPage from "./pages/ShiftsPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from './pages/ProfilePage';
+import UsersPage from './pages/UsersPage';
+import EditUserPage from './pages/EditUserPage';
 
 export default function App() {
   return (
@@ -16,8 +20,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/zadania" element={<TasksPage />} />
-          <Route path="/technicy" element={<TechniciansPage />} />
-          <Route path="/zmiany" element={<ShiftsPage />} />
+          <Route path="/shifts" element={<ShiftsPage />} />
+          <Route path="/shift-chart" element={<ShiftChartPage />} />
+          <Route path="/technicians" element={<TechniciansPage />} />
           <Route path="/raporty" element={<ReportsPage />} />
           <Route path="/ustawienia" element={<SettingsPage />} />
         </Routes>
