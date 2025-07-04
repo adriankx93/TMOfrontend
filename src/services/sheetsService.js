@@ -58,11 +58,31 @@ export const sheetsService = {
     
     for (let i = 1; i < rawData.length; i++) {
       const row = rawData[i];
-      if (row.length > 0) {
+      if (row.length > 0 && row[0]) {
+        // Parsuj datę w różnych formatach
+        let parsedDate = null;
+        if (row[0]) {
+          // Próbuj różne formaty daty
+          const dateStr = row[0].toString();
+          if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+              parsedDate = new Date(parts[2], parts[1] - 1, parts[0]); // DD/MM/YYYY
+            }
+          } else if (dateStr.includes('-')) {
+            parsedDate = new Date(dateStr); // YYYY-MM-DD
+          } else if (dateStr.includes('.')) {
+            const parts = dateStr.split('.');
+            if (parts.length === 3) {
+              parsedDate = new Date(parts[2], parts[1] - 1, parts[0]); // DD.MM.YYYY
+            }
+          }
+        }
+
         const shift = {
-          date: row[0] || '',
-          dayTechnicians: row[1] ? row[1].split(',').map(t => t.trim()) : [],
-          nightTechnicians: row[2] ? row[2].split(',').map(t => t.trim()) : [],
+          date: parsedDate ? parsedDate.toISOString().split('T')[0] : row[0],
+          dayTechnicians: row[1] ? row[1].toString().split(',').map(t => t.trim()).filter(t => t.length > 0) : [],
+          nightTechnicians: row[2] ? row[2].toString().split(',').map(t => t.trim()).filter(t => t.length > 0) : [],
           dayTasks: parseInt(row[3]) || 0,
           nightTasks: parseInt(row[4]) || 0,
           notes: row[5] || ''
@@ -72,6 +92,31 @@ export const sheetsService = {
     }
     
     return shifts;
+  },
+
+  // Pobierz dane tylko z aktualnego miesiąca
+  getCurrentMonthShifts: async () => {
+    try {
+      const allData = await sheetsService.getAllSheetData();
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+      
+      const currentMonthShifts = allData.shifts.filter(shift => {
+        const shiftDate = new Date(shift.date);
+        return shiftDate.getMonth() === currentMonth && shiftDate.getFullYear() === currentYear;
+      });
+
+      return {
+        technicians: allData.technicians,
+        shifts: currentMonthShifts,
+        month: currentMonth,
+        year: currentYear
+      };
+    } catch (error) {
+      console.error('Error fetching current month data:', error);
+      return { technicians: [], shifts: [], month: new Date().getMonth(), year: new Date().getFullYear() };
+    }
   },
 
   // Pobierz wszystkie dane z arkusza

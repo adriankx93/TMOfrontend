@@ -11,6 +11,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
 import EditUserPage from './pages/EditUserPage';
+import CurrentMonthPage from './pages/CurrentMonthPage'; // Assuming this page exists
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/zadania" element={<TasksPage />} />
           <Route path="/shifts" element={<ShiftsPage />} />
           <Route path="/shift-chart" element={<ShiftChartPage />} />
+          <Route path="/current-month" element={<CurrentMonthPage />} />
           <Route path="/technicians" element={<TechniciansPage />} />
           <Route path="/raporty" element={<ReportsPage />} />
           <Route path="/ustawienia" element={<SettingsPage />} />
@@ -30,3 +32,4 @@ export default function App() {
     </div>
   );
 }
+```

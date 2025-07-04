@@ -62,6 +62,21 @@ export default function Sidebar() {
               <span className="font-medium">{item.label}</span>
             </NavLink>
           ))}
+           <NavLink
+              to="/current-month"
+              className={({ isActive }) =>
+                `group flex items-center gap-4 py-4 px-4 rounded-2xl font-semibold transition-all duration-200 ${
+                  isActive 
+                    ? "bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-500/25 transform scale-[1.02]" 
+                    : "text-slate-300 hover:text-white hover:bg-slate-700/50 hover:transform hover:scale-[1.01]"
+                }`
+              }
+            >
+              <span className="text-xl group-hover:scale-110 transition-transform duration-200">
+              📅
+              </span>
+              <span className="font-medium">Aktualny miesiąc</span>
+            </NavLink>
         </div>
       </nav>
 
