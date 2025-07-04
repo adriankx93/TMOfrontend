@@ -3,24 +3,42 @@ import { NavLink } from "react-router-dom";
 export default function Sidebar() {
   const navItems = [
     { to: "/", label: "Dashboard", icon: "📊" },
+    { to: "/zadania", label: "Zadania", icon: "📋" },
     { to: "/technicy", label: "Technicy", icon: "👷" },
-    { to: "/zgloszenia", label: "Zgłoszenia", icon: "🎫" },
+    { to: "/zmiany", label: "Zmiany", icon: "🕐" },
+    { to: "/raporty", label: "Raporty", icon: "📈" },
     { to: "/ustawienia", label: "Ustawienia", icon: "⚙️" }
   ];
+
+  const currentShift = new Date().getHours() >= 7 && new Date().getHours() < 19 ? "Dzienna" : "Nocna";
+  const shiftTime = currentShift === "Dzienna" ? "07:00 - 19:00" : "19:00 - 07:00";
 
   return (
     <aside className="hidden md:flex flex-col w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen shadow-2xl border-r border-slate-700/50">
       {/* Header */}
       <div className="p-8 border-b border-slate-700/50">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl flex items-center justify-center font-bold text-white shadow-lg">
-            T
+          <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-600 rounded-xl flex items-center justify-center font-bold text-white shadow-lg">
+            M
           </div>
-          <div className="font-bold text-2xl tracking-wide bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-            TMO
+          <div>
+            <div className="font-bold text-xl tracking-wide bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+              Miasteczko Orange
+            </div>
+            <div className="text-xs text-slate-400 font-medium">System TMO</div>
           </div>
         </div>
-        <p className="text-slate-400 text-sm font-medium">System zarządzania</p>
+        
+        {/* Current Shift Info */}
+        <div className="mt-4 p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold text-white">Zmiana {currentShift}</div>
+              <div className="text-xs text-slate-400">{shiftTime}</div>
+            </div>
+            <div className={`w-3 h-3 rounded-full ${currentShift === "Dzienna" ? "bg-yellow-400" : "bg-blue-400"} animate-pulse`}></div>
+          </div>
+        </div>
       </div>
 
       {/* Navigation */}
@@ -33,7 +51,7 @@ export default function Sidebar() {
               className={({ isActive }) =>
                 `group flex items-center gap-4 py-4 px-4 rounded-2xl font-semibold transition-all duration-200 ${
                   isActive 
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 transform scale-[1.02]" 
+                    ? "bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-500/25 transform scale-[1.02]" 
                     : "text-slate-300 hover:text-white hover:bg-slate-700/50 hover:transform hover:scale-[1.01]"
                 }`
               }
@@ -54,12 +72,12 @@ export default function Sidebar() {
             A
           </div>
           <div>
-            <div className="font-semibold text-sm text-white">Admin</div>
-            <div className="text-xs text-slate-400">admin@tmo.pl</div>
+            <div className="font-semibold text-sm text-white">Koordynator</div>
+            <div className="text-xs text-slate-400">admin@orange.pl</div>
           </div>
         </div>
         <div className="text-slate-500 text-xs">
-          © {new Date().getFullYear()} TMO. Wszystkie prawa zastrzeżone.
+          © {new Date().getFullYear()} TMO Orange
         </div>
       </div>
     </aside>

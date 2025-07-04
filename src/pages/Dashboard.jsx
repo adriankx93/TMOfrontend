@@ -1,9 +1,19 @@
+import Topbar from "../components/Topbar";
+import Stats from "../components/Stats";
+import ShiftOverview from "../components/ShiftOverview";
+import TasksOverview from "../components/TasksOverview";
+import TechniciansStatus from "../components/TechniciansStatus";
+
 export default function Dashboard() {
   return (
-    <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-8 mt-8">
-      <h1 className="text-2xl font-bold mb-2">Panel główny TMO</h1>
-      <p className="mb-2">Jesteś zalogowany w systemie TMO.</p>
-      <p>Po lewej masz dostęp do funkcji panelu – użytkownicy, profil itp.</p>
+    <div className="space-y-8">
+      <Topbar title="Dashboard" subtitle="Przegląd systemu Miasteczko Orange" />
+      <Stats />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <ShiftOverview />
+        <TechniciansStatus />
+      </div>
+      <TasksOverview />
     </div>
   );
 }

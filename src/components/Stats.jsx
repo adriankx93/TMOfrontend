@@ -1,5 +1,6 @@
-function StatCard({ icon, title, value, trend, trendValue, color = "blue" }) {
+function StatCard({ icon, title, value, trend, trendValue, color = "orange" }) {
   const colorClasses = {
+    orange: "from-orange-500 to-red-600",
     blue: "from-blue-500 to-indigo-600",
     emerald: "from-emerald-500 to-teal-600", 
     amber: "from-amber-500 to-orange-600",
@@ -38,36 +39,36 @@ export default function Stats() {
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
       <StatCard 
-        icon="👤" 
-        title="Aktywni użytkownicy" 
-        value="8" 
+        icon="👷" 
+        title="Technicy na zmianie" 
+        value="6" 
         trend="up" 
-        trendValue="+12%" 
+        trendValue="+1" 
+        color="orange"
+      />
+      <StatCard 
+        icon="📋" 
+        title="Zadania w toku" 
+        value="12" 
+        trend="down" 
+        trendValue="-3%" 
         color="blue"
       />
       <StatCard 
-        icon="🛠️" 
-        title="Zgłoszenia" 
-        value="17" 
+        icon="🔄" 
+        title="Pula zadań" 
+        value="8" 
         trend="up" 
-        trendValue="+5%" 
-        color="emerald"
-      />
-      <StatCard 
-        icon="🚗" 
-        title="Technicy w terenie" 
-        value="4" 
-        trend="down" 
-        trendValue="-2%" 
+        trendValue="+2" 
         color="amber"
       />
       <StatCard 
-        icon="⭐" 
-        title="Ocena systemu" 
-        value="4.9/5" 
+        icon="✅" 
+        title="Wykonane dziś" 
+        value="24" 
         trend="up" 
-        trendValue="+0.2" 
-        color="purple"
+        trendValue="+15%" 
+        color="emerald"
       />
     </section>
   );
