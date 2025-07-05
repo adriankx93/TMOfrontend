@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { sheetsService } from "../services/sheetsService";
+import sheetsService from "../services/sheetsService";
 import StatisticsCards from "./StatisticsCards";
 import TechnicianWorkload from "./TechnicianWorkload";
 import DailyScheduleTable from "./DailyScheduleTable";

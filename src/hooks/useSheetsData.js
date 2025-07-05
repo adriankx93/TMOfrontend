@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { sheetsService } from '../services/sheetsService';
+import sheetsService from '../services/sheetsService';
 
 export const useSheetsData = () => {
   const [data, setData] = useState({
