@@ -71,7 +71,7 @@ export const sheetsService = {
       name => name.toLowerCase() === expectedSheetName.toLowerCase()
     );
     if (!sheetName) {
-      throw new Error(`Nie znaleziono arkusza "${expectedSheetName}". Dostępne arkusze: ${allSheets.join(', ')}`);
+      throw new Error(`Nie znaleziono arkusza "${expectedSheetName}". Dostępne arkusze: ${allSheets.join(", ")}`);
     }
 
     const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
@@ -119,56 +119,55 @@ export const sheetsService = {
   },
 
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
-  if (!technicians.length || !dates.length || !shiftsData.length) return [];
+    if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
-  return dates
-    .map((cell, idx) => {
-      let day = parseInt(cell);
+    return dates
+      .map((cell, idx) => {
+        let day = parseInt(cell);
 
-      // Jeśli parseInt nie działa, spróbuj utworzyć Date z pełnego stringa
-      if (isNaN(day)) {
-        const parsedDate = new Date(cell);
-        if (!isNaN(parsedDate.getTime())) {
-          day = parsedDate.getDate();
+        // OPCJA 2: próba parsowania jako pełnej daty
+        if (isNaN(day)) {
+          const parsedDate = new Date(cell);
+          if (!isNaN(parsedDate.getTime())) {
+            day = parsedDate.getDate();
+          }
         }
-      }
 
-      if (isNaN(day) || day < 1 || day > 31) return null;
+        if (isNaN(day) || day < 1 || day > 31) return null;
 
-      const date = new Date(year, monthIndex, day);
-      if (date.getMonth() !== monthIndex) return null;
+        const date = new Date(year, monthIndex, day);
+        if (date.getMonth() !== monthIndex) return null;
 
-      const shift = {
-        date: date.toISOString().split('T')[0],
-        dayNumber: day,
-        shifts: {
-          day: [],
-          night: [],
-          firstShift: [],
-          vacation: [],
-          sickLeave: []
-        }
-      };
+        const shift = {
+          date: date.toISOString().split('T')[0],
+          dayNumber: day,
+          shifts: {
+            day: [],
+            night: [],
+            firstShift: [],
+            vacation: [],
+            sickLeave: []
+          }
+        };
 
-      technicians.forEach(tech => {
-        const row = shiftsData[tech.shiftRowIndex] || [];
-        const value = (row[idx] || '').toLowerCase();
+        technicians.forEach(tech => {
+          const row = shiftsData[tech.shiftRowIndex] || [];
+          const value = (row[idx] || '').toLowerCase();
+          if (value.includes(CONFIG.shiftCodes.firstShift)) shift.shifts.firstShift.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.day)) shift.shifts.day.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.night)) shift.shifts.night.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.vacation)) shift.shifts.vacation.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.sickLeave)) shift.shifts.sickLeave.push(tech.fullName);
+        });
 
-        if (value.includes(CONFIG.shiftCodes.firstShift)) shift.shifts.firstShift.push(tech.fullName);
-        if (value.includes(CONFIG.shiftCodes.day)) shift.shifts.day.push(tech.fullName);
-        if (value.includes(CONFIG.shiftCodes.night)) shift.shifts.night.push(tech.fullName);
-        if (value.includes(CONFIG.shiftCodes.vacation)) shift.shifts.vacation.push(tech.fullName);
-        if (value.includes(CONFIG.shiftCodes.sickLeave)) shift.shifts.sickLeave.push(tech.fullName);
-      });
+        shift.totalWorking =
+          shift.shifts.day.length +
+          shift.shifts.night.length +
+          shift.shifts.firstShift.length;
 
-      shift.totalWorking =
-        shift.shifts.day.length +
-        shift.shifts.night.length +
-        shift.shifts.firstShift.length;
-
-      return shift;
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.dayNumber - b.dayNumber);
-},
-
+        return shift;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.dayNumber - b.dayNumber);
+  },
+};
