@@ -1,17 +1,18 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
+
 import Dashboard from "./pages/Dashboard";
 import TasksPage from "./pages/TasksPage";
-import ShiftsPage from './pages/ShiftsPage';
-import ShiftChartPage from './pages/ShiftChartPage';
+import ShiftsPage from "./pages/ShiftsPage";
+import ShiftChartPage from "./pages/ShiftChartPage";
+import CurrentMonthPage from "./pages/CurrentMonthPage";
 import TechniciansPage from "./pages/TechniciansPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
-import ProfilePage from './pages/ProfilePage';
-import UsersPage from './pages/UsersPage';
-import EditUserPage from './pages/EditUserPage';
-import CurrentMonthPage from './pages/CurrentMonthPage';
+import ProfilePage from "./pages/ProfilePage";
+import UsersPage from "./pages/UsersPage";
+import EditUserPage from "./pages/EditUserPage";
 
 export default function App() {
   return (
@@ -27,6 +28,9 @@ export default function App() {
           <Route path="/technicians" element={<TechniciansPage />} />
           <Route path="/raporty" element={<ReportsPage />} />
           <Route path="/ustawienia" element={<SettingsPage />} />
+          <Route path="/profil" element={<ProfilePage />} />
+          <Route path="/uzytkownicy" element={<UsersPage />} />
+          <Route path="/uzytkownicy/:id" element={<EditUserPage />} />
         </Routes>
       </main>
     </div>
