@@ -1,15 +1,14 @@
-// --- KONFIGURACJA ---
 const CONFIG = {
   spreadsheetId: "1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ",
   apiKey: "AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY",
   ranges: {
-    technicians: "C7:E18",
+    technicians: "C7:E24",
     dates: "J32:AN32",
-    shifts: "J7:AN18",
+    shifts: "J7:AN24",
   },
   monthNames: [
     "styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec",
-    "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień"
+    "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień",
   ],
   shiftCodes: {
     firstShift: "1",
@@ -17,14 +16,10 @@ const CONFIG = {
     night: "n",
     vacation: "u",
     sickLeave: "l4",
-  }
+  },
 };
 
-// Włącz tryb testowy, aby wstawić dane przykładowe
-const useTestData = false;
-
 const _fetchFromSheets = async (url, errorMessagePrefix) => {
-  console.log(`[Sheets API] Wywołuję URL: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
@@ -67,52 +62,6 @@ export const sheetsService = {
   },
 
   getCurrentMonthData: async () => {
-    // Tryb testowy
-    if (useTestData) {
-      console.log("[Sheets API] Tryb testowy - zwracam dane przykładowe");
-      const technicians = [
-        { id: 0, shiftRowIndex: 0, firstName: "Jan", lastName: "Kowalski", specialization: "Techniczny", fullName: "Jan Kowalski" },
-        { id: 1, shiftRowIndex: 1, firstName: "Anna", lastName: "Nowak", specialization: "Techniczny", fullName: "Anna Nowak" }
-      ];
-
-      const shifts = [
-        {
-          date: "2025-07-01",
-          dayNumber: 1,
-          dayTechnicians: ["Jan Kowalski"],
-          nightTechnicians: ["Anna Nowak"],
-          firstShiftTechnicians: [],
-          vacationTechnicians: [],
-          l4Technicians: [],
-          totalWorking: 2
-        },
-        {
-          date: "2025-07-02",
-          dayNumber: 2,
-          dayTechnicians: [],
-          nightTechnicians: ["Jan Kowalski"],
-          firstShiftTechnicians: [],
-          vacationTechnicians: [],
-          l4Technicians: [],
-          totalWorking: 1
-        }
-      ];
-
-      return {
-        month: 6,
-        year: 2025,
-        sheetName: "Testowy Arkusz",
-        technicians,
-        shifts,
-        debugRawData: {
-          techniciansData: technicians,
-          datesData: ["1", "2"],
-          shiftsData: shifts,
-        },
-      };
-    }
-
-    // Tryb produkcyjny
     const now = new Date();
     const monthIndex = now.getMonth();
     const year = now.getFullYear();
@@ -153,6 +102,7 @@ export const sheetsService = {
 
     let finalMonthIndex = monthIndex;
     let finalYear = year;
+
     const sheetNameLower = sheetName.toLowerCase();
     for (let i = 0; i < CONFIG.monthNames.length; i++) {
       if (sheetNameLower.includes(CONFIG.monthNames[i])) {
