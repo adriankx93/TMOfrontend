@@ -10,7 +10,6 @@ const SHEETS_API_KEY = import.meta.env.VITE_SHEETS_API_KEY;
 const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
 
 // --- OBIEKT KONFIGURACYJNY ---
-// Wszystkie "magiczne" wartości w jednym miejscu dla łatwiejszej edycji.
 const CONFIG = {
     ranges: {
         technicians: 'C7:E23',
@@ -31,11 +30,9 @@ const CONFIG = {
 };
 
 // --- PRYWATNA FUNKCJA POMOCNICZA ---
-// Jedna funkcja do obsługi wszystkich zapytań fetch, aby uniknąć powtarzania kodu.
 const _fetchFromSheets = async (url, errorMessagePrefix = 'Błąd pobierania danych') => {
     try {
         const response = await fetch(url);
-
         if (!response.ok) {
             const errorText = await response.text();
             console.error('API Error Response:', errorText);
@@ -50,14 +47,12 @@ const _fetchFromSheets = async (url, errorMessagePrefix = 'Błąd pobierania dan
             }
             throw new Error(errorMessage);
         }
-
         return await response.json();
     } catch (error) {
         console.error(error.message);
         throw error;
     }
 };
-
 
 export const sheetsService = {
     /**
@@ -73,27 +68,23 @@ export const sheetsService = {
     },
 
     /**
-     * Pobiera wiele zakresów danych w jednym, wydajnym zapytaniu API.
-     * @param {string} sheetName - Nazwa arkusza.
-     * @param {string[]} ranges - Tablica zakresów do pobrania, np. ['A1:B2', 'C5:D8'].
-     * @returns {Promise<any[][]>} Tablica tablic z danymi dla każdego zakresu.
+     * Pobiera wiele zakresów danych w jednym zapytaniu API.
      */
     getMultipleRanges: async (sheetName, ranges) => {
         const encodedSheetName = encodeURIComponent(sheetName);
         const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values:batchGet?${rangesQuery}&key=${SHEETS_API_KEY}`;
-        
         console.log(`Pobieranie zakresów: ${ranges.join(', ')} z arkusza "${sheetName}"...`);
         const data = await _fetchFromSheets(url, 'Błąd pobierania wielu zakresów');
         return data.valueRanges.map(range => range.values || []);
     },
 
     /**
-     * Główna funkcja pobierająca i przetwarzająca wszystkie dane dla bieżącego miesiąca.
+     * Główna funkcja pobierająca i przetwarzająca dane bieżącego miesiąca.
      */
     getCurrentMonthData: async () => {
         const currentDate = new Date();
-        const currentMonthIndex = currentDate.getMonth(); // 0 = styczeń, 1 = luty...
+        const currentMonthIndex = currentDate.getMonth(); // 0 = styczeń
         const currentYear = currentDate.getFullYear();
 
         const expectedSheetName = CONFIG.monthNames[currentMonthIndex];
@@ -109,12 +100,11 @@ export const sheetsService = {
         }
         console.log(`Używam arkusza: ${sheetName}`);
         
-        // Jedno zapytanie API do pobrania wszystkich potrzebnych danych
         const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
             sheetName,
             [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
         );
-        
+
         const technicians = sheetsService.parseTechnicians(techniciansData);
         const dates = datesData[0] || [];
         const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, currentYear, currentMonthIndex);
@@ -125,6 +115,13 @@ export const sheetsService = {
             month: currentMonthIndex,
             year: currentYear
         };
+    },
+
+    /**
+     * Alias - zgodnie z oczekiwanym interfejsem w komponentach.
+     */
+    getCurrentMonthShifts: async () => {
+        return await sheetsService.getCurrentMonthData();
     },
 
     /**
@@ -141,11 +138,11 @@ export const sheetsService = {
                 specialization: row[2]?.trim() || 'Techniczny',
                 fullName: `${row[0]} ${row[1]}`.trim()
             };
-        }).filter(Boolean); // Usuwa nulle z tablicy
+        }).filter(Boolean);
     },
-    
+
     /**
-     * Przetwarza surowe dane o zmianach na gotową strukturę.
+     * Przetwarza dane o zmianach na gotową strukturę.
      */
     parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
         if (!technicians.length || !dates.length || !shiftsData.length) return [];
@@ -175,7 +172,7 @@ export const sheetsService = {
                 if (shiftValue.includes(CONFIG.shiftCodes.vacation)) shift.vacationTechnicians.push(technician.fullName);
                 if (shiftValue.includes(CONFIG.shiftCodes.sickLeave)) shift.l4Technicians.push(technician.fullName);
             });
-            
+
             shift.totalWorking = shift.dayTechnicians.length + shift.nightTechnicians.length + shift.firstShiftTechnicians.length;
             shifts.push(shift);
         });
