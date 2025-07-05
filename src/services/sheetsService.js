@@ -55,21 +55,13 @@ const _fetchFromSheets = async (url, errorMessagePrefix = 'Błąd pobierania dan
 };
 
 export const sheetsService = {
-    /**
-     * Pobiera nazwy wszystkich dostępnych kart (arkuszy) w dokumencie.
-     */
     getAvailableSheets: async () => {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}?key=${SHEETS_API_KEY}`;
         console.log('Pobieranie listy arkuszy...');
         const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
-        const sheetNames = data.sheets.map(s => s.properties.title);
-        console.log('Dostępne arkusze:', sheetNames);
-        return sheetNames;
+        return data.sheets.map(s => s.properties.title);
     },
 
-    /**
-     * Pobiera wiele zakresów danych w jednym zapytaniu API.
-     */
     getMultipleRanges: async (sheetName, ranges) => {
         const encodedSheetName = encodeURIComponent(sheetName);
         const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
@@ -79,14 +71,10 @@ export const sheetsService = {
         return data.valueRanges.map(range => range.values || []);
     },
 
-    /**
-     * Główna funkcja pobierająca i przetwarzająca dane bieżącego miesiąca.
-     */
     getCurrentMonthData: async () => {
         const currentDate = new Date();
-        const currentMonthIndex = currentDate.getMonth(); // 0 = styczeń
+        const currentMonthIndex = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
-
         const expectedSheetName = CONFIG.monthNames[currentMonthIndex];
         console.log(`Oczekiwana nazwa arkusza: ${expectedSheetName}`);
 
@@ -96,10 +84,10 @@ export const sheetsService = {
         );
 
         if (!sheetName) {
-            throw new Error(`Nie znaleziono karty dla miesiąca "${expectedSheetName}". Sprawdź nazwy arkuszy.`);
+            throw new Error(`Nie znaleziono karty dla miesiąca "${expectedSheetName}".`);
         }
         console.log(`Używam arkusza: ${sheetName}`);
-        
+
         const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
             sheetName,
             [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
@@ -117,22 +105,17 @@ export const sheetsService = {
         };
     },
 
-    /**
-     * Alias - zgodnie z oczekiwanym interfejsem w komponentach.
-     */
     getCurrentMonthShifts: async () => {
         return await sheetsService.getCurrentMonthData();
     },
 
-    /**
-     * Przetwarza surowe dane techników na listę obiektów.
-     */
     parseTechnicians: (techniciansData) => {
         if (!techniciansData) return [];
         return techniciansData.map((row, index) => {
             if (row?.length < 2 || !row[0] || !row[1]) return null;
             return {
                 id: index,
+                rowIndex: index, // <- kluczowa zmiana!
                 firstName: row[0].trim(),
                 lastName: row[1].trim(),
                 specialization: row[2]?.trim() || 'Techniczny',
@@ -141,20 +124,18 @@ export const sheetsService = {
         }).filter(Boolean);
     },
 
-    /**
-     * Przetwarza dane o zmianach na gotową strukturę.
-     */
     parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
         if (!technicians.length || !dates.length || !shiftsData.length) return [];
         const shifts = [];
 
         dates.forEach((dateValue, dateIndex) => {
-            const date = new Date(year, monthIndex, parseInt(dateValue));
+            const dayNumber = parseInt(dateValue);
+            const date = new Date(year, monthIndex, dayNumber);
             if (isNaN(date.getTime()) || date.getMonth() !== monthIndex) return;
 
             const shift = {
                 date: date.toISOString().split('T')[0],
-                dayNumber: date.getDate(),
+                dayNumber,
                 dayTechnicians: [],
                 nightTechnicians: [],
                 firstShiftTechnicians: [],
@@ -162,8 +143,9 @@ export const sheetsService = {
                 l4Technicians: [],
             };
 
-            technicians.forEach((technician, techIndex) => {
-                const shiftValue = (shiftsData[techIndex]?.[dateIndex] || '').toLowerCase();
+            technicians.forEach((technician) => {
+                const shiftRow = shiftsData[technician.rowIndex] || [];
+                const shiftValue = (shiftRow[dateIndex] || '').toLowerCase();
                 if (!shiftValue) return;
 
                 if (shiftValue.includes(CONFIG.shiftCodes.firstShift)) shift.firstShiftTechnicians.push(technician.fullName);
