@@ -4,7 +4,7 @@ const CONFIG = {
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E23',
-    dates: 'J3:AN3', // AN jeśli masz 31 dni
+    dates: 'J3:AN3',
     shifts: 'J7:AN23',
   },
   monthNames: [
@@ -88,7 +88,7 @@ export const sheetsService = {
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
     const dates = datesData[0];
-    const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, year, monthIndex);
+    const shifts = sheetsService.parseShifts(technicians, dates, shiftsData);
 
     return {
       meta: { month: monthIndex, year, sheetName },
@@ -118,29 +118,33 @@ export const sheetsService = {
       .filter(Boolean);
   },
 
-  parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
+  parseShifts: (technicians, dates, shiftsData) => {
     if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
     return dates
       .map((cell, idx) => {
-        let day = parseInt(cell);
+        let date = null;
 
-        // OPCJA 2: próba parsowania jako pełnej daty
-        if (isNaN(day)) {
-          const parsedDate = new Date(cell);
-          if (!isNaN(parsedDate.getTime())) {
-            day = parsedDate.getDate();
+        // Spróbuj najpierw pełnej daty
+        const parsedDate = new Date(cell);
+        if (!isNaN(parsedDate.getTime())) {
+          date = parsedDate;
+        } else {
+          // Jeśli nie działa, spróbuj samego dnia
+          const day = parseInt(cell);
+          if (!isNaN(day) && day >= 1 && day <= 31) {
+            const now = new Date();
+            date = new Date(now.getFullYear(), now.getMonth(), day);
           }
         }
 
-        if (isNaN(day) || day < 1 || day > 31) return null;
+        if (!date) return null;
 
-        const date = new Date(year, monthIndex, day);
-        if (date.getMonth() !== monthIndex) return null;
+        const dayNumber = date.getDate();
 
         const shift = {
           date: date.toISOString().split('T')[0],
-          dayNumber: day,
+          dayNumber,
           shifts: {
             day: [],
             night: [],
