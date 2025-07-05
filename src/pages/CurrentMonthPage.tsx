@@ -3,9 +3,9 @@ const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:C18', // jedna kolumna z imionami
+    technicians: 'C7:C18',          // tylko jedna kolumna z nazwiskami
     dates: 'J32:AN32',
-    shifts: 'J7:AN18',
+    shifts: 'J7:AN18',              // zostawiasz zakres jak był
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -24,12 +24,30 @@ const _fetchFromSheets = async (url, errorMessagePrefix) => {
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`${errorMessagePrefix}: ${response.status} ${response.statusText}\n${errorText}`);
+    let errorMessage = `${errorMessagePrefix}: ${response.status} ${response.statusText}`;
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.error?.message) {
+        errorMessage += ` - ${errorData.error.message}`;
+      }
+    } catch {
+      errorMessage += ` - ${errorText}`;
+    }
+    throw new Error(errorMessage);
   }
   return await response.json();
 };
 
 export const sheetsService = {
+  testConnection: async () => {
+    const sheets = await sheetsService.getAvailableSheets();
+    return {
+      success: true,
+      message: 'Połączenie z Google Sheets działa poprawnie',
+      sheets
+    };
+  },
+
   getAvailableSheets: async () => {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}?key=${CONFIG.apiKey}`;
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
@@ -62,21 +80,49 @@ export const sheetsService = {
       );
     }
     if (!sheetName) {
-      throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}".`);
+      throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(', ')}`);
     }
 
-    const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
+    const [techniciansData, datesData, shiftsDataRaw] = await sheetsService.getMultipleRanges(
       sheetName,
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
 
+    if (!datesData.length || !datesData[0]?.length) {
+      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
+    }
+    if (!shiftsDataRaw.length) {
+      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
+    }
+    if (!techniciansData.length) {
+      throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
+    }
+
+    // Tu odcinamy pierwszy wiersz (ten z "1")
+    const shiftsData = shiftsDataRaw.slice(1);
+
+    let finalMonthIndex = monthIndex;
+    let finalYear = year;
+
+    const sheetNameLower = sheetName.toLowerCase();
+    for (let i = 0; i < CONFIG.monthNames.length; i++) {
+      if (sheetNameLower.includes(CONFIG.monthNames[i])) {
+        finalMonthIndex = i;
+        break;
+      }
+    }
+    const yearMatch = sheetName.match(/20\d{2}/);
+    if (yearMatch) {
+      finalYear = parseInt(yearMatch[0]);
+    }
+
     const technicians = sheetsService.parseTechnicians(techniciansData);
     const dates = datesData[0];
-    const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, year, monthIndex);
+    const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
 
     return {
-      month: monthIndex,
-      year,
+      month: finalMonthIndex,
+      year: finalYear,
       sheetName,
       technicians,
       shifts,
@@ -88,19 +134,23 @@ export const sheetsService = {
     };
   },
 
+  getCurrentMonthShifts: async () => {
+    return await sheetsService.getCurrentMonthData();
+  },
+
   parseTechnicians: (data) => {
     if (!data || !Array.isArray(data)) return [];
     return data
       .map((row, i) => {
-        const name = row[0]?.toString().trim();
-        if (!name) return null;
+        const fullName = row[0]?.toString().trim();
+        if (!fullName) return null;
         return {
           id: i,
           shiftRowIndex: i,
           firstName: "",
           lastName: "",
           specialization: "",
-          fullName: name
+          fullName
         };
       })
       .filter(Boolean);
@@ -111,8 +161,15 @@ export const sheetsService = {
 
     return dates
       .map((cell, idx) => {
-        const dayNumber = parseInt(cell);
-        if (isNaN(dayNumber)) return null;
+        let dayNumber = parseInt(cell);
+        if (isNaN(dayNumber)) {
+          const parsed = new Date(cell);
+          if (!isNaN(parsed.getTime())) {
+            dayNumber = parsed.getDate();
+          }
+        }
+        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
+
         const date = new Date(year, monthIndex, dayNumber);
 
         const shift = {
@@ -127,15 +184,21 @@ export const sheetsService = {
 
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
-          const value = (row[idx] || '').toLowerCase().trim();
-          const tokens = value.split(/\s|,/).filter(Boolean);
+          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
+          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
 
           tokens.forEach(token => {
-            if (token === CONFIG.shiftCodes.day) shift.dayTechnicians.push(tech.fullName);
-            if (token === CONFIG.shiftCodes.night) shift.nightTechnicians.push(tech.fullName);
-            if (token === CONFIG.shiftCodes.firstShift) shift.firstShiftTechnicians.push(tech.fullName);
-            if (token === CONFIG.shiftCodes.vacation) shift.vacationTechnicians.push(tech.fullName);
-            if (token === CONFIG.shiftCodes.sickLeave) shift.l4Technicians.push(tech.fullName);
+            if (token === CONFIG.shiftCodes.firstShift) {
+              shift.firstShiftTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.day) {
+              shift.dayTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.night) {
+              shift.nightTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.vacation) {
+              shift.vacationTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.sickLeave) {
+              shift.l4Technicians.push(tech.fullName);
+            }
           });
         });
 
@@ -146,6 +209,7 @@ export const sheetsService = {
 
         return shift;
       })
-      .filter(Boolean);
+      .filter(Boolean)
+      .sort((a, b) => a.dayNumber - b.dayNumber);
   },
 };
