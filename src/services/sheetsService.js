@@ -1,3 +1,4 @@
+// --- KONFIGURACJA ---
 const CONFIG = {
   spreadsheetId: "1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ",
   apiKey: "AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY",
@@ -8,7 +9,7 @@ const CONFIG = {
   },
   monthNames: [
     "styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec",
-    "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień",
+    "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień"
   ],
   shiftCodes: {
     firstShift: "1",
@@ -81,14 +82,17 @@ export const sheetsService = {
     }
     if (!sheetName) {
       throw new Error(
-        `Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(", ")}`
+        `Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(
+          ", "
+        )}`
       );
     }
 
-    const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
-      sheetName,
-      [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
-    );
+    const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(sheetName, [
+      CONFIG.ranges.technicians,
+      CONFIG.ranges.dates,
+      CONFIG.ranges.shifts,
+    ]);
 
     if (!datesData.length || !datesData[0]?.length) {
       throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
@@ -125,11 +129,7 @@ export const sheetsService = {
       sheetName,
       technicians,
       shifts,
-      debugRawData: {
-        techniciansData,
-        datesData,
-        shiftsData,
-      },
+      debugRawData: { techniciansData, datesData, shiftsData },
     };
   },
 
@@ -156,6 +156,7 @@ export const sheetsService = {
 
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
     if (!technicians.length || !dates.length || !shiftsData.length) return [];
+
     return dates
       .map((cell, idx) => {
         let dayNumber = parseInt(cell);
@@ -168,6 +169,7 @@ export const sheetsService = {
         if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
 
         const date = new Date(year, monthIndex, dayNumber);
+
         const shift = {
           date: date.toISOString().split("T")[0],
           dayNumber,
@@ -182,12 +184,19 @@ export const sheetsService = {
           const row = shiftsData[tech.shiftRowIndex] || [];
           const rawValue = (row[idx] || "").toString().trim().toLowerCase();
           const tokens = rawValue.split(/\s|,/).map((s) => s.trim()).filter(Boolean);
+
           tokens.forEach((token) => {
-            if (token === CONFIG.shiftCodes.firstShift) shift.firstShiftTechnicians.push(tech.fullName);
-            else if (token === CONFIG.shiftCodes.day) shift.dayTechnicians.push(tech.fullName);
-            else if (token === CONFIG.shiftCodes.night) shift.nightTechnicians.push(tech.fullName);
-            else if (token === CONFIG.shiftCodes.vacation) shift.vacationTechnicians.push(tech.fullName);
-            else if (token === CONFIG.shiftCodes.sickLeave) shift.l4Technicians.push(tech.fullName);
+            if (token === CONFIG.shiftCodes.firstShift) {
+              shift.firstShiftTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.day) {
+              shift.dayTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.night) {
+              shift.nightTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.vacation) {
+              shift.vacationTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.sickLeave) {
+              shift.l4Technicians.push(tech.fullName);
+            }
           });
         });
 
