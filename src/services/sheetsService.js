@@ -41,22 +41,12 @@ const _fetchFromSheets = async (url, errorMessagePrefix) => {
 
 export const sheetsService = {
   testConnection: async () => {
-    try {
-      console.log('[Sheets API] Testowanie połączenia...');
-      const sheets = await sheetsService.getAvailableSheets();
-      return {
-        success: true,
-        message: 'Połączenie z Google Sheets działa poprawnie',
-        sheets: sheets
-      };
-    } catch (error) {
-      console.error('[Sheets API] Błąd połączenia:', error);
-      return {
-        success: false,
-        message: error.message,
-        sheets: []
-      };
-    }
+    const sheets = await sheetsService.getAvailableSheets();
+    return {
+      success: true,
+      message: 'Połączenie z Google Sheets działa poprawnie',
+      sheets
+    };
   },
 
   getAvailableSheets: async () => {
@@ -109,7 +99,6 @@ export const sheetsService = {
       throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
     }
 
-    // domyślnie bierze miesiąc i rok aktualny
     let finalMonthIndex = monthIndex;
     let finalYear = year;
 
