@@ -4,7 +4,7 @@ const CONFIG = {
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E18',
-    dates: 'J4:AN4', // UWAGA: tu zmiana - start od J4!
+    dates: 'K4:AN4', // UWAGA: zmiana tu - K4 zamiast J4
     shifts: 'J7:AN18',
   },
   monthNames: [
@@ -122,7 +122,12 @@ export const sheetsService = {
       year: finalYear,
       sheetName,
       technicians,
-      shifts
+      shifts,
+      debugRawData: {
+        techniciansData,
+        datesData,
+        shiftsData
+      }
     };
   },
 
@@ -135,11 +140,14 @@ export const sheetsService = {
     return data
       .map((row, i) => {
         if (!row || !row[0]) return null;
+        const parts = row[0].split(' ');
         return {
           id: i,
           shiftRowIndex: i,
-          fullName: row[0].trim(),
-          specialization: row[1]?.toString().trim() || ''
+          firstName: parts.slice(0, -1).join(' ').trim() || 'Technik',
+          lastName: parts.slice(-1)[0].trim() || '',
+          specialization: row[1]?.toString().trim() || '',
+          fullName: row[0].trim()
         };
       })
       .filter(Boolean);
@@ -148,54 +156,57 @@ export const sheetsService = {
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
     if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
-    return dates.map((cell, idx) => {
-      let dayNumber = parseInt(cell);
-      if (isNaN(dayNumber)) {
-        const parsed = new Date(cell);
-        if (!isNaN(parsed.getTime())) {
-          dayNumber = parsed.getDate();
-        }
-      }
-      if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
-
-      const date = new Date(year, monthIndex, dayNumber);
-
-      const shift = {
-        date: date.toISOString().split('T')[0],
-        dayNumber,
-        dayTechnicians: [],
-        nightTechnicians: [],
-        firstShiftTechnicians: [],
-        vacationTechnicians: [],
-        l4Technicians: []
-      };
-
-      technicians.forEach(tech => {
-        const row = shiftsData[tech.shiftRowIndex] || [];
-        const rawValue = (row[idx] || '').toString().trim().toLowerCase();
-        const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
-
-        tokens.forEach(token => {
-          if (token === CONFIG.shiftCodes.firstShift) {
-            shift.firstShiftTechnicians.push(tech.fullName);
-          } else if (token === CONFIG.shiftCodes.day) {
-            shift.dayTechnicians.push(tech.fullName);
-          } else if (token === CONFIG.shiftCodes.night) {
-            shift.nightTechnicians.push(tech.fullName);
-          } else if (token === CONFIG.shiftCodes.vacation) {
-            shift.vacationTechnicians.push(tech.fullName);
-          } else if (token === CONFIG.shiftCodes.sickLeave) {
-            shift.l4Technicians.push(tech.fullName);
+    return dates
+      .map((cell, idx) => {
+        let dayNumber = parseInt(cell);
+        if (isNaN(dayNumber)) {
+          const parsed = new Date(cell);
+          if (!isNaN(parsed.getTime())) {
+            dayNumber = parsed.getDate();
           }
+        }
+        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
+
+        const date = new Date(year, monthIndex, dayNumber);
+
+        const shift = {
+          date: date.toISOString().split('T')[0],
+          dayNumber,
+          dayTechnicians: [],
+          nightTechnicians: [],
+          firstShiftTechnicians: [],
+          vacationTechnicians: [],
+          l4Technicians: []
+        };
+
+        technicians.forEach(tech => {
+          const row = shiftsData[tech.shiftRowIndex] || [];
+          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
+          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
+
+          tokens.forEach(token => {
+            if (token === CONFIG.shiftCodes.firstShift) {
+              shift.firstShiftTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.day) {
+              shift.dayTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.night) {
+              shift.nightTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.vacation) {
+              shift.vacationTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.sickLeave) {
+              shift.l4Technicians.push(tech.fullName);
+            }
+          });
         });
-      });
 
-      shift.totalWorking =
-        shift.dayTechnicians.length +
-        shift.nightTechnicians.length +
-        shift.firstShiftTechnicians.length;
+        shift.totalWorking =
+          shift.dayTechnicians.length +
+          shift.nightTechnicians.length +
+          shift.firstShiftTechnicians.length;
 
-      return shift;
-    }).filter(Boolean).sort((a, b) => a.dayNumber - b.dayNumber);
+        return shift;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.dayNumber - b.dayNumber);
   },
 };
