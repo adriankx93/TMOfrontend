@@ -1,122 +1,160 @@
-// Configuration object for sheet ranges and month names
-const CONFIG = {
-  monthNames: [
-    'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
-    'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'
-  ],
-  ranges: {
-    technicians: 'A:A',
-    dates: 'B:B', 
-    shifts: 'C:Z'
-  }
-};
+import { useState, useEffect } from "react";
+import { sheetsService } from "../services/sheetsService";
+import StatisticsCards from "./StatisticsCards";
+import TechnicianWorkload from "./TechnicianWorkload";
+import DailyScheduleTable from "./DailyScheduleTable";
 
-// Main sheets service object
-const sheetsService = {
-  // Test connection to Google Sheets API
-  testConnection: async () => {
+export default function CurrentMonthChart() {
+  const [data, setData] = useState({
+    technicians: [],
+    shifts: [],
+    month: new Date().getMonth(),
+    year: new Date().getFullYear(),
+    sheetName: ""
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [connectionTest, setConnectionTest] = useState(null);
+
+  const months = [
+    "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+    "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+  ];
+
+  useEffect(() => {
+    testConnection();
+    fetchCurrentMonthData();
+    const interval = setInterval(fetchCurrentMonthData, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const testConnection = async () => {
     try {
-      console.log('[Sheets API] Testing connection...');
-      // Placeholder for connection test logic
-      return { success: true, message: 'Connection successful' };
-    } catch (error) {
-      console.error('[Sheets API] Connection test failed:', error);
-      throw error;
+      const result = await sheetsService.testConnection();
+      setConnectionTest(result);
+    } catch (err) {
+      setConnectionTest({
+        success: false,
+        message: err.message,
+        sheets: []
+      });
     }
-  },
+  };
 
-  // Get all available sheet names
-  getAvailableSheets: async () => {
+  const fetchCurrentMonthData = async () => {
     try {
-      console.log('[Sheets API] Fetching available sheets...');
-      // Placeholder - return mock sheet names for now
-      const currentYear = new Date().getFullYear();
-      const currentMonth = CONFIG.monthNames[new Date().getMonth()];
-      return [
-        `${currentMonth} ${currentYear}`,
-        `${CONFIG.monthNames[new Date().getMonth() - 1]} ${currentYear}`,
-        'Harmonogram'
-      ];
-    } catch (error) {
-      console.error('[Sheets API] Failed to get available sheets:', error);
-      throw error;
+      setLoading(true);
+      setError(null);
+      const monthData = await sheetsService.getCurrentMonthShifts();
+      setData(monthData);
+    } catch (err) {
+      setError(err.message || "Błąd podczas pobierania danych");
+    } finally {
+      setLoading(false);
     }
-  },
+  };
 
-  // Get data from multiple ranges
-  getMultipleRanges: async (sheetName, ranges) => {
-    try {
-      console.log(`[Sheets API] Fetching multiple ranges from "${sheetName}":`, ranges);
-      // Placeholder - return mock data structure
-      return ranges.map(range => ({
-        range,
-        values: [['Mock Data']]
-      }));
-    } catch (error) {
-      console.error('[Sheets API] Failed to get multiple ranges:', error);
-      throw error;
-    }
-  },
-
-  // Get all data from a specific sheet
-  getAllSheetData: async (sheetName) => {
-    try {
-      console.log(`[Sheets API] Fetching all data from "${sheetName}"`);
-      // Placeholder for getting all sheet data
+  const getMonthStats = () => {
+    if (!data.shifts || data.shifts.length === 0) {
       return {
-        values: [['Mock', 'Sheet', 'Data']]
+        totalDays: 0,
+        totalWorkingDays: 0,
+        avgWorkersPerDay: 0,
+        allTechnicians: new Set()
       };
-    } catch (error) {
-      console.error('[Sheets API] Failed to get sheet data:', error);
-      throw error;
     }
-  },
+    const totalDays = data.shifts.length;
+    const totalWorkingDays = data.shifts.filter(s => s.totalWorking > 0).length;
 
-  // Get current month data (renamed from getCurrentMonthData to getCurrentMonthShifts)
-  getCurrentMonthShifts: async () => {
-    const now = new Date();
-    const monthIndex = now.getMonth();
-    const year = now.getFullYear();
-    const expectedMonthName = CONFIG.monthNames[monthIndex];
+    const allTechnicians = new Set();
+    let totalWorkers = 0;
 
-    console.log(`[Sheets API] Szukam arkusza zawierającego "${expectedMonthName}" i rok ${year}...`);
-
-    const allSheets = await sheetsService.getAvailableSheets();
-    let sheetName = allSheets.find(name =>
-      name.toLowerCase().includes(expectedMonthName.toLowerCase()) &&
-      name.includes(year.toString())
-    );
-    if (!sheetName) {
-      sheetName = allSheets.find(name =>
-        name.toLowerCase().includes(expectedMonthName.toLowerCase())
-      );
-    }
-    if (!sheetName) {
-      throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(", ")}`);
-    }
-
-    console.log(`[Sheets API] Używam arkusza "${sheetName}"`);
-
-    const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
-      sheetName,
-      [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
-    );
-
-    console.log("=== TechniciansData ===", JSON.stringify(techniciansData, null, 2));
-    console.log("=== DatesData ===", JSON.stringify(datesData, null, 2));
-    console.log("=== ShiftsData ===", JSON.stringify(shiftsData, null, 2));
+    data.shifts.forEach(shift => {
+      [...(shift.dayTechnicians || []), ...(shift.nightTechnicians || []), ...(shift.firstShiftTechnicians || [])]
+        .forEach(t => {
+          allTechnicians.add(t);
+          totalWorkers++;
+        });
+    });
 
     return {
-      month: monthIndex,
-      year,
-      sheetName,
-      raw: {
-        techniciansData,
-        datesData,
-        shiftsData
-      }
+      totalDays,
+      totalWorkingDays,
+      avgWorkersPerDay: totalDays > 0 ? (totalWorkers / totalDays).toFixed(1) : 0,
+      allTechnicians
     };
-  }
-};
+  };
 
-export default sheetsService;
+  const getTechnicianWorkload = () => {
+    if (!data.shifts || data.shifts.length === 0) return [];
+
+    const stats = {};
+    data.shifts.forEach(shift => {
+      const add = (type, arr) => {
+        (arr || []).forEach(name => {
+          if (!stats[name]) {
+            stats[name] = { day: 0, night: 0, first: 0, vacation: 0, l4: 0 };
+          }
+          stats[name][type]++;
+        });
+      };
+      add("day", shift.dayTechnicians);
+      add("night", shift.nightTechnicians);
+      add("first", shift.firstShiftTechnicians);
+      add("vacation", shift.vacationTechnicians);
+      add("l4", shift.l4Technicians);
+    });
+
+    return Object.entries(stats).map(([name, s]) => ({
+      name,
+      dayShifts: s.day,
+      nightShifts: s.night,
+      firstShifts: s.first,
+      vacationDays: s.vacation,
+      l4Days: s.l4,
+      totalShifts: s.day + s.night,
+      workingDays: s.day + s.night,
+      totalDays: s.day + s.night + s.vacation + s.l4
+    })).sort((a, b) => b.totalShifts - a.totalShifts);
+  };
+
+  const stats = getMonthStats();
+  const workload = getTechnicianWorkload();
+
+  if (loading) {
+    return <div className="p-8 text-center">Ładowanie danych...</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-500">{error}</div>;
+  }
+
+  return (
+    <div className="space-y-8">
+      <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-xl p-8 text-white">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">
+              Grafik zmian - {months[data.month]} {data.year}
+            </h1>
+            <p className="text-blue-100 text-lg mt-1">
+              Dane z arkusza "{data.sheetName}"
+            </p>
+          </div>
+          <button
+            onClick={fetchCurrentMonthData}
+            className="px-6 py-3 bg-white/20 backdrop-blur-xl rounded-xl border border-white/20"
+          >
+            🔄 Odśwież
+          </button>
+        </div>
+      </div>
+
+      <StatisticsCards stats={stats} />
+
+      <TechnicianWorkload workload={workload} />
+
+      <DailyScheduleTable shifts={data.shifts} />
+    </div>
+  );
+}
