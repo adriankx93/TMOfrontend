@@ -122,7 +122,6 @@ export const sheetsService = {
       throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts} w arkuszu "${sheetName}".`);
     }
 
-    // Jeśli w datacells są pełne daty (np. 2025-07-01), ustaw month/year na podstawie pierwszej komórki
     const firstCell = datesData[0][0];
     const parsedDate = new Date(firstCell);
     let finalMonthIndex = monthIndex;
@@ -137,8 +136,11 @@ export const sheetsService = {
     const dates = datesData[0];
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
 
+    // 🚀 ZWRACAJ strukturę zgodną z komponentem
     return {
-      meta: { month: finalMonthIndex, year: finalYear, sheetName },
+      month: finalMonthIndex,
+      year: finalYear,
+      sheetName,
       technicians,
       shifts
     };
@@ -172,7 +174,6 @@ export const sheetsService = {
       .map((cell, idx) => {
         let dayNumber = parseInt(cell);
 
-        // Jeśli nie liczba, próbuj sparsować jako datę
         if (isNaN(dayNumber)) {
           const parsed = new Date(cell);
           if (!isNaN(parsed.getTime())) {
@@ -187,29 +188,28 @@ export const sheetsService = {
         const shift = {
           date: date.toISOString().split('T')[0],
           dayNumber,
-          shifts: {
-            day: [],
-            night: [],
-            firstShift: [],
-            vacation: [],
-            sickLeave: []
-          }
+          dayTechnicians: [],
+          nightTechnicians: [],
+          firstShiftTechnicians: [],
+          vacationTechnicians: [],
+          l4Technicians: []
         };
 
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
           const value = (row[idx] || '').toLowerCase();
-          if (value.includes(CONFIG.shiftCodes.firstShift)) shift.shifts.firstShift.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.day)) shift.shifts.day.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.night)) shift.shifts.night.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.vacation)) shift.shifts.vacation.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.sickLeave)) shift.shifts.sickLeave.push(tech.fullName);
+
+          if (value.includes(CONFIG.shiftCodes.firstShift)) shift.firstShiftTechnicians.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.day)) shift.dayTechnicians.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.night)) shift.nightTechnicians.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.vacation)) shift.vacationTechnicians.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.sickLeave)) shift.l4Technicians.push(tech.fullName);
         });
 
         shift.totalWorking =
-          shift.shifts.day.length +
-          shift.shifts.night.length +
-          shift.shifts.firstShift.length;
+          shift.dayTechnicians.length +
+          shift.nightTechnicians.length +
+          shift.firstShiftTechnicians.length;
 
         return shift;
       })
