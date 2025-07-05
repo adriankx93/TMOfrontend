@@ -43,7 +43,6 @@ export const sheetsService = {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}?key=${SHEETS_API_KEY}`;
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
     const sheetNames = data.sheets.map(s => s.properties.title.trim());
-    console.log('Dostępne arkusze:', sheetNames);
     return sheetNames;
   },
 
@@ -52,7 +51,6 @@ export const sheetsService = {
     const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values:batchGet?${rangesQuery}&key=${SHEETS_API_KEY}`;
     const data = await _fetchFromSheets(url, 'Błąd pobierania zakresów');
-    console.log(`Dane pobrane z ranges:`, data);
     return data.valueRanges.map(r => r.values || []);
   },
 
@@ -62,33 +60,24 @@ export const sheetsService = {
     const year = now.getFullYear();
     const expectedSheetName = CONFIG.monthNames[monthIndex];
 
-    console.log(`Szukam arkusza dla miesiąca: "${expectedSheetName}"`);
-
     const allSheets = await sheetsService.getAvailableSheets();
     const sheetName = allSheets.find(
       name => name.toLowerCase() === expectedSheetName.toLowerCase()
     );
-
     if (!sheetName) {
       throw new Error(`Nie znaleziono arkusza "${expectedSheetName}". Dostępne arkusze: ${allSheets.join(", ")}`);
     }
-
-    console.log(`Używam arkusza: "${sheetName}"`);
 
     const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
       sheetName,
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
 
-    console.log('Technicians raw:', techniciansData);
-    console.log('Dates raw:', datesData);
-    console.log('Shifts raw:', shiftsData);
-
     if (!datesData.length || !datesData[0]?.length) {
-      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates} w arkuszu "${sheetName}"`);
+      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates} w arkuszu "${sheetName}".`);
     }
     if (!shiftsData.length) {
-      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts} w arkuszu "${sheetName}"`);
+      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts} w arkuszu "${sheetName}".`);
     }
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
@@ -113,7 +102,8 @@ export const sheetsService = {
         if (!row[0] || !row[1]) return null;
         return {
           id: i,
-          rowIndex: i,
+          // Indeks w shiftsData odpowiada indeksowi w techniciansData
+          shiftRowIndex: i,
           firstName: row[0].trim(),
           lastName: row[1].trim(),
           specialization: row[2]?.trim() || 'Techniczny',
@@ -147,7 +137,7 @@ export const sheetsService = {
         };
 
         technicians.forEach(tech => {
-          const row = shiftsData[tech.rowIndex] || [];
+          const row = shiftsData[tech.shiftRowIndex] || [];
           const value = (row[idx] || '').toLowerCase();
           if (value.includes(CONFIG.shiftCodes.firstShift)) shift.shifts.firstShift.push(tech.fullName);
           if (value.includes(CONFIG.shiftCodes.day)) shift.shifts.day.push(tech.fullName);
