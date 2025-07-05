@@ -1,3 +1,5 @@
+// src/services/sheetsService.js
+// --- KONFIGURACJA ---
 const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
@@ -20,10 +22,11 @@ const CONFIG = {
 };
 
 const _fetchFromSheets = async (url, errorMessagePrefix) => {
+  console.log(`[Sheets API] Wywołuję URL: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
-    let errorMessage = `${errorMessagePrefix}: ${response.status}`;
+    let errorMessage = `${errorMessagePrefix}: ${response.status} ${response.statusText}`;
     try {
       const errorData = JSON.parse(errorText);
       if (errorData.error?.message) {
@@ -87,11 +90,19 @@ export const sheetsService = {
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
 
-    if (!datesData[0]?.length) throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
-    if (!techniciansData.length) throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
+    if (!datesData.length || !datesData[0]?.length) {
+      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
+    }
+    if (!shiftsData.length) {
+      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
+    }
+    if (!techniciansData.length) {
+      throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
+    }
 
     let finalMonthIndex = monthIndex;
     let finalYear = year;
+
     const sheetNameLower = sheetName.toLowerCase();
     for (let i = 0; i < CONFIG.monthNames.length; i++) {
       if (sheetNameLower.includes(CONFIG.monthNames[i])) {
@@ -100,7 +111,9 @@ export const sheetsService = {
       }
     }
     const yearMatch = sheetName.match(/20\d{2}/);
-    if (yearMatch) finalYear = parseInt(yearMatch[0]);
+    if (yearMatch) {
+      finalYear = parseInt(yearMatch[0]);
+    }
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
     const dates = datesData[0];
@@ -125,18 +138,25 @@ export const sheetsService = {
   },
 
   parseTechnicians: (data) => {
-    if (!Array.isArray(data)) return [];
-    return data.map((row, i) => {
-      if (!row || !row[0]) return null;
-      return {
-        id: i,
-        shiftRowIndex: i,
-        fullName: row[0].trim()
-      };
-    }).filter(Boolean);
+    if (!data || !Array.isArray(data)) return [];
+    return data
+      .map((row, i) => {
+        if (!row || !row[0]) return null;
+        return {
+          id: i,
+          shiftRowIndex: i,
+          firstName: row[0].toString().trim().split(' ')[0],
+          lastName: row[0].toString().trim().split(' ').slice(1).join(' '),
+          specialization: row[1]?.toString().trim() || '',
+          fullName: row[0].toString().trim()
+        };
+      })
+      .filter(Boolean);
   },
 
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
+    if (!technicians.length || !dates.length || !shiftsData.length) return [];
+
     return dates.map((cell, idx) => {
       const dayNumber = parseInt(cell);
       if (isNaN(dayNumber)) return null;
@@ -154,7 +174,9 @@ export const sheetsService = {
 
       technicians.forEach(tech => {
         const row = shiftsData[tech.shiftRowIndex] || [];
-        const rawValue = (row[idx] || '').toLowerCase().trim();
+        // Upewniamy się, że kolumny są wyrównane z datami
+        const safeCell = idx < row.length ? row[idx] : '';
+        const rawValue = (safeCell || '').toLowerCase().trim();
         const tokens = rawValue.split(/\s|,/).filter(Boolean);
 
         tokens.forEach(token => {
@@ -182,5 +204,5 @@ export const sheetsService = {
 
       return shift;
     }).filter(Boolean);
-  },
+  }
 };
