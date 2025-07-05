@@ -1,11 +1,10 @@
-// src/services/sheetsService.js
-
+// --- KONFIGURACJA ---
 const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E18',
-    dates: 'J4:AN4', // daty z wiersza 4
+    dates: 'K4:AN4', // UWAGA: zmiana tu - K4 zamiast J4
     shifts: 'J7:AN18',
   },
   monthNames: [
@@ -17,12 +16,11 @@ const CONFIG = {
     day: 'd',
     night: 'n',
     vacation: 'u',
-    sickLeave: 'l4'
+    sickLeave: 'l4',
   }
 };
 
 const _fetchFromSheets = async (url, errorMessagePrefix) => {
-  console.log(`[Sheets API] Wywołuję URL: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
@@ -119,10 +117,6 @@ export const sheetsService = {
     const dates = datesData[0];
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
 
-    console.log("[DEBUG] techniciansData:", JSON.stringify(techniciansData, null, 2));
-    console.log("[DEBUG] datesData:", JSON.stringify(datesData, null, 2));
-    console.log("[DEBUG] shiftsData:", JSON.stringify(shiftsData, null, 2));
-
     return {
       month: finalMonthIndex,
       year: finalYear,
@@ -146,14 +140,14 @@ export const sheetsService = {
     return data
       .map((row, i) => {
         if (!row || !row[0]) return null;
-        const fullName = row[0].toString().trim();
+        const parts = row[0].split(' ');
         return {
           id: i,
           shiftRowIndex: i,
-          firstName: fullName.split(' ')[0],
-          lastName: fullName.split(' ').slice(1).join(' '),
-          specialization: row[1]?.toString().trim() || 'Techniczny',
-          fullName
+          firstName: parts.slice(0, -1).join(' ').trim() || 'Technik',
+          lastName: parts.slice(-1)[0].trim() || '',
+          specialization: row[1]?.toString().trim() || '',
+          fullName: row[0].trim()
         };
       })
       .filter(Boolean);
