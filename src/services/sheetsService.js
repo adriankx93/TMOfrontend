@@ -1,15 +1,6 @@
-/*
- * Aby ten kod zadziałał, musisz utworzyć w głównym folderze projektu plik `.env`
- * i umieścić w nim swoje klucze. Jeśli używasz Vite, prefix VITE_ jest wymagany.
- *
- * Plik .env:
- * VITE_SHEETS_API_KEY=TWOJ_KLUCZ_API
- * VITE_SPREADSHEET_ID=TWOJ_ID_ARKUSZA
- */
 const SHEETS_API_KEY = import.meta.env.VITE_SHEETS_API_KEY;
 const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
 
-// --- KONFIGURACJA ---
 const CONFIG = {
   ranges: {
     technicians: 'C7:E23',
@@ -29,8 +20,7 @@ const CONFIG = {
   }
 };
 
-// --- FUNKCJA POMOCNICZA ---
-const _fetchFromSheets = async (url, errorMessagePrefix = 'Błąd pobierania danych') => {
+const _fetchFromSheets = async (url, errorMessagePrefix) => {
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
@@ -49,62 +39,56 @@ const _fetchFromSheets = async (url, errorMessagePrefix = 'Błąd pobierania dan
 };
 
 export const sheetsService = {
-  /**
-   * Lista arkuszy w dokumencie.
-   */
   getAvailableSheets: async () => {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}?key=${SHEETS_API_KEY}`;
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
-    return data.sheets.map(s => s.properties.title.trim());
+    const sheetNames = data.sheets.map(s => s.properties.title.trim());
+    console.log('Dostępne arkusze:', sheetNames);
+    return sheetNames;
   },
 
-  /**
-   * Pobiera kilka zakresów w jednym zapytaniu.
-   */
   getMultipleRanges: async (sheetName, ranges) => {
     const encodedSheetName = encodeURIComponent(sheetName);
     const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values:batchGet?${rangesQuery}&key=${SHEETS_API_KEY}`;
-    const data = await _fetchFromSheets(url, 'Błąd pobierania danych zakresów');
+    const data = await _fetchFromSheets(url, 'Błąd pobierania zakresów');
+    console.log(`Dane pobrane z ranges:`, data);
     return data.valueRanges.map(r => r.values || []);
   },
 
-  /**
-   * Pobiera i przetwarza wszystkie dane bieżącego miesiąca.
-   */
   getCurrentMonthData: async () => {
     const now = new Date();
     const monthIndex = now.getMonth();
     const year = now.getFullYear();
     const expectedSheetName = CONFIG.monthNames[monthIndex];
 
-    console.log(`Sprawdzam arkusze dla: "${expectedSheetName}"`);
+    console.log(`Szukam arkusza dla miesiąca: "${expectedSheetName}"`);
 
     const allSheets = await sheetsService.getAvailableSheets();
-    console.log("Dostępne arkusze:", allSheets);
-
     const sheetName = allSheets.find(
       name => name.toLowerCase() === expectedSheetName.toLowerCase()
     );
 
     if (!sheetName) {
-      throw new Error(
-        `Brak arkusza "${expectedSheetName}". Dostępne arkusze: ${allSheets.join(", ")}`
-      );
+      throw new Error(`Nie znaleziono arkusza "${expectedSheetName}". Dostępne arkusze: ${allSheets.join(", ")}`);
     }
 
-    console.log(`Używam arkusza: ${sheetName}`);
+    console.log(`Używam arkusza: "${sheetName}"`);
 
     const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
       sheetName,
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
 
-    if (!techniciansData.length) {
-      throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}`);
-    }
+    console.log('Technicians raw:', techniciansData);
+    console.log('Dates raw:', datesData);
+    console.log('Shifts raw:', shiftsData);
+
     if (!datesData.length || !datesData[0]?.length) {
-      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}`);
+      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates} w arkuszu "${sheetName}"`);
+    }
+    if (!shiftsData.length) {
+      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts} w arkuszu "${sheetName}"`);
     }
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
@@ -112,31 +96,21 @@ export const sheetsService = {
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, year, monthIndex);
 
     return {
-      meta: {
-        month: monthIndex,
-        year,
-        sheetName,
-      },
+      meta: { month: monthIndex, year, sheetName },
       technicians,
       shifts
     };
   },
 
-  /**
-   * Alias do użycia w komponentach.
-   */
   getCurrentMonthShifts: async () => {
     return await sheetsService.getCurrentMonthData();
   },
 
-  /**
-   * Tworzy listę techników.
-   */
   parseTechnicians: (data) => {
     if (!data) return [];
     return data
       .map((row, i) => {
-        if (row?.length < 2 || !row[0] || !row[1]) return null;
+        if (!row[0] || !row[1]) return null;
         return {
           id: i,
           rowIndex: i,
@@ -149,48 +123,43 @@ export const sheetsService = {
       .filter(Boolean);
   },
 
-  /**
-   * Tworzy listę zmian.
-   */
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
     if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
     return dates
-      .map((dayCell, dateIdx) => {
-        const dayNumber = parseInt(dayCell);
-        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
+      .map((cell, idx) => {
+        const day = parseInt(cell);
+        if (isNaN(day) || day < 1 || day > 31) return null;
 
-        const date = new Date(year, monthIndex, dayNumber);
-        if (isNaN(date.getTime()) || date.getMonth() !== monthIndex) return null;
+        const date = new Date(year, monthIndex, day);
+        if (date.getMonth() !== monthIndex) return null;
 
         const shift = {
           date: date.toISOString().split('T')[0],
-          dayNumber,
+          dayNumber: day,
           shifts: {
             day: [],
             night: [],
             firstShift: [],
             vacation: [],
             sickLeave: []
-          },
-          totalWorking: 0
+          }
         };
 
-        technicians.forEach(technician => {
-          const row = shiftsData[technician.rowIndex] || [];
-          const cell = (row[dateIdx] || '').toLowerCase();
-
-          if (cell.includes(CONFIG.shiftCodes.firstShift)) shift.shifts.firstShift.push(technician.fullName);
-          if (cell.includes(CONFIG.shiftCodes.day)) shift.shifts.day.push(technician.fullName);
-          if (cell.includes(CONFIG.shiftCodes.night)) shift.shifts.night.push(technician.fullName);
-          if (cell.includes(CONFIG.shiftCodes.vacation)) shift.shifts.vacation.push(technician.fullName);
-          if (cell.includes(CONFIG.shiftCodes.sickLeave)) shift.shifts.sickLeave.push(technician.fullName);
+        technicians.forEach(tech => {
+          const row = shiftsData[tech.rowIndex] || [];
+          const value = (row[idx] || '').toLowerCase();
+          if (value.includes(CONFIG.shiftCodes.firstShift)) shift.shifts.firstShift.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.day)) shift.shifts.day.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.night)) shift.shifts.night.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.vacation)) shift.shifts.vacation.push(tech.fullName);
+          if (value.includes(CONFIG.shiftCodes.sickLeave)) shift.shifts.sickLeave.push(tech.fullName);
         });
 
         shift.totalWorking =
           shift.shifts.day.length +
-          shift.shifts.firstShift.length +
-          shift.shifts.night.length;
+          shift.shifts.night.length +
+          shift.shifts.firstShift.length;
 
         return shift;
       })
