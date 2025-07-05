@@ -10,11 +10,11 @@ export default function CurrentMonthChart() {
     shifts: [],
     month: new Date().getMonth(),
     year: new Date().getFullYear(),
-    sheetName: ""
+    sheetName: "",
+    debugRawData: {}
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [connectionTest, setConnectionTest] = useState(null);
 
   const months = [
     "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
@@ -22,32 +22,15 @@ export default function CurrentMonthChart() {
   ];
 
   useEffect(() => {
-    testConnection();
     fetchCurrentMonthData();
-    const interval = setInterval(fetchCurrentMonthData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
   }, []);
-
-  const testConnection = async () => {
-    try {
-      const result = await sheetsService.testConnection();
-      setConnectionTest(result);
-    } catch (err) {
-      setConnectionTest({
-        success: false,
-        message: err.message,
-        sheets: []
-      });
-    }
-  };
 
   const fetchCurrentMonthData = async () => {
     try {
       setLoading(true);
       setError(null);
       const monthData = await sheetsService.getCurrentMonthShifts();
-console.log("[DEBUG] monthData", monthData);      
-setData(monthData);
+      setData(monthData);
     } catch (err) {
       setError(err.message || "Błąd podczas pobierania danych");
     } finally {
@@ -86,41 +69,7 @@ setData(monthData);
     };
   };
 
-  const getTechnicianWorkload = () => {
-    if (!data.shifts || data.shifts.length === 0) return [];
-
-    const stats = {};
-    data.shifts.forEach(shift => {
-      const add = (type, arr) => {
-        (arr || []).forEach(name => {
-          if (!stats[name]) {
-            stats[name] = { day: 0, night: 0, first: 0, vacation: 0, l4: 0 };
-          }
-          stats[name][type]++;
-        });
-      };
-      add("day", shift.dayTechnicians);
-      add("night", shift.nightTechnicians);
-      add("first", shift.firstShiftTechnicians);
-      add("vacation", shift.vacationTechnicians);
-      add("l4", shift.l4Technicians);
-    });
-
-    return Object.entries(stats).map(([name, s]) => ({
-      name,
-      dayShifts: s.day,
-      nightShifts: s.night,
-      firstShifts: s.first,
-      vacationDays: s.vacation,
-      l4Days: s.l4,
-      totalShifts: s.day + s.night,
-      workingDays: s.day + s.night,
-      totalDays: s.day + s.night + s.vacation + s.l4
-    })).sort((a, b) => b.totalShifts - a.totalShifts);
-  };
-
   const stats = getMonthStats();
-  const workload = getTechnicianWorkload();
 
   if (loading) {
     return <div className="p-8 text-center">Ładowanie danych...</div>;
@@ -139,32 +88,28 @@ setData(monthData);
               Grafik zmian - {months[data.month]} {data.year}
             </h1>
             <p className="text-blue-100 text-lg mt-1">
-              Dane z arkusza "{data.sheetName}"
+              Dane z arkusza <strong>{data.sheetName}</strong>
             </p>
           </div>
           <button
             onClick={fetchCurrentMonthData}
             className="px-6 py-3 bg-white/20 backdrop-blur-xl rounded-xl border border-white/20"
           >
-            🔄 Odśwież
+            🔄 Odśwież dane
           </button>
         </div>
       </div>
 
       <StatisticsCards stats={stats} />
-
-      <TechnicianWorkload workload={workload} />
-
+      <TechnicianWorkload workload={[]} />
       <DailyScheduleTable shifts={data.shifts} />
 
-      {data && (
-        <div className="mt-6">
-          <h2 className="text-lg font-semibold mb-2">🔍 Surowe dane debug (JSON):</h2>
-          <pre className="bg-slate-100 p-4 rounded-lg overflow-x-auto text-xs">
-            {JSON.stringify(data, null, 2)}
-          </pre>
-        </div>
-      )}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-2">📋 Surowe dane debug:</h2>
+        <pre className="bg-gray-100 text-black p-4 text-xs overflow-x-auto rounded-lg">
+          {JSON.stringify(data.debugRawData, null, 2)}
+        </pre>
+      </div>
     </div>
   );
 }
