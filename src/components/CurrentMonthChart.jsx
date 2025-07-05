@@ -155,6 +155,15 @@ export default function CurrentMonthChart() {
       <TechnicianWorkload workload={workload} />
 
       <DailyScheduleTable shifts={data.shifts} />
+
+      {data.debugRawData && (
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold mb-2">🔍 Surowe dane debug:</h2>
+          <pre className="bg-slate-100 p-4 rounded-lg overflow-x-auto text-xs">
+            {JSON.stringify(data.debugRawData, null, 2)}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }
