@@ -1,5 +1,5 @@
 const SHEETS_API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
-const SPREADSHEET_ID = '1gduTrxhu4I7Z8CKcBtxmia3_4-7GopgM';
+const SPREADSHEET_ID = '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ';
 
 export const sheetsService = {
   // Pobierz dane z konkretnego zakresu arkusza
