@@ -6,7 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import TasksPage from "./pages/TasksPage";
 import ShiftsPage from "./pages/ShiftsPage";
 import ShiftChartPage from "./pages/ShiftChartPage";
-import CurrentMonthPage from "./pages/CurrentMonthPage";
+import CurrentMonthChart from "./components/CurrentMonthChart";
 import TechniciansPage from "./pages/TechniciansPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -24,7 +24,7 @@ export default function App() {
           <Route path="/zadania" element={<TasksPage />} />
           <Route path="/shifts" element={<ShiftsPage />} />
           <Route path="/shift-chart" element={<ShiftChartPage />} />
-          <Route path="/current-month" element={<CurrentMonthPage />} />
+          <Route path="/current-month" element={<CurrentMonthChart />} />
           <Route path="/technicians" element={<TechniciansPage />} />
           <Route path="/raporty" element={<ReportsPage />} />
           <Route path="/ustawienia" element={<SettingsPage />} />
