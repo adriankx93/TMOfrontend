@@ -4,7 +4,7 @@ const CONFIG = {
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E23',
-    dates: 'J3:AN3',
+    dates: 'J32:AN32', // TU ZMIENIONE: wiersz 32 zawiera numery dni
     shifts: 'J7:AN23',
   },
   monthNames: [
@@ -88,7 +88,7 @@ export const sheetsService = {
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
     const dates = datesData[0];
-    const shifts = sheetsService.parseShifts(technicians, dates, shiftsData);
+    const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, year, monthIndex);
 
     return {
       meta: { month: monthIndex, year, sheetName },
@@ -118,29 +118,15 @@ export const sheetsService = {
       .filter(Boolean);
   },
 
-  parseShifts: (technicians, dates, shiftsData) => {
+  parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
     if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
     return dates
       .map((cell, idx) => {
-        let date = null;
+        const dayNumber = parseInt(cell);
+        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
 
-        // Spróbuj najpierw pełnej daty
-        const parsedDate = new Date(cell);
-        if (!isNaN(parsedDate.getTime())) {
-          date = parsedDate;
-        } else {
-          // Jeśli nie działa, spróbuj samego dnia
-          const day = parseInt(cell);
-          if (!isNaN(day) && day >= 1 && day <= 31) {
-            const now = new Date();
-            date = new Date(now.getFullYear(), now.getMonth(), day);
-          }
-        }
-
-        if (!date) return null;
-
-        const dayNumber = date.getDate();
+        const date = new Date(year, monthIndex, dayNumber);
 
         const shift = {
           date: date.toISOString().split('T')[0],
