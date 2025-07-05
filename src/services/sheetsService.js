@@ -1,4 +1,4 @@
-// Klucz API wpisany na sztywno
+// Klucz API wpisany na sztywno BEZ żadnych warunków
 const SHEETS_API_KEY = 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY';
 const SPREADSHEET_ID = '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ';
 
@@ -17,7 +17,7 @@ export const sheetsService = {
         let errorMessage = `Failed to fetch sheet range: ${response.status} ${response.statusText}`;
         try {
           const errorData = JSON.parse(errorText);
-          if (errorData.error && errorData.error.message) {
+          if (errorData.error?.message) {
             errorMessage += ` - ${errorData.error.message}`;
           }
         } catch {
@@ -48,7 +48,7 @@ export const sheetsService = {
         let errorMessage = `Failed to fetch sheet data: ${response.status} ${response.statusText}`;
         try {
           const errorData = JSON.parse(errorText);
-          if (errorData.error && errorData.error.message) {
+          if (errorData.error?.message) {
             errorMessage += ` - ${errorData.error.message}`;
           }
         } catch {
@@ -109,19 +109,14 @@ export const sheetsService = {
       );
 
       if (!sheetName) {
-        throw new Error(`Nie znaleziono karty dla miesiąca "${expectedSheetName}". Sprawdź nazwy arkuszy w Google Sheets.`);
+        throw new Error(`Nie znaleziono karty dla miesiąca "${expectedSheetName}". Sprawdź nazwy arkuszy.`);
       }
 
       console.log(`Używam arkusza: ${sheetName}`);
 
       const techniciansRange = await sheetsService.getSheetRange(sheetName, 'C7:E23');
-      console.log('Dane techników:', techniciansRange);
-
       const datesRange = await sheetsService.getSheetRange(sheetName, 'J3:AM3');
-      console.log('Daty:', datesRange);
-
       const shiftsRange = await sheetsService.getSheetRange(sheetName, 'J7:AM23');
-      console.log('Zmiany:', shiftsRange);
 
       const technicians = sheetsService.parseCurrentMonthTechnicians(techniciansRange);
       const dates = datesRange[0] || [];
@@ -144,27 +139,23 @@ export const sheetsService = {
     const technicians = [];
 
     techniciansData.forEach((row, index) => {
-      if (row && row.length >= 2 && row[0] && row[1]) {
+      if (row?.length >= 2 && row[0] && row[1]) {
         const technician = {
           id: index,
-          firstName: row[0]?.toString().trim(),
-          lastName: row[1]?.toString().trim(),
+          firstName: row[0].toString().trim(),
+          lastName: row[1].toString().trim(),
           specialization: row[2]?.toString().trim() || 'Techniczny',
           fullName: `${row[0]} ${row[1]}`.trim()
         };
-        if (technician.firstName && technician.lastName) {
-          technicians.push(technician);
-        }
+        technicians.push(technician);
       }
     });
 
-    console.log('Przetworzone dane techników:', technicians);
     return technicians;
   },
 
   parseSheetDate: (dateValue, year, month) => {
     if (!dateValue) return null;
-
     const dateStr = dateValue.toString().trim();
     const dayOnly = parseInt(dateStr);
     if (!isNaN(dayOnly) && dayOnly >= 1 && dayOnly <= 31) {
@@ -177,9 +168,7 @@ export const sheetsService = {
         const day = parseInt(parts[0]);
         const monthPart = parseInt(parts[1]);
         const yearPart = parseInt(parts[2]);
-        if (day >= 1 && day <= 31 && monthPart >= 1 && monthPart <= 12) {
-          return new Date(yearPart, monthPart - 1, day);
-        }
+        return new Date(yearPart, monthPart - 1, day);
       }
     }
     if (dateStr.includes('-')) {
@@ -202,10 +191,7 @@ export const sheetsService = {
 
     dates.forEach((dateValue, dateIndex) => {
       const date = sheetsService.parseSheetDate(dateValue, year, month);
-      if (!date) {
-        console.warn(`Nie można sparsować daty: ${dateValue}`);
-        return;
-      }
+      if (!date) return;
       if (date.getMonth() !== month - 1) return;
 
       const shift = {
@@ -224,13 +210,11 @@ export const sheetsService = {
       technicians.forEach((technician, techIndex) => {
         if (techIndex < shiftsData.length) {
           const shiftValue = (shiftsData[techIndex][dateIndex] || '').toString().trim().toLowerCase();
-          if (shiftValue) {
-            if (shiftValue.includes('1')) shift.firstShiftTechnicians.push(technician.fullName);
-            if (shiftValue.includes('d')) shift.dayTechnicians.push(technician.fullName);
-            if (shiftValue.includes('n')) shift.nightTechnicians.push(technician.fullName);
-            if (shiftValue.includes('u')) shift.vacationTechnicians.push(technician.fullName);
-            if (shiftValue.includes('l4')) shift.l4Technicians.push(technician.fullName);
-          }
+          if (shiftValue.includes('1')) shift.firstShiftTechnicians.push(technician.fullName);
+          if (shiftValue.includes('d')) shift.dayTechnicians.push(technician.fullName);
+          if (shiftValue.includes('n')) shift.nightTechnicians.push(technician.fullName);
+          if (shiftValue.includes('u')) shift.vacationTechnicians.push(technician.fullName);
+          if (shiftValue.includes('l4')) shift.l4Technicians.push(technician.fullName);
         }
       });
 
@@ -238,16 +222,10 @@ export const sheetsService = {
       shifts.push(shift);
     });
 
-    console.log('Przetworzone zmiany:', shifts);
     return shifts.sort((a, b) => new Date(a.date) - new Date(b.date));
   },
 
   getCurrentMonthShifts: async () => {
-    try {
-      return await sheetsService.getCurrentMonthData();
-    } catch (error) {
-      console.error('Error fetching current month shifts:', error);
-      throw error;
-    }
+    return await sheetsService.getCurrentMonthData();
   }
 };
