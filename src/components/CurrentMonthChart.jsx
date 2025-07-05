@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import sheetsService from "../services/sheetsService";
+import { sheetsService } from "../services/sheetsService";
 import StatisticsCards from "./StatisticsCards";
 import TechnicianWorkload from "./TechnicianWorkload";
 import DailyScheduleTable from "./DailyScheduleTable";
@@ -158,7 +158,7 @@ export default function CurrentMonthChart() {
 
       {data && (
         <div className="mt-6">
-          <h2 className="text-lg font-semibold mb-2">🔍 Pełne dane debug (JSON):</h2>
+          <h2 className="text-lg font-semibold mb-2">🔍 Surowe dane debug (JSON):</h2>
           <pre className="bg-slate-100 p-4 rounded-lg overflow-x-auto text-xs">
             {JSON.stringify(data, null, 2)}
           </pre>
