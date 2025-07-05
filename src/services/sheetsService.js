@@ -1,7 +1,3 @@
-// --- STAŁE z Twoimi wartościami ---
-const SHEETS_API_KEY = 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY';
-const SPREADSHEET_ID = '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ';
-
 // --- KONFIGURACJA ---
 const CONFIG = {
   ranges: {
