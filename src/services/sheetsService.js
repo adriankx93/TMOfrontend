@@ -116,7 +116,20 @@ export const sheetsService = {
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
     const dates = datesData[0];
+    
+    // LOGI DEBUG
+    console.log('🔍 DEBUG - Surowe dane przed parsowaniem:');
+    console.log('📊 techniciansData:', techniciansData);
+    console.log('📅 datesData:', datesData);
+    console.log('🔄 shiftsData:', shiftsData);
+    console.log('📋 Sparsowani technicy:', technicians);
+    console.log('📆 Daty (pierwszy wiersz):', dates);
+    console.log('🗓️ Miesiąc/rok przed parsowaniem:', finalMonthIndex, finalYear);
+    
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
+
+    console.log('✅ Sparsowane zmiany:', shifts);
+    console.log('📈 Liczba zmian:', shifts.length);
 
     // DODAJEMY debugRawData
     return {
