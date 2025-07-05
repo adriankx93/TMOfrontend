@@ -1,231 +1,185 @@
-// Klucz API wpisany na sztywno BEZ żadnych warunków
-const SHEETS_API_KEY = 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY';
-const SPREADSHEET_ID = '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ';
+/*
+ * Aby ten kod zadziałał, musisz utworzyć w głównym folderze projektu plik `.env`
+ * i umieścić w nim swoje klucze. Jeśli używasz Vite, prefix VITE_ jest wymagany.
+ *
+ * Plik .env:
+ * VITE_SHEETS_API_KEY=TWOJ_KLUCZ_API
+ * VITE_SPREADSHEET_ID=TWOJ_ID_ARKUSZA
+ */
+const SHEETS_API_KEY = import.meta.env.VITE_SHEETS_API_KEY;
+const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
+
+// --- OBIEKT KONFIGURACYJNY ---
+// Wszystkie "magiczne" wartości w jednym miejscu dla łatwiejszej edycji.
+const CONFIG = {
+    ranges: {
+        technicians: 'C7:E23',
+        dates: 'J3:AM3',
+        shifts: 'J7:AM23',
+    },
+    monthNames: [
+        'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+        'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+    ],
+    shiftCodes: {
+        firstShift: '1',
+        day: 'd',
+        night: 'n',
+        vacation: 'u',
+        sickLeave: 'l4',
+    }
+};
+
+// --- PRYWATNA FUNKCJA POMOCNICZA ---
+// Jedna funkcja do obsługi wszystkich zapytań fetch, aby uniknąć powtarzania kodu.
+const _fetchFromSheets = async (url, errorMessagePrefix = 'Błąd pobierania danych') => {
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error Response:', errorText);
+            let errorMessage = `${errorMessagePrefix}: ${response.status} ${response.statusText}`;
+            try {
+                const errorData = JSON.parse(errorText);
+                if (errorData.error?.message) {
+                    errorMessage += ` - ${errorData.error.message}`;
+                }
+            } catch {
+                errorMessage += ` - ${errorText}`;
+            }
+            throw new Error(errorMessage);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(error.message);
+        throw error;
+    }
+};
+
 
 export const sheetsService = {
-  getSheetRange: async (sheetName, range) => {
-    try {
-      const encodedSheetName = encodeURIComponent(sheetName);
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodedSheetName}!${range}?key=${SHEETS_API_KEY}`;
-      console.log('Fetching from URL:', url);
+    /**
+     * Pobiera nazwy wszystkich dostępnych kart (arkuszy) w dokumencie.
+     */
+    getAvailableSheets: async () => {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}?key=${SHEETS_API_KEY}`;
+        console.log('Pobieranie listy arkuszy...');
+        const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
+        const sheetNames = data.sheets.map(s => s.properties.title);
+        console.log('Dostępne arkusze:', sheetNames);
+        return sheetNames;
+    },
 
-      const response = await fetch(url);
+    /**
+     * Pobiera wiele zakresów danych w jednym, wydajnym zapytaniu API.
+     * @param {string} sheetName - Nazwa arkusza.
+     * @param {string[]} ranges - Tablica zakresów do pobrania, np. ['A1:B2', 'C5:D8'].
+     * @returns {Promise<any[][]>} Tablica tablic z danymi dla każdego zakresu.
+     */
+    getMultipleRanges: async (sheetName, ranges) => {
+        const encodedSheetName = encodeURIComponent(sheetName);
+        const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values:batchGet?${rangesQuery}&key=${SHEETS_API_KEY}`;
+        
+        console.log(`Pobieranie zakresów: ${ranges.join(', ')} z arkusza "${sheetName}"...`);
+        const data = await _fetchFromSheets(url, 'Błąd pobierania wielu zakresów');
+        return data.valueRanges.map(range => range.values || []);
+    },
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error Response:', errorText);
-        let errorMessage = `Failed to fetch sheet range: ${response.status} ${response.statusText}`;
-        try {
-          const errorData = JSON.parse(errorText);
-          if (errorData.error?.message) {
-            errorMessage += ` - ${errorData.error.message}`;
-          }
-        } catch {
-          errorMessage += ` - ${errorText}`;
+    /**
+     * Główna funkcja pobierająca i przetwarzająca wszystkie dane dla bieżącego miesiąca.
+     */
+    getCurrentMonthData: async () => {
+        const currentDate = new Date();
+        const currentMonthIndex = currentDate.getMonth(); // 0 = styczeń, 1 = luty...
+        const currentYear = currentDate.getFullYear();
+
+        const expectedSheetName = CONFIG.monthNames[currentMonthIndex];
+        console.log(`Oczekiwana nazwa arkusza: ${expectedSheetName}`);
+
+        const allSheets = await sheetsService.getAvailableSheets();
+        const sheetName = allSheets.find(
+            name => name.toLowerCase() === expectedSheetName.toLowerCase()
+        );
+
+        if (!sheetName) {
+            throw new Error(`Nie znaleziono karty dla miesiąca "${expectedSheetName}". Sprawdź nazwy arkuszy.`);
         }
-        throw new Error(errorMessage);
-      }
+        console.log(`Używam arkusza: ${sheetName}`);
+        
+        // Jedno zapytanie API do pobrania wszystkich potrzebnych danych
+        const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
+            sheetName,
+            [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
+        );
+        
+        const technicians = sheetsService.parseTechnicians(techniciansData);
+        const dates = datesData[0] || [];
+        const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, currentYear, currentMonthIndex);
 
-      const data = await response.json();
-      return data.values || [];
-    } catch (error) {
-      console.error('Error fetching sheet range:', error);
-      throw new Error(`Błąd pobierania danych z arkusza: ${error.message}`);
-    }
-  },
-
-  getSheetData: async (sheetName) => {
-    try {
-      const encodedSheetName = encodeURIComponent(sheetName);
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodedSheetName}?key=${SHEETS_API_KEY}`;
-      console.log('Fetching sheet data from URL:', url);
-
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error Response:', errorText);
-        let errorMessage = `Failed to fetch sheet data: ${response.status} ${response.statusText}`;
-        try {
-          const errorData = JSON.parse(errorText);
-          if (errorData.error?.message) {
-            errorMessage += ` - ${errorData.error.message}`;
-          }
-        } catch {
-          errorMessage += ` - ${errorText}`;
-        }
-        throw new Error(errorMessage);
-      }
-
-      const data = await response.json();
-      return data.values || [];
-    } catch (error) {
-      console.error('Error fetching sheet data:', error);
-      throw new Error(`Błąd pobierania danych z arkusza: ${error.message}`);
-    }
-  },
-
-  getAvailableSheets: async () => {
-    try {
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}?key=${SHEETS_API_KEY}`;
-      console.log('Pobieranie listy arkuszy z URL:', url);
-
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error Response:', errorText);
-        throw new Error(`Nie udało się pobrać listy arkuszy: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const sheetNames = data.sheets.map(s => s.properties.title);
-      console.log('Dostępne arkusze:', sheetNames);
-
-      return sheetNames;
-    } catch (error) {
-      console.error('Błąd pobierania listy arkuszy:', error);
-      throw error;
-    }
-  },
-
-  getCurrentMonthData: async () => {
-    try {
-      const currentDate = new Date();
-      const currentMonth = currentDate.getMonth() + 1;
-      const currentYear = currentDate.getFullYear();
-
-      const monthNames = [
-        '', 'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
-        'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
-      ];
-
-      const expectedSheetName = monthNames[currentMonth];
-      console.log(`Oczekiwana nazwa arkusza: ${expectedSheetName}`);
-
-      const allSheets = await sheetsService.getAvailableSheets();
-      const sheetName = allSheets.find(
-        (name) => name.toLowerCase() === expectedSheetName.toLowerCase()
-      );
-
-      if (!sheetName) {
-        throw new Error(`Nie znaleziono karty dla miesiąca "${expectedSheetName}". Sprawdź nazwy arkuszy.`);
-      }
-
-      console.log(`Używam arkusza: ${sheetName}`);
-
-      const techniciansRange = await sheetsService.getSheetRange(sheetName, 'C7:E23');
-      const datesRange = await sheetsService.getSheetRange(sheetName, 'J3:AM3');
-      const shiftsRange = await sheetsService.getSheetRange(sheetName, 'J7:AM23');
-
-      const technicians = sheetsService.parseCurrentMonthTechnicians(techniciansRange);
-      const dates = datesRange[0] || [];
-      const shifts = sheetsService.parseCurrentMonthShifts(technicians, dates, shiftsRange, currentYear, currentMonth);
-
-      return {
-        technicians,
-        shifts,
-        month: currentMonth - 1,
-        year: currentYear
-      };
-    } catch (error) {
-      console.error('Error fetching current month data:', error);
-      throw error;
-    }
-  },
-
-  parseCurrentMonthTechnicians: (techniciansData) => {
-    if (!techniciansData || techniciansData.length === 0) return [];
-    const technicians = [];
-
-    techniciansData.forEach((row, index) => {
-      if (row?.length >= 2 && row[0] && row[1]) {
-        const technician = {
-          id: index,
-          firstName: row[0].toString().trim(),
-          lastName: row[1].toString().trim(),
-          specialization: row[2]?.toString().trim() || 'Techniczny',
-          fullName: `${row[0]} ${row[1]}`.trim()
+        return {
+            technicians,
+            shifts,
+            month: currentMonthIndex,
+            year: currentYear
         };
-        technicians.push(technician);
-      }
-    });
+    },
 
-    return technicians;
-  },
+    /**
+     * Przetwarza surowe dane techników na listę obiektów.
+     */
+    parseTechnicians: (techniciansData) => {
+        if (!techniciansData) return [];
+        return techniciansData.map((row, index) => {
+            if (row?.length < 2 || !row[0] || !row[1]) return null;
+            return {
+                id: index,
+                firstName: row[0].trim(),
+                lastName: row[1].trim(),
+                specialization: row[2]?.trim() || 'Techniczny',
+                fullName: `${row[0]} ${row[1]}`.trim()
+            };
+        }).filter(Boolean); // Usuwa nulle z tablicy
+    },
+    
+    /**
+     * Przetwarza surowe dane o zmianach na gotową strukturę.
+     */
+    parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
+        if (!technicians.length || !dates.length || !shiftsData.length) return [];
+        const shifts = [];
 
-  parseSheetDate: (dateValue, year, month) => {
-    if (!dateValue) return null;
-    const dateStr = dateValue.toString().trim();
-    const dayOnly = parseInt(dateStr);
-    if (!isNaN(dayOnly) && dayOnly >= 1 && dayOnly <= 31) {
-      return new Date(year, month - 1, dayOnly);
-    }
-    if (dateStr.includes('/') || dateStr.includes('.')) {
-      const separator = dateStr.includes('/') ? '/' : '.';
-      const parts = dateStr.split(separator);
-      if (parts.length === 3) {
-        const day = parseInt(parts[0]);
-        const monthPart = parseInt(parts[1]);
-        const yearPart = parseInt(parts[2]);
-        return new Date(yearPart, monthPart - 1, day);
-      }
-    }
-    if (dateStr.includes('-')) {
-      const date = new Date(dateStr);
-      if (!isNaN(date.getTime())) {
-        return date;
-      }
-    }
-    const excelDate = parseFloat(dateStr);
-    if (!isNaN(excelDate) && excelDate > 25000) {
-      const excelEpoch = new Date(1899, 11, 30);
-      return new Date(excelEpoch.getTime() + excelDate * 24 * 60 * 60 * 1000);
-    }
-    return null;
-  },
+        dates.forEach((dateValue, dateIndex) => {
+            const date = new Date(year, monthIndex, parseInt(dateValue));
+            if (isNaN(date.getTime()) || date.getMonth() !== monthIndex) return;
 
-  parseCurrentMonthShifts: (technicians, dates, shiftsData, year, month) => {
-    if (!technicians || !dates || !shiftsData) return [];
-    const shifts = [];
+            const shift = {
+                date: date.toISOString().split('T')[0],
+                dayNumber: date.getDate(),
+                dayTechnicians: [],
+                nightTechnicians: [],
+                firstShiftTechnicians: [],
+                vacationTechnicians: [],
+                l4Technicians: [],
+            };
 
-    dates.forEach((dateValue, dateIndex) => {
-      const date = sheetsService.parseSheetDate(dateValue, year, month);
-      if (!date) return;
-      if (date.getMonth() !== month - 1) return;
+            technicians.forEach((technician, techIndex) => {
+                const shiftValue = (shiftsData[techIndex]?.[dateIndex] || '').toLowerCase();
+                if (!shiftValue) return;
 
-      const shift = {
-        date: date.toISOString().split('T')[0],
-        dayNumber: date.getDate(),
-        dayTechnicians: [],
-        nightTechnicians: [],
-        firstShiftTechnicians: [],
-        vacationTechnicians: [],
-        l4Technicians: [],
-        dayTasks: Math.floor(Math.random() * 10) + 1,
-        nightTasks: Math.floor(Math.random() * 5) + 1,
-        totalWorking: 0
-      };
+                if (shiftValue.includes(CONFIG.shiftCodes.firstShift)) shift.firstShiftTechnicians.push(technician.fullName);
+                if (shiftValue.includes(CONFIG.shiftCodes.day)) shift.dayTechnicians.push(technician.fullName);
+                if (shiftValue.includes(CONFIG.shiftCodes.night)) shift.nightTechnicians.push(technician.fullName);
+                if (shiftValue.includes(CONFIG.shiftCodes.vacation)) shift.vacationTechnicians.push(technician.fullName);
+                if (shiftValue.includes(CONFIG.shiftCodes.sickLeave)) shift.l4Technicians.push(technician.fullName);
+            });
+            
+            shift.totalWorking = shift.dayTechnicians.length + shift.nightTechnicians.length + shift.firstShiftTechnicians.length;
+            shifts.push(shift);
+        });
 
-      technicians.forEach((technician, techIndex) => {
-        if (techIndex < shiftsData.length) {
-          const shiftValue = (shiftsData[techIndex][dateIndex] || '').toString().trim().toLowerCase();
-          if (shiftValue.includes('1')) shift.firstShiftTechnicians.push(technician.fullName);
-          if (shiftValue.includes('d')) shift.dayTechnicians.push(technician.fullName);
-          if (shiftValue.includes('n')) shift.nightTechnicians.push(technician.fullName);
-          if (shiftValue.includes('u')) shift.vacationTechnicians.push(technician.fullName);
-          if (shiftValue.includes('l4')) shift.l4Technicians.push(technician.fullName);
-        }
-      });
-
-      shift.totalWorking = shift.dayTechnicians.length + shift.nightTechnicians.length + shift.firstShiftTechnicians.length;
-      shifts.push(shift);
-    });
-
-    return shifts.sort((a, b) => new Date(a.date) - new Date(b.date));
-  },
-
-  getCurrentMonthShifts: async () => {
-    return await sheetsService.getCurrentMonthData();
-  }
+        return shifts.sort((a, b) => a.dayNumber - b.dayNumber);
+    },
 };
