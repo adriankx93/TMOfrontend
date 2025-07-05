@@ -1,10 +1,11 @@
+// --- KONFIGURACJA ---
 const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:C24',       // TYLKO kolumna z nazwiskami
+    technicians: 'C7:E18',
     dates: 'J32:AN32',
-    shifts: 'J7:AN24',           // zakres obejmuje wiersz z "1"
+    shifts: 'J7:AN18',
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -20,6 +21,7 @@ const CONFIG = {
 };
 
 const _fetchFromSheets = async (url, errorMessagePrefix) => {
+  console.log(`[Sheets API] Wywołuję URL: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
@@ -82,7 +84,7 @@ export const sheetsService = {
       throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(', ')}`);
     }
 
-    const [techniciansData, datesData, shiftsDataRaw] = await sheetsService.getMultipleRanges(
+    const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
       sheetName,
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
@@ -90,15 +92,12 @@ export const sheetsService = {
     if (!datesData.length || !datesData[0]?.length) {
       throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
     }
-    if (!shiftsDataRaw.length) {
+    if (!shiftsData.length) {
       throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
     }
     if (!techniciansData.length) {
       throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
     }
-
-    // Ucinamy pierwszy wiersz z "1"
-    const shiftsData = shiftsDataRaw.slice(1);
 
     let finalMonthIndex = monthIndex;
     let finalYear = year;
@@ -141,15 +140,15 @@ export const sheetsService = {
     if (!data || !Array.isArray(data)) return [];
     return data
       .map((row, i) => {
-        const fullName = row[0]?.toString().trim();
-        if (!fullName) return null;
+        if (!row || !row[0]) return null;
+        const [firstName, lastName = ''] = row[0].split(' ');
         return {
           id: i,
           shiftRowIndex: i,
-          firstName: '',
-          lastName: '',
-          specialization: '',
-          fullName
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          specialization: row[1]?.toString().trim() || 'Techniczny',
+          fullName: row[0].toString().trim()
         };
       })
       .filter(Boolean);
@@ -161,7 +160,13 @@ export const sheetsService = {
     return dates
       .map((cell, idx) => {
         let dayNumber = parseInt(cell);
-        if (isNaN(dayNumber)) return null;
+        if (isNaN(dayNumber)) {
+          const parsed = new Date(cell);
+          if (!isNaN(parsed.getTime())) {
+            dayNumber = parsed.getDate();
+          }
+        }
+        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
 
         const date = new Date(year, monthIndex, dayNumber);
 
@@ -178,11 +183,15 @@ export const sheetsService = {
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
           const rawValue = (row[idx] || '').toString().trim().toLowerCase();
-          const tokens = rawValue.split(/\s|,/).map(t => t.trim()).filter(Boolean);
+          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
+
+          console.log(`[DEBUG] ${tech.fullName} - ${cell}: ${tokens.join(", ")}`);
 
           tokens.forEach(token => {
             if (token === CONFIG.shiftCodes.firstShift) {
+              // Pierwsza zmiana liczy się też jako dzienna
               shift.firstShiftTechnicians.push(tech.fullName);
+              shift.dayTechnicians.push(tech.fullName);
             } else if (token === CONFIG.shiftCodes.day) {
               shift.dayTechnicians.push(tech.fullName);
             } else if (token === CONFIG.shiftCodes.night) {
