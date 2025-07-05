@@ -3,7 +3,7 @@ const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:C18', // Tylko kolumna C
+    technicians: 'C7:C18', // jedna kolumna z imionami
     dates: 'J32:AN32',
     shifts: 'J7:AN18',
   },
@@ -92,15 +92,15 @@ export const sheetsService = {
     if (!data || !Array.isArray(data)) return [];
     return data
       .map((row, i) => {
-        const full = row[0]?.toString().trim();
-        if (!full) return null;
+        const name = row[0]?.toString().trim();
+        if (!name) return null;
         return {
           id: i,
           shiftRowIndex: i,
           firstName: "",
           lastName: "",
           specialization: "",
-          fullName: full
+          fullName: name
         };
       })
       .filter(Boolean);
