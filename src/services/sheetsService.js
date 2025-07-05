@@ -21,6 +21,7 @@ const CONFIG = {
 };
 
 const _fetchFromSheets = async (url, errorMessagePrefix) => {
+  console.log(`[Sheets API] FETCH URL: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
@@ -43,7 +44,7 @@ export const sheetsService = {
     const sheets = await sheetsService.getAvailableSheets();
     return {
       success: true,
-      message: "Połączenie z Google Sheets działa poprawnie",
+      message: "Połączenie z Google Sheets działa",
       sheets,
     };
   },
@@ -59,6 +60,7 @@ export const sheetsService = {
     const rangesQuery = ranges.map((r) => `ranges=${encodedSheetName}!${r}`).join("&");
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values:batchGet?${rangesQuery}&key=${CONFIG.apiKey}`;
     const data = await _fetchFromSheets(url, "Błąd pobierania zakresów");
+    console.log("[Sheets API] getMultipleRanges RESPONSE:", JSON.stringify(data, null, 2));
     return data.valueRanges.map((r) => r.values || []);
   },
 
@@ -69,6 +71,7 @@ export const sheetsService = {
     const expectedMonthName = CONFIG.monthNames[monthIndex];
 
     const allSheets = await sheetsService.getAvailableSheets();
+    console.log("[Sheets API] Dostępne arkusze:", allSheets);
 
     let sheetName = allSheets.find(
       (name) =>
@@ -82,17 +85,20 @@ export const sheetsService = {
     }
     if (!sheetName) {
       throw new Error(
-        `Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(
-          ", "
-        )}`
+        `Nie znaleziono arkusza "${expectedMonthName} ${year}".`
       );
     }
+    console.log("[Sheets API] Wybrany arkusz:", sheetName);
 
     const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(sheetName, [
       CONFIG.ranges.technicians,
       CONFIG.ranges.dates,
       CONFIG.ranges.shifts,
     ]);
+
+    console.log("[Sheets API] techniciansData:", techniciansData);
+    console.log("[Sheets API] datesData:", datesData);
+    console.log("[Sheets API] shiftsData:", shiftsData);
 
     if (!datesData.length || !datesData[0]?.length) {
       throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
