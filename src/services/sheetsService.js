@@ -119,46 +119,56 @@ export const sheetsService = {
   },
 
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
-    if (!technicians.length || !dates.length || !shiftsData.length) return [];
+  if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
-    return dates
-      .map((cell, idx) => {
-        const day = parseInt(cell);
-        if (isNaN(day) || day < 1 || day > 31) return null;
+  return dates
+    .map((cell, idx) => {
+      let day = parseInt(cell);
 
-        const date = new Date(year, monthIndex, day);
-        if (date.getMonth() !== monthIndex) return null;
+      // Jeśli parseInt nie działa, spróbuj utworzyć Date z pełnego stringa
+      if (isNaN(day)) {
+        const parsedDate = new Date(cell);
+        if (!isNaN(parsedDate.getTime())) {
+          day = parsedDate.getDate();
+        }
+      }
 
-        const shift = {
-          date: date.toISOString().split('T')[0],
-          dayNumber: day,
-          shifts: {
-            day: [],
-            night: [],
-            firstShift: [],
-            vacation: [],
-            sickLeave: []
-          }
-        };
+      if (isNaN(day) || day < 1 || day > 31) return null;
 
-        technicians.forEach(tech => {
-          const row = shiftsData[tech.shiftRowIndex] || [];
-          const value = (row[idx] || '').toLowerCase();
-          if (value.includes(CONFIG.shiftCodes.firstShift)) shift.shifts.firstShift.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.day)) shift.shifts.day.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.night)) shift.shifts.night.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.vacation)) shift.shifts.vacation.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.sickLeave)) shift.shifts.sickLeave.push(tech.fullName);
-        });
+      const date = new Date(year, monthIndex, day);
+      if (date.getMonth() !== monthIndex) return null;
 
-        shift.totalWorking =
-          shift.shifts.day.length +
-          shift.shifts.night.length +
-          shift.shifts.firstShift.length;
+      const shift = {
+        date: date.toISOString().split('T')[0],
+        dayNumber: day,
+        shifts: {
+          day: [],
+          night: [],
+          firstShift: [],
+          vacation: [],
+          sickLeave: []
+        }
+      };
 
-        return shift;
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.dayNumber - b.dayNumber);
-  },
-};
+      technicians.forEach(tech => {
+        const row = shiftsData[tech.shiftRowIndex] || [];
+        const value = (row[idx] || '').toLowerCase();
+
+        if (value.includes(CONFIG.shiftCodes.firstShift)) shift.shifts.firstShift.push(tech.fullName);
+        if (value.includes(CONFIG.shiftCodes.day)) shift.shifts.day.push(tech.fullName);
+        if (value.includes(CONFIG.shiftCodes.night)) shift.shifts.night.push(tech.fullName);
+        if (value.includes(CONFIG.shiftCodes.vacation)) shift.shifts.vacation.push(tech.fullName);
+        if (value.includes(CONFIG.shiftCodes.sickLeave)) shift.shifts.sickLeave.push(tech.fullName);
+      });
+
+      shift.totalWorking =
+        shift.shifts.day.length +
+        shift.shifts.night.length +
+        shift.shifts.firstShift.length;
+
+      return shift;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.dayNumber - b.dayNumber);
+},
+
