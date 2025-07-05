@@ -3,9 +3,9 @@ const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E23',
+    technicians: 'C7:E18',
     dates: 'J32:AN32', // Jeśli numery dni są w wierszu 32
-    shifts: 'J7:AN23',
+    shifts: 'J7:AN18',
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
