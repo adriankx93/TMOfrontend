@@ -39,6 +39,25 @@ const _fetchFromSheets = async (url, errorMessagePrefix) => {
 };
 
 export const sheetsService = {
+  testConnection: async () => {
+    try {
+      console.log('[Sheets API] Testowanie połączenia...');
+      const sheets = await sheetsService.getAvailableSheets();
+      return {
+        success: true,
+        message: 'Połączenie z Google Sheets działa poprawnie',
+        sheets: sheets
+      };
+    } catch (error) {
+      console.error('[Sheets API] Błąd połączenia:', error);
+      return {
+        success: false,
+        message: error.message,
+        sheets: []
+      };
+    }
+  },
+
   getAvailableSheets: async () => {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}?key=${CONFIG.apiKey}`;
     console.log('[Sheets API] Pobieram listę arkuszy...');
