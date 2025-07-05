@@ -1,5 +1,7 @@
 // --- KONFIGURACJA ---
 const CONFIG = {
+  spreadsheetId: import.meta.env.VITE_SPREADSHEET_ID,
+  apiKey: import.meta.env.VITE_SHEETS_API_KEY,
   ranges: {
     technicians: 'C7:E23',
     dates: 'J3:AN3', // AN jeśli masz 31 dni
@@ -38,7 +40,7 @@ const _fetchFromSheets = async (url, errorMessagePrefix) => {
 
 export const sheetsService = {
   getAvailableSheets: async () => {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}?key=${SHEETS_API_KEY}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}?key=${CONFIG.apiKey}`;
     console.log('[Sheets API] Pobieram listę arkuszy...');
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
     const sheetNames = data.sheets.map(s => s.properties.title.trim());
@@ -49,7 +51,7 @@ export const sheetsService = {
   getMultipleRanges: async (sheetName, ranges) => {
     const encodedSheetName = encodeURIComponent(sheetName);
     const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values:batchGet?${rangesQuery}&key=${SHEETS_API_KEY}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values:batchGet?${rangesQuery}&key=${CONFIG.apiKey}`;
     console.log(`[Sheets API] Pobieram zakresy: ${ranges.join(', ')} z arkusza "${sheetName}"...`);
     const data = await _fetchFromSheets(url, 'Błąd pobierania zakresów');
     console.log('[Sheets API] Odpowiedź:', data);
