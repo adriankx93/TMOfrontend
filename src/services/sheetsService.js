@@ -1,14 +1,10 @@
-const SHEETS_API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
+// Klucz API wpisany na sztywno
+const SHEETS_API_KEY = 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY';
 const SPREADSHEET_ID = '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ';
 
 export const sheetsService = {
-  // Pobierz dane z konkretnego zakresu arkusza
   getSheetRange: async (sheetName, range) => {
     try {
-      if (!SHEETS_API_KEY) {
-        throw new Error('Brak klucza API Google Sheets. Sprawdź plik .env.');
-      }
-
       const encodedSheetName = encodeURIComponent(sheetName);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodedSheetName}!${range}?key=${SHEETS_API_KEY}`;
       console.log('Fetching from URL:', url);
@@ -38,13 +34,8 @@ export const sheetsService = {
     }
   },
 
-  // Pobierz dane z całego arkusza
   getSheetData: async (sheetName) => {
     try {
-      if (!SHEETS_API_KEY) {
-        throw new Error('Brak klucza API Google Sheets.');
-      }
-
       const encodedSheetName = encodeURIComponent(sheetName);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodedSheetName}?key=${SHEETS_API_KEY}`;
       console.log('Fetching sheet data from URL:', url);
@@ -74,13 +65,8 @@ export const sheetsService = {
     }
   },
 
-  // Pobierz listę wszystkich arkuszy w dokumencie
   getAvailableSheets: async () => {
     try {
-      if (!SHEETS_API_KEY) {
-        throw new Error('Brak klucza API Google Sheets.');
-      }
-
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}?key=${SHEETS_API_KEY}`;
       console.log('Pobieranie listy arkuszy z URL:', url);
 
@@ -103,11 +89,10 @@ export const sheetsService = {
     }
   },
 
-  // Pobierz dane aktualnego miesiąca
   getCurrentMonthData: async () => {
     try {
       const currentDate = new Date();
-      const currentMonth = currentDate.getMonth() + 1; // 1-12
+      const currentMonth = currentDate.getMonth() + 1;
       const currentYear = currentDate.getFullYear();
 
       const monthNames = [
@@ -118,7 +103,6 @@ export const sheetsService = {
       const expectedSheetName = monthNames[currentMonth];
       console.log(`Oczekiwana nazwa arkusza: ${expectedSheetName}`);
 
-      // Pobierz wszystkie arkusze i dopasuj ignorując wielkość liter
       const allSheets = await sheetsService.getAvailableSheets();
       const sheetName = allSheets.find(
         (name) => name.toLowerCase() === expectedSheetName.toLowerCase()
@@ -130,7 +114,6 @@ export const sheetsService = {
 
       console.log(`Używam arkusza: ${sheetName}`);
 
-      // Pobierz dane
       const techniciansRange = await sheetsService.getSheetRange(sheetName, 'C7:E23');
       console.log('Dane techników:', techniciansRange);
 
