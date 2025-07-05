@@ -118,12 +118,18 @@ export const sheetsService = {
     const dates = datesData[0];
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
 
+    // DODAJEMY debugRawData
     return {
       month: finalMonthIndex,
       year: finalYear,
       sheetName,
       technicians,
-      shifts
+      shifts,
+      debugRawData: {
+        techniciansData,
+        datesData,
+        shiftsData
+      }
     };
   },
 
