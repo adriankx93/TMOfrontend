@@ -1,4 +1,3 @@
-// --- KONFIGURACJA ---
 const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
@@ -21,11 +20,10 @@ const CONFIG = {
 };
 
 const _fetchFromSheets = async (url, errorMessagePrefix) => {
-  console.log(`[Sheets API] Wywołuję URL: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
-    let errorMessage = `${errorMessagePrefix}: ${response.status} ${response.statusText}`;
+    let errorMessage = `${errorMessagePrefix}: ${response.status}`;
     try {
       const errorData = JSON.parse(errorText);
       if (errorData.error?.message) {
@@ -89,19 +87,11 @@ export const sheetsService = {
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
 
-    if (!datesData.length || !datesData[0]?.length) {
-      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
-    }
-    if (!shiftsData.length) {
-      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
-    }
-    if (!techniciansData.length) {
-      throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
-    }
+    if (!datesData[0]?.length) throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
+    if (!techniciansData.length) throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
 
     let finalMonthIndex = monthIndex;
     let finalYear = year;
-
     const sheetNameLower = sheetName.toLowerCase();
     for (let i = 0; i < CONFIG.monthNames.length; i++) {
       if (sheetNameLower.includes(CONFIG.monthNames[i])) {
@@ -110,9 +100,7 @@ export const sheetsService = {
       }
     }
     const yearMatch = sheetName.match(/20\d{2}/);
-    if (yearMatch) {
-      finalYear = parseInt(yearMatch[0]);
-    }
+    if (yearMatch) finalYear = parseInt(yearMatch[0]);
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
     const dates = datesData[0];
@@ -137,81 +125,62 @@ export const sheetsService = {
   },
 
   parseTechnicians: (data) => {
-    if (!data || !Array.isArray(data)) return [];
-    return data
-      .map((row, i) => {
-        if (!row || !row[0]) return null;
-        const [firstName, lastName = ''] = row[0].split(' ');
-        return {
-          id: i,
-          shiftRowIndex: i,
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          specialization: row[1]?.toString().trim() || 'Techniczny',
-          fullName: row[0].toString().trim()
-        };
-      })
-      .filter(Boolean);
+    if (!Array.isArray(data)) return [];
+    return data.map((row, i) => {
+      if (!row || !row[0]) return null;
+      return {
+        id: i,
+        shiftRowIndex: i,
+        fullName: row[0].trim()
+      };
+    }).filter(Boolean);
   },
 
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
-    if (!technicians.length || !dates.length || !shiftsData.length) return [];
+    return dates.map((cell, idx) => {
+      const dayNumber = parseInt(cell);
+      if (isNaN(dayNumber)) return null;
+      const date = new Date(year, monthIndex, dayNumber);
 
-    return dates
-      .map((cell, idx) => {
-        let dayNumber = parseInt(cell);
-        if (isNaN(dayNumber)) {
-          const parsed = new Date(cell);
-          if (!isNaN(parsed.getTime())) {
-            dayNumber = parsed.getDate();
+      const shift = {
+        date: date.toISOString().split('T')[0],
+        dayNumber,
+        dayTechnicians: [],
+        nightTechnicians: [],
+        firstShiftTechnicians: [],
+        vacationTechnicians: [],
+        l4Technicians: []
+      };
+
+      technicians.forEach(tech => {
+        const row = shiftsData[tech.shiftRowIndex] || [];
+        const rawValue = (row[idx] || '').toLowerCase().trim();
+        const tokens = rawValue.split(/\s|,/).filter(Boolean);
+
+        tokens.forEach(token => {
+          if (token === CONFIG.shiftCodes.firstShift) {
+            shift.firstShiftTechnicians.push(tech.fullName);
           }
-        }
-        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
-
-        const date = new Date(year, monthIndex, dayNumber);
-
-        const shift = {
-          date: date.toISOString().split('T')[0],
-          dayNumber,
-          dayTechnicians: [],
-          nightTechnicians: [],
-          firstShiftTechnicians: [],
-          vacationTechnicians: [],
-          l4Technicians: []
-        };
-
-        technicians.forEach(tech => {
-          const row = shiftsData[tech.shiftRowIndex] || [];
-          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
-          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
-
-          console.log(`[DEBUG] ${tech.fullName} - ${cell}: ${tokens.join(", ")}`);
-
-          tokens.forEach(token => {
-            if (token === CONFIG.shiftCodes.firstShift) {
-              // Pierwsza zmiana liczy się też jako dzienna
-              shift.firstShiftTechnicians.push(tech.fullName);
-              shift.dayTechnicians.push(tech.fullName);
-            } else if (token === CONFIG.shiftCodes.day) {
-              shift.dayTechnicians.push(tech.fullName);
-            } else if (token === CONFIG.shiftCodes.night) {
-              shift.nightTechnicians.push(tech.fullName);
-            } else if (token === CONFIG.shiftCodes.vacation) {
-              shift.vacationTechnicians.push(tech.fullName);
-            } else if (token === CONFIG.shiftCodes.sickLeave) {
-              shift.l4Technicians.push(tech.fullName);
-            }
-          });
+          if (token === CONFIG.shiftCodes.day || token === CONFIG.shiftCodes.firstShift) {
+            shift.dayTechnicians.push(tech.fullName);
+          }
+          if (token === CONFIG.shiftCodes.night) {
+            shift.nightTechnicians.push(tech.fullName);
+          }
+          if (token === CONFIG.shiftCodes.vacation) {
+            shift.vacationTechnicians.push(tech.fullName);
+          }
+          if (token === CONFIG.shiftCodes.sickLeave) {
+            shift.l4Technicians.push(tech.fullName);
+          }
         });
+      });
 
-        shift.totalWorking =
-          shift.dayTechnicians.length +
-          shift.nightTechnicians.length +
-          shift.firstShiftTechnicians.length;
+      shift.totalWorking =
+        shift.dayTechnicians.length +
+        shift.nightTechnicians.length;
 
-        return shift;
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.dayNumber - b.dayNumber);
+      return shift;
+    }).filter(Boolean);
   },
 };
