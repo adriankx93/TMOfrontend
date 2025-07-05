@@ -1,10 +1,12 @@
+// src/services/sheetsService.js
+
 const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E18',
-    dates: 'J32:AN32',
-    shifts: 'J7:AN18',
+    dates: 'I32:AN32', // <-- zmiana z J32 na I32
+    shifts: 'I7:AN18', // <-- zmiana z J7 na I7
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -15,11 +17,12 @@ const CONFIG = {
     day: 'd',
     night: 'n',
     vacation: 'u',
-    sickLeave: 'l4',
+    sickLeave: 'l4'
   }
 };
 
 const _fetchFromSheets = async (url, errorMessagePrefix) => {
+  console.log(`[Sheets API] Wywołuję URL: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
@@ -116,6 +119,10 @@ export const sheetsService = {
     const dates = datesData[0];
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
 
+    console.log("[DEBUG] techniciansData:", JSON.stringify(techniciansData, null, 2));
+    console.log("[DEBUG] datesData:", JSON.stringify(datesData, null, 2));
+    console.log("[DEBUG] shiftsData:", JSON.stringify(shiftsData, null, 2));
+
     return {
       month: finalMonthIndex,
       year: finalYear,
@@ -139,13 +146,14 @@ export const sheetsService = {
     return data
       .map((row, i) => {
         if (!row || !row[0]) return null;
+        const fullName = row[0].toString().trim();
         return {
           id: i,
           shiftRowIndex: i,
-          firstName: row[0].toString().trim().split(' ')[0],
-          lastName: row[0].toString().trim().split(' ').slice(1).join(' '),
-          specialization: row[1]?.toString().trim() || '',
-          fullName: row[0].toString().trim()
+          firstName: fullName.split(' ')[0],
+          lastName: fullName.split(' ').slice(1).join(' '),
+          specialization: row[1]?.toString().trim() || 'Techniczny',
+          fullName
         };
       })
       .filter(Boolean);
@@ -154,55 +162,57 @@ export const sheetsService = {
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
     if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
-    return dates.map((cell, idx) => {
-      const dayNumber = parseInt(cell);
-      if (isNaN(dayNumber)) return null;
-      const date = new Date(year, monthIndex, dayNumber);
-
-      const shift = {
-        date: date.toISOString().split('T')[0],
-        dayNumber,
-        dayTechnicians: [],
-        nightTechnicians: [],
-        firstShiftTechnicians: [],
-        vacationTechnicians: [],
-        l4Technicians: []
-      };
-
-      technicians.forEach(tech => {
-        let row = shiftsData[tech.shiftRowIndex] || [];
-
-        // WAŻNE: Uzupełnij pustymi, aby długość była zgodna z datami
-        if (row.length < dates.length) {
-          row = [...row, ...Array(dates.length - row.length).fill('')];
+    return dates
+      .map((cell, idx) => {
+        let dayNumber = parseInt(cell);
+        if (isNaN(dayNumber)) {
+          const parsed = new Date(cell);
+          if (!isNaN(parsed.getTime())) {
+            dayNumber = parsed.getDate();
+          }
         }
+        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
 
-        const rawValue = (row[idx] || '').toLowerCase().trim();
-        const tokens = rawValue.split(/\s|,/).filter(Boolean);
+        const date = new Date(year, monthIndex, dayNumber);
 
-        tokens.forEach(token => {
-          if (token === CONFIG.shiftCodes.firstShift) {
-            shift.firstShiftTechnicians.push(tech.fullName);
-          }
-          if (token === CONFIG.shiftCodes.day || token === CONFIG.shiftCodes.firstShift) {
-            shift.dayTechnicians.push(tech.fullName);
-          }
-          if (token === CONFIG.shiftCodes.night) {
-            shift.nightTechnicians.push(tech.fullName);
-          }
-          if (token === CONFIG.shiftCodes.vacation) {
-            shift.vacationTechnicians.push(tech.fullName);
-          }
-          if (token === CONFIG.shiftCodes.sickLeave) {
-            shift.l4Technicians.push(tech.fullName);
-          }
+        const shift = {
+          date: date.toISOString().split('T')[0],
+          dayNumber,
+          dayTechnicians: [],
+          nightTechnicians: [],
+          firstShiftTechnicians: [],
+          vacationTechnicians: [],
+          l4Technicians: []
+        };
+
+        technicians.forEach(tech => {
+          const row = shiftsData[tech.shiftRowIndex] || [];
+          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
+          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
+
+          tokens.forEach(token => {
+            if (token === CONFIG.shiftCodes.firstShift) {
+              shift.firstShiftTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.day) {
+              shift.dayTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.night) {
+              shift.nightTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.vacation) {
+              shift.vacationTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.sickLeave) {
+              shift.l4Technicians.push(tech.fullName);
+            }
+          });
         });
-      });
 
-      shift.totalWorking =
-        shift.dayTechnicians.length + shift.nightTechnicians.length;
+        shift.totalWorking =
+          shift.dayTechnicians.length +
+          shift.nightTechnicians.length +
+          shift.firstShiftTechnicians.length;
 
-      return shift;
-    }).filter(Boolean);
-  }
+        return shift;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.dayNumber - b.dayNumber);
+  },
 };
