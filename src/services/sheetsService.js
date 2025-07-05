@@ -87,9 +87,7 @@ export const sheetsService = {
 
     const allSheets = await sheetsService.getAvailableSheets();
 
-    let sheetName;
-
-    sheetName = allSheets.find(name =>
+    let sheetName = allSheets.find(name =>
       name.toLowerCase().includes(expectedMonthName.toLowerCase()) &&
       name.includes(year.toString())
     );
@@ -190,14 +188,27 @@ export const sheetsService = {
 
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
-          const value = (row[idx] || '').toLowerCase().trim();
+          const value = (row[idx] || '').trim().toLowerCase();
 
-          // precyzyjne dopasowanie
-          if (value === CONFIG.shiftCodes.day) shift.dayTechnicians.push(tech.fullName);
-          else if (value === CONFIG.shiftCodes.night) shift.nightTechnicians.push(tech.fullName);
-          else if (value === CONFIG.shiftCodes.vacation) shift.vacationTechnicians.push(tech.fullName);
-          else if (value === CONFIG.shiftCodes.sickLeave) shift.l4Technicians.push(tech.fullName);
-          else if (value === CONFIG.shiftCodes.firstShift) shift.firstShiftTechnicians.push(tech.fullName);
+          // Log wartości do debugowania
+          // console.log(`Wartość [${tech.fullName}, kolumna ${idx}]: "${value}"`);
+
+          // dopasowanie zawierające
+          if (value.includes(CONFIG.shiftCodes.firstShift)) {
+            shift.firstShiftTechnicians.push(tech.fullName);
+          }
+          if (value.includes(CONFIG.shiftCodes.day)) {
+            shift.dayTechnicians.push(tech.fullName);
+          }
+          if (value.includes(CONFIG.shiftCodes.night)) {
+            shift.nightTechnicians.push(tech.fullName);
+          }
+          if (value.includes(CONFIG.shiftCodes.vacation)) {
+            shift.vacationTechnicians.push(tech.fullName);
+          }
+          if (value.includes(CONFIG.shiftCodes.sickLeave)) {
+            shift.l4Technicians.push(tech.fullName);
+          }
         });
 
         shift.totalWorking =
