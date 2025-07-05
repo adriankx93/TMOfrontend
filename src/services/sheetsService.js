@@ -3,9 +3,9 @@ const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E18',
-    dates: 'K4:AN4', // UWAGA: zmiana tu - K4 zamiast J4
-    shifts: 'J7:AN18',
+    technicians: 'C7:E23', // ZAKRES obejmujący WSZYSTKICH techników
+    dates: 'K4:AN4',
+    shifts: 'J7:AN23',
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -122,12 +122,7 @@ export const sheetsService = {
       year: finalYear,
       sheetName,
       technicians,
-      shifts,
-      debugRawData: {
-        techniciansData,
-        datesData,
-        shiftsData
-      }
+      shifts
     };
   },
 
