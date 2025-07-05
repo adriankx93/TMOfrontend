@@ -5,8 +5,8 @@ const CONFIG = {
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E18',
-    dates: 'I32:AN32', // <-- zmiana z J32 na I32
-    shifts: 'I7:AN18', // <-- zmiana z J7 na I7
+    dates: 'J4:AN4', // daty z wiersza 4
+    shifts: 'J7:AN18',
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
