@@ -3,9 +3,9 @@ const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E18', // Zmienione na wiersze 7-18
+    technicians: 'C7:E18',
     dates: 'J32:AN32',
-    shifts: 'J7:AN18',     // Zmienione na wiersze 7-18
+    shifts: 'J7:AN18',
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -61,20 +61,15 @@ export const sheetsService = {
 
   getAvailableSheets: async () => {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}?key=${CONFIG.apiKey}`;
-    console.log('[Sheets API] Pobieram listę arkuszy...');
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
-    const sheetNames = data.sheets.map(s => s.properties.title.trim());
-    console.log('[Sheets API] Dostępne arkusze:', sheetNames);
-    return sheetNames;
+    return data.sheets.map(s => s.properties.title.trim());
   },
 
   getMultipleRanges: async (sheetName, ranges) => {
     const encodedSheetName = encodeURIComponent(sheetName);
     const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values:batchGet?${rangesQuery}&key=${CONFIG.apiKey}`;
-    console.log(`[Sheets API] Pobieram zakresy: ${ranges.join(', ')} z arkusza "${sheetName}"...`);
     const data = await _fetchFromSheets(url, 'Błąd pobierania zakresów');
-    console.log('[Sheets API] Surowa odpowiedź API:', JSON.stringify(data, null, 2));
     return data.valueRanges.map(r => r.values || []);
   },
 
@@ -84,52 +79,40 @@ export const sheetsService = {
     const year = now.getFullYear();
     const expectedMonthName = CONFIG.monthNames[monthIndex];
 
-    console.log(`[Sheets API] Szukam arkusza zawierającego "${expectedMonthName}" i rok ${year}...`);
-
     const allSheets = await sheetsService.getAvailableSheets();
 
     let sheetName = allSheets.find(name =>
       name.toLowerCase().includes(expectedMonthName.toLowerCase()) &&
       name.includes(year.toString())
     );
-
     if (!sheetName) {
       sheetName = allSheets.find(name =>
         name.toLowerCase().includes(expectedMonthName.toLowerCase())
       );
     }
-
     if (!sheetName) {
       throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(', ')}`);
     }
-
-    console.log(`[Sheets API] Używam arkusza "${sheetName}"`);
 
     const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
       sheetName,
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
 
-    console.log('[Sheets API] Dane techników (surowe):', techniciansData);
-    console.log('[Sheets API] Dane dat (surowe):', datesData);
-    console.log('[Sheets API] Dane zmian (surowe):', shiftsData);
-
     if (!datesData.length || !datesData[0]?.length) {
-      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}. Otrzymane dane: ${JSON.stringify(datesData)}`);
+      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
     }
     if (!shiftsData.length) {
-      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}. Otrzymane dane: ${JSON.stringify(shiftsData)}`);
+      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
     }
     if (!techniciansData.length) {
-      throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}. Otrzymane dane: ${JSON.stringify(techniciansData)}`);
+      throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
     }
 
-    // Używamy aktualnego miesiąca i roku zamiast parsowania z arkusza
-    // bo arkusz może mieć nieprawidłowe daty w pierwszej komórce
+    // domyślnie bierze miesiąc i rok aktualny
     let finalMonthIndex = monthIndex;
     let finalYear = year;
-    
-    // Próbujemy wyciągnąć miesiąc i rok z nazwy arkusza
+
     const sheetNameLower = sheetName.toLowerCase();
     for (let i = 0; i < CONFIG.monthNames.length; i++) {
       if (sheetNameLower.includes(CONFIG.monthNames[i])) {
@@ -137,21 +120,14 @@ export const sheetsService = {
         break;
       }
     }
-    
-    // Szukamy roku w nazwie arkusza
     const yearMatch = sheetName.match(/20\d{2}/);
     if (yearMatch) {
       finalYear = parseInt(yearMatch[0]);
     }
-    
-    console.log(`[Sheets API] Wykryty miesiąc: ${CONFIG.monthNames[finalMonthIndex]} ${finalYear}`);
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
-    console.log('[Sheets API] Sparsowani technicy:', technicians);
-    
     const dates = datesData[0];
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
-    console.log('[Sheets API] Sparsowane zmiany:', shifts);
 
     return {
       month: finalMonthIndex,
@@ -167,21 +143,11 @@ export const sheetsService = {
   },
 
   parseTechnicians: (data) => {
-    console.log('[Sheets API] Parsowanie techników z danych:', data);
-    if (!data || !Array.isArray(data)) {
-      console.log('[Sheets API] Brak danych techników lub nieprawidłowy format');
-      return [];
-    }
-    
-    const technicians = data
+    if (!data || !Array.isArray(data)) return [];
+    return data
       .map((row, i) => {
-        console.log(`[Sheets API] Wiersz ${i}:`, row);
-        if (!row || !Array.isArray(row) || !row[0] || !row[1]) {
-          console.log(`[Sheets API] Pomijam wiersz ${i} - brak imienia lub nazwiska`);
-          return null;
-        }
-        
-        const tech = {
+        if (!row || !row[0] || !row[1]) return null;
+        return {
           id: i,
           shiftRowIndex: i,
           firstName: row[0].toString().trim(),
@@ -189,31 +155,15 @@ export const sheetsService = {
           specialization: row[2]?.toString().trim() || 'Techniczny',
           fullName: `${row[0]} ${row[1]}`.trim()
         };
-        
-        console.log(`[Sheets API] Utworzono technika:`, tech);
-        return tech;
       })
       .filter(Boolean);
-      
-    console.log('[Sheets API] Finalna lista techników:', technicians);
-    return technicians;
   },
 
   parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
-    console.log('[Sheets API] Parsowanie zmian...');
-    console.log('[Sheets API] Technicy:', technicians);
-    console.log('[Sheets API] Daty:', dates);
-    console.log('[Sheets API] Dane zmian:', shiftsData);
-    
-    if (!technicians.length || !dates.length || !shiftsData.length) {
-      console.log('[Sheets API] Brak wymaganych danych do parsowania zmian');
-      return [];
-    }
+    if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
-    const shifts = dates
+    return dates
       .map((cell, idx) => {
-        console.log(`[Sheets API] Przetwarzam datę ${idx}: "${cell}"`);
-        
         let dayNumber = parseInt(cell);
         if (isNaN(dayNumber)) {
           const parsed = new Date(cell);
@@ -221,11 +171,7 @@ export const sheetsService = {
             dayNumber = parsed.getDate();
           }
         }
-
-        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) {
-          console.log(`[Sheets API] Pomijam nieprawidłową datę: "${cell}"`);
-          return null;
-        }
+        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
 
         const date = new Date(year, monthIndex, dayNumber);
 
@@ -239,35 +185,24 @@ export const sheetsService = {
           l4Technicians: []
         };
 
-        console.log(`[Sheets API] Przetwarzam zmianę dla dnia ${dayNumber}:`);
-
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
-          const value = (row[idx] || '').toString().trim().toLowerCase();
+          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
+          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
 
-          console.log(`[Sheets API] ${tech.fullName} (wiersz ${tech.shiftRowIndex}, kolumna ${idx}): "${value}"`);
-
-          // Sprawdzanie kodów zmian
-          if (value.includes(CONFIG.shiftCodes.firstShift)) {
-            shift.firstShiftTechnicians.push(tech.fullName);
-            console.log(`[Sheets API] ${tech.fullName} -> pierwsza zmiana`);
-          }
-          if (value.includes(CONFIG.shiftCodes.day)) {
-            shift.dayTechnicians.push(tech.fullName);
-            console.log(`[Sheets API] ${tech.fullName} -> dzienna`);
-          }
-          if (value.includes(CONFIG.shiftCodes.night)) {
-            shift.nightTechnicians.push(tech.fullName);
-            console.log(`[Sheets API] ${tech.fullName} -> nocna`);
-          }
-          if (value.includes(CONFIG.shiftCodes.vacation)) {
-            shift.vacationTechnicians.push(tech.fullName);
-            console.log(`[Sheets API] ${tech.fullName} -> urlop`);
-          }
-          if (value.includes(CONFIG.shiftCodes.sickLeave)) {
-            shift.l4Technicians.push(tech.fullName);
-            console.log(`[Sheets API] ${tech.fullName} -> L4`);
-          }
+          tokens.forEach(token => {
+            if (token === CONFIG.shiftCodes.firstShift) {
+              shift.firstShiftTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.day) {
+              shift.dayTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.night) {
+              shift.nightTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.vacation) {
+              shift.vacationTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.sickLeave) {
+              shift.l4Technicians.push(tech.fullName);
+            }
+          });
         });
 
         shift.totalWorking =
@@ -275,13 +210,9 @@ export const sheetsService = {
           shift.nightTechnicians.length +
           shift.firstShiftTechnicians.length;
 
-        console.log(`[Sheets API] Zmiana ${dayNumber} - łącznie pracujących: ${shift.totalWorking}`);
         return shift;
       })
       .filter(Boolean)
       .sort((a, b) => a.dayNumber - b.dayNumber);
-
-    console.log(`[Sheets API] Sparsowano ${shifts.length} zmian`);
-    return shifts;
   },
 };
