@@ -6,10 +6,12 @@ export default function CurrentMonthChart() {
     technicians: [],
     shifts: [],
     month: new Date().getMonth(),
-    year: new Date().getFullYear()
+    year: new Date().getFullYear(),
+    sheetName: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [connectionTest, setConnectionTest] = useState(null);
 
   const months = [
     'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
@@ -17,6 +19,7 @@ export default function CurrentMonthChart() {
   ];
 
   useEffect(() => {
+    testConnection();
     fetchCurrentMonthData();
     
     // Automatyczne odświeżanie co 5 minut
@@ -24,6 +27,21 @@ export default function CurrentMonthChart() {
     
     return () => clearInterval(interval);
   }, []);
+
+  const testConnection = async () => {
+    try {
+      const result = await sheetsService.testConnection();
+      setConnectionTest(result);
+      console.log('Test połączenia:', result);
+    } catch (err) {
+      console.error('Błąd testu połączenia:', err);
+      setConnectionTest({
+        success: false,
+        message: err.message,
+        sheets: []
+      });
+    }
+  };
 
   const fetchCurrentMonthData = async () => {
     try {
@@ -58,8 +76,6 @@ export default function CurrentMonthChart() {
     }
 
     const totalDays = data.shifts.length;
-    const totalDayTasks = data.shifts.reduce((sum, shift) => sum + (shift.dayTasks || 0), 0);
-    const totalNightTasks = data.shifts.reduce((sum, shift) => sum + (shift.nightTasks || 0), 0);
     const totalWorkingDays = data.shifts.filter(shift => shift.totalWorking > 0).length;
     
     const allTechnicians = new Set();
@@ -78,8 +94,6 @@ export default function CurrentMonthChart() {
 
     return {
       totalDays,
-      totalDayTasks,
-      totalNightTasks,
       totalWorkingDays,
       avgWorkersPerDay: totalDays > 0 ? (totalWorkers / totalDays).toFixed(1) : 0,
       allTechnicians
@@ -104,11 +118,9 @@ export default function CurrentMonthChart() {
               firstShifts: 0,
               vacationDays: 0,
               l4Days: 0,
-              totalTasks: 0 
             };
           }
           technicianStats[tech].dayShifts++;
-          technicianStats[tech].totalTasks += shift.dayTasks || 0;
         });
       }
       
@@ -122,11 +134,9 @@ export default function CurrentMonthChart() {
               firstShifts: 0,
               vacationDays: 0,
               l4Days: 0,
-              totalTasks: 0 
             };
           }
           technicianStats[tech].nightShifts++;
-          technicianStats[tech].totalTasks += shift.nightTasks || 0;
         });
       }
 
@@ -149,7 +159,6 @@ export default function CurrentMonthChart() {
               firstShifts: 0,
               vacationDays: 0,
               l4Days: 0,
-              totalTasks: 0 
             };
           }
           technicianStats[tech].vacationDays++;
@@ -166,7 +175,6 @@ export default function CurrentMonthChart() {
               firstShifts: 0,
               vacationDays: 0,
               l4Days: 0,
-              totalTasks: 0 
             };
           }
           technicianStats[tech].l4Days++;
@@ -183,7 +191,6 @@ export default function CurrentMonthChart() {
         firstShifts: stats.firstShifts,
         vacationDays: stats.vacationDays,
         l4Days: stats.l4Days,
-        totalTasks: stats.totalTasks,
         workingDays: stats.dayShifts + stats.nightShifts,
         totalDays: stats.dayShifts + stats.nightShifts + stats.vacationDays + stats.l4Days
       }))
@@ -241,6 +248,23 @@ export default function CurrentMonthChart() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           <span className="ml-4 text-slate-600">Pobieranie danych z arkusza Google...</span>
         </div>
+        
+        {connectionTest && (
+          <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+            <div className="text-sm">
+              <div className="font-semibold text-blue-800 mb-2">Status połączenia:</div>
+              <div className={connectionTest.success ? 'text-green-700' : 'text-red-700'}>
+                {connectionTest.message}
+              </div>
+              {connectionTest.sheets.length > 0 && (
+                <div className="mt-2 text-blue-700">
+                  <div className="font-medium">Dostępne arkusze:</div>
+                  <div className="text-xs">{connectionTest.sheets.join(', ')}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -253,15 +277,33 @@ export default function CurrentMonthChart() {
             ⚠️ Błąd wczytywania danych
           </div>
           <p className="text-slate-600 mb-4">{error}</p>
+          
+          {connectionTest && (
+            <div className="mb-4 p-4 bg-gray-50 rounded-xl text-left">
+              <div className="text-sm">
+                <div className="font-semibold text-gray-800 mb-2">Diagnostyka połączenia:</div>
+                <div className={connectionTest.success ? 'text-green-700' : 'text-red-700'}>
+                  {connectionTest.message}
+                </div>
+                {connectionTest.sheets.length > 0 && (
+                  <div className="mt-2 text-gray-700">
+                    <div className="font-medium">Dostępne arkusze:</div>
+                    <div className="text-xs">{connectionTest.sheets.join(', ')}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
           <div className="text-sm text-slate-500 mb-4">
             Sprawdź czy:
             <ul className="list-disc list-inside mt-2">
               <li>Arkusz Google Sheets jest publiczny</li>
               <li>Klucz API jest prawidłowy</li>
-              <li>Istnieje arkusz o nazwie aktualnego miesiąca (np. "Styczeń")</li>
-              <li>Dane techników są w zakresie C7:E23</li>
-              <li>Daty są w wierszu J3:AM3</li>
-              <li>Zmiany techników są w zakresie J7:AM23</li>
+              <li>Istnieje arkusz o nazwie aktualnego miesiąca (np. "styczeń")</li>
+              <li>Dane techników są w zakresie C7:E18</li>
+              <li>Daty są w wierszu J3:AM3 lub J32:AM32</li>
+              <li>Zmiany techników są w zakresie J7:AM18</li>
             </ul>
           </div>
           <button 
@@ -269,6 +311,12 @@ export default function CurrentMonthChart() {
             className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
           >
             🔄 Spróbuj ponownie
+          </button>
+          <button 
+            onClick={testConnection}
+            className="ml-4 px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
+          >
+            🔧 Test połączenia
           </button>
         </div>
       </div>
@@ -289,7 +337,7 @@ export default function CurrentMonthChart() {
                 Grafik zmian - {months[data.month]} {data.year}
               </h1>
               <p className="text-blue-100 text-lg mt-1">
-                Dane z arkusza "{months[data.month]}" • Daty z J3:AM3 • Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL')}
+                Dane z arkusza "{data.sheetName}" • Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL')}
               </p>
             </div>
           </div>
@@ -402,10 +450,6 @@ export default function CurrentMonthChart() {
                         <div className="font-bold text-red-700">🏥 {tech.l4Days}</div>
                         <div className="text-red-600">L4</div>
                       </div>
-                      <div className="text-center p-2 bg-emerald-50 rounded-lg">
-                        <div className="font-bold text-emerald-700">📋 {tech.totalTasks}</div>
-                        <div className="text-emerald-600">Zadania</div>
-                      </div>
                     </div>
                     
                     <div className="flex justify-between items-center text-sm">
@@ -445,7 +489,7 @@ export default function CurrentMonthChart() {
           <div className="text-center py-12 text-slate-500">
             <span className="text-4xl mb-4 block">📅</span>
             <div className="text-lg">Brak danych zmian dla aktualnego miesiąca</div>
-            <div className="text-sm mt-2">Sprawdź czy arkusz "{months[data.month]}" zawiera daty w J3:AM3 i zmiany w J7:AM23</div>
+            <div className="text-sm mt-2">Sprawdź czy arkusz "{data.sheetName}" zawiera daty i zmiany w odpowiednich zakresach</div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -475,12 +519,12 @@ export default function CurrentMonthChart() {
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex flex-wrap gap-1">
-                        {(shift.dayTechnicians || []).map((tech, idx) => (
+                        {[...(shift.firstShiftTechnicians || []), ...(shift.dayTechnicians || [])].map((tech, idx) => (
                           <span key={idx} className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium border border-yellow-200">
                             {tech}
                           </span>
                         ))}
-                        {(!shift.dayTechnicians || shift.dayTechnicians.length === 0) && (
+                        {(!shift.dayTechnicians || shift.dayTechnicians.length === 0) && (!shift.firstShiftTechnicians || shift.firstShiftTechnicians.length === 0) && (
                           <span className="text-slate-400 text-sm">Brak przypisań</span>
                         )}
                       </div>
