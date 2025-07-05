@@ -5,12 +5,37 @@ export const sheetsService = {
   // Pobierz dane z konkretnego zakresu arkusza
   getSheetRange: async (sheetName, range) => {
     try {
-      const response = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}!${range}?key=${SHEETS_API_KEY}`
-      );
+      // Validate API key
+      if (!SHEETS_API_KEY) {
+        throw new Error('Brak klucza API Google Sheets. Sprawdź plik .env i upewnij się, że VITE_GOOGLE_SHEETS_API_KEY jest ustawiony.');
+      }
+
+      // Encode sheet name to handle Polish characters
+      const encodedSheetName = encodeURIComponent(sheetName);
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodedSheetName}!${range}?key=${SHEETS_API_KEY}`;
+      
+      console.log('Fetching from URL:', url);
+      console.log('Sheet name:', sheetName, 'Encoded:', encodedSheetName);
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch sheet range: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        
+        let errorMessage = `Failed to fetch sheet range: ${response.status} ${response.statusText}`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error && errorData.error.message) {
+            errorMessage += ` - ${errorData.error.message}`;
+          }
+        } catch (parseError) {
+          // If we can't parse the error response, use the raw text
+          errorMessage += ` - ${errorText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
@@ -24,12 +49,34 @@ export const sheetsService = {
   // Pobierz dane z arkusza
   getSheetData: async (sheetName) => {
     try {
-      const response = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}?key=${SHEETS_API_KEY}`
-      );
+      // Validate API key
+      if (!SHEETS_API_KEY) {
+        throw new Error('Brak klucza API Google Sheets. Sprawdź plik .env i upewnij się, że VITE_GOOGLE_SHEETS_API_KEY jest ustawiony.');
+      }
+
+      const encodedSheetName = encodeURIComponent(sheetName);
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodedSheetName}?key=${SHEETS_API_KEY}`;
+      
+      console.log('Fetching sheet data from URL:', url);
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch sheet data: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        
+        let errorMessage = `Failed to fetch sheet data: ${response.status} ${response.statusText}`;
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.error && errorData.error.message) {
+            errorMessage += ` - ${errorData.error.message}`;
+          }
+        } catch (parseError) {
+          errorMessage += ` - ${errorText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
@@ -55,7 +102,15 @@ export const sheetsService = {
       
       const sheetName = monthNames[currentMonth];
       
-      console.log(`Pobieranie danych z arkusza: ${sheetName}`);
+      console.log(`Pobieranie danych z arkusza: ${sheetName} (miesiąc: ${currentMonth})`);
+      
+      // First, try to verify if the sheet exists by getting basic sheet info
+      try {
+        await sheetsService.getSheetData(sheetName);
+      } catch (error) {
+        console.error(`Arkusz "${sheetName}" nie istnieje lub nie jest dostępny:`, error);
+        throw new Error(`Arkusz "${sheetName}" nie istnieje w dokumencie Google Sheets lub nie masz do niego dostępu. Sprawdź czy arkusz o tej nazwie istnieje i czy dokument jest udostępniony publicznie lub z odpowiednimi uprawnieniami.`);
+      }
       
       // Pobierz techników z zakresu C7:E23
       const techniciansRange = await sheetsService.getSheetRange(sheetName, 'C7:E23');
