@@ -157,7 +157,7 @@ export default function CurrentMonthChart() {
     return (
       <div className="p-8 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-        <p className="text-slate-600">Ładowanie danych...</p>
+        <p className="text-slate-600">Ładowanie danych z arkusza...</p>
       </div>
     );
   }
@@ -191,12 +191,22 @@ export default function CurrentMonthChart() {
             <p className="text-blue-100 text-lg mt-1">
               Dane z arkusza <strong>{data.sheetName}</strong>
             </p>
+            <div className="flex items-center gap-4 mt-3 text-blue-100">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                <span className="text-sm">Połączono z Google Sheets</span>
+              </div>
+              <div className="text-sm">
+                Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL')}
+              </div>
+            </div>
           </div>
           <button
             onClick={fetchCurrentMonthData}
-            className="px-6 py-3 bg-white/20 backdrop-blur-xl rounded-xl border border-white/20 hover:bg-white/30 transition-all duration-200"
+            className="px-6 py-3 bg-white/20 backdrop-blur-xl rounded-xl border border-white/20 hover:bg-white/30 transition-all duration-200 flex items-center gap-2"
           >
-            🔄 Odśwież dane
+            <span>🔄</span>
+            <span>Odśwież dane</span>
           </button>
         </div>
       </div>
@@ -210,13 +220,27 @@ export default function CurrentMonthChart() {
       {/* Daily Schedule */}
       <DailyScheduleTable shifts={data.shifts} />
 
-      {/* Debug Section */}
+      {/* Quick Actions */}
       <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-8">
-        <h2 className="text-lg font-semibold mb-4 text-slate-800">📋 Surowe dane debug:</h2>
-        <div className="bg-gray-100 text-black p-4 text-xs overflow-x-auto rounded-lg">
-          <pre className="whitespace-pre-wrap">
-            {JSON.stringify(data.debugRawData, null, 2)}
-          </pre>
+        <h3 className="text-xl font-bold text-slate-800 mb-6">Szybkie akcje</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button className="p-4 bg-blue-50 hover:bg-blue-100 rounded-2xl border border-blue-200 transition-all duration-200 text-left">
+            <div className="text-2xl mb-2">📊</div>
+            <div className="font-semibold text-blue-800">Generuj raport</div>
+            <div className="text-sm text-blue-600">Utwórz raport miesięczny</div>
+          </button>
+          
+          <button className="p-4 bg-green-50 hover:bg-green-100 rounded-2xl border border-green-200 transition-all duration-200 text-left">
+            <div className="text-2xl mb-2">📧</div>
+            <div className="font-semibold text-green-800">Wyślij powiadomienia</div>
+            <div className="text-sm text-green-600">Powiadom o zmianach</div>
+          </button>
+          
+          <button className="p-4 bg-purple-50 hover:bg-purple-100 rounded-2xl border border-purple-200 transition-all duration-200 text-left">
+            <div className="text-2xl mb-2">📋</div>
+            <div className="font-semibold text-purple-800">Eksportuj dane</div>
+            <div className="text-sm text-purple-600">Pobierz jako Excel</div>
+          </button>
         </div>
       </div>
     </div>
