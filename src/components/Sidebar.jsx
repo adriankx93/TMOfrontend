@@ -5,7 +5,7 @@ export default function Sidebar() {
     { to: "/", label: "Dashboard", icon: "📊" },
     { to: "/zadania", label: "Zadania", icon: "📋" },
     { to: "/technicy", label: "Technicy", icon: "👷" },
-    { to: "/zmiany", label: "Zmiany", icon: "🕐" },
+    { to: "/magazyn", label: "Magazyn", icon: "📦" },
     { to: "/raporty", label: "Raporty", icon: "📈" },
     { to: "/ustawienia", label: "Ustawienia", icon: "⚙️" }
   ];

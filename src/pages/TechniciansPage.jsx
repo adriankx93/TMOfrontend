@@ -1,14 +1,14 @@
 import Topbar from "../components/Topbar";
-import TechniciansList from "../components/TechniciansList";
+import TechniciansFromSheets from "../components/TechniciansFromSheets";
 
 export default function TechniciansPage() {
   return (
     <div className="space-y-8">
       <Topbar 
-        title="Zarządzanie technikami" 
-        subtitle="Monitoruj status i zadania techników"
+        title="Zespół techników" 
+        subtitle="Dane techników z arkusza Google Sheets"
       />
-      <TechniciansList />
+      <TechniciansFromSheets />
     </div>
   );
 }
