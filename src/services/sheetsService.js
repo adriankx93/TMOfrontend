@@ -3,9 +3,9 @@ const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E23',
-    dates: 'J32:AN32', // numery dni lub daty
-    shifts: 'J7:AN23',
+    technicians: 'C8:E23', // UWAGA: zaczynamy od wiersza 8
+    dates: 'J32:AN32',
+    shifts: 'J8:AN23',     // UWAGA: zaczynamy od wiersza 8
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -89,13 +89,11 @@ export const sheetsService = {
 
     let sheetName;
 
-    // 1) Spróbuj znaleźć arkusz z nazwą miesiąca + rokiem
     sheetName = allSheets.find(name =>
       name.toLowerCase().includes(expectedMonthName.toLowerCase()) &&
       name.includes(year.toString())
     );
 
-    // 2) Jeśli nie ma, spróbuj samego miesiąca
     if (!sheetName) {
       sheetName = allSheets.find(name =>
         name.toLowerCase().includes(expectedMonthName.toLowerCase())
@@ -103,9 +101,7 @@ export const sheetsService = {
     }
 
     if (!sheetName) {
-      throw new Error(
-        `Nie znaleziono arkusza z datami dla "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(", ")}`
-      );
+      throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(', ')}`);
     }
 
     console.log(`[Sheets API] Używam arkusza "${sheetName}"`);
@@ -116,10 +112,10 @@ export const sheetsService = {
     );
 
     if (!datesData.length || !datesData[0]?.length) {
-      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates} w arkuszu "${sheetName}".`);
+      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
     }
     if (!shiftsData.length) {
-      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts} w arkuszu "${sheetName}".`);
+      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
     }
 
     const firstCell = datesData[0][0];
@@ -129,14 +125,12 @@ export const sheetsService = {
     if (!isNaN(parsedDate.getTime())) {
       finalMonthIndex = parsedDate.getMonth();
       finalYear = parsedDate.getFullYear();
-      console.log(`[Sheets API] Data w komórce: ${firstCell}, rozpoznano miesiąc ${CONFIG.monthNames[finalMonthIndex]} ${finalYear}`);
     }
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
     const dates = datesData[0];
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
 
-    // 🚀 ZWRACAJ strukturę zgodną z komponentem
     return {
       month: finalMonthIndex,
       year: finalYear,
@@ -173,7 +167,6 @@ export const sheetsService = {
     return dates
       .map((cell, idx) => {
         let dayNumber = parseInt(cell);
-
         if (isNaN(dayNumber)) {
           const parsed = new Date(cell);
           if (!isNaN(parsed.getTime())) {
@@ -197,13 +190,14 @@ export const sheetsService = {
 
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
-          const value = (row[idx] || '').toLowerCase();
+          const value = (row[idx] || '').toLowerCase().trim();
 
-          if (value.includes(CONFIG.shiftCodes.firstShift)) shift.firstShiftTechnicians.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.day)) shift.dayTechnicians.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.night)) shift.nightTechnicians.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.vacation)) shift.vacationTechnicians.push(tech.fullName);
-          if (value.includes(CONFIG.shiftCodes.sickLeave)) shift.l4Technicians.push(tech.fullName);
+          // precyzyjne dopasowanie
+          if (value === CONFIG.shiftCodes.day) shift.dayTechnicians.push(tech.fullName);
+          else if (value === CONFIG.shiftCodes.night) shift.nightTechnicians.push(tech.fullName);
+          else if (value === CONFIG.shiftCodes.vacation) shift.vacationTechnicians.push(tech.fullName);
+          else if (value === CONFIG.shiftCodes.sickLeave) shift.l4Technicians.push(tech.fullName);
+          else if (value === CONFIG.shiftCodes.firstShift) shift.firstShiftTechnicians.push(tech.fullName);
         });
 
         shift.totalWorking =
