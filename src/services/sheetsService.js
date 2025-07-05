@@ -1,7 +1,7 @@
 // --- KONFIGURACJA ---
 const CONFIG = {
-  spreadsheetId: import.meta.env.VITE_SPREADSHEET_ID,
-  apiKey: import.meta.env.VITE_SHEETS_API_KEY,
+  spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
+  apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E23',
     dates: 'J3:AN3', // AN jeśli masz 31 dni
