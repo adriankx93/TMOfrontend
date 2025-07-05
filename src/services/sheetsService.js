@@ -124,14 +124,27 @@ export const sheetsService = {
       throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}. Otrzymane dane: ${JSON.stringify(techniciansData)}`);
     }
 
-    const firstCell = datesData[0][0];
-    const parsedDate = new Date(firstCell);
+    // Używamy aktualnego miesiąca i roku zamiast parsowania z arkusza
+    // bo arkusz może mieć nieprawidłowe daty w pierwszej komórce
     let finalMonthIndex = monthIndex;
     let finalYear = year;
-    if (!isNaN(parsedDate.getTime())) {
-      finalMonthIndex = parsedDate.getMonth();
-      finalYear = parsedDate.getFullYear();
+    
+    // Próbujemy wyciągnąć miesiąc i rok z nazwy arkusza
+    const sheetNameLower = sheetName.toLowerCase();
+    for (let i = 0; i < CONFIG.monthNames.length; i++) {
+      if (sheetNameLower.includes(CONFIG.monthNames[i])) {
+        finalMonthIndex = i;
+        break;
+      }
     }
+    
+    // Szukamy roku w nazwie arkusza
+    const yearMatch = sheetName.match(/20\d{2}/);
+    if (yearMatch) {
+      finalYear = parseInt(yearMatch[0]);
+    }
+    
+    console.log(`[Sheets API] Wykryty miesiąc: ${CONFIG.monthNames[finalMonthIndex]} ${finalYear}`);
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
     console.log('[Sheets API] Sparsowani technicy:', technicians);
