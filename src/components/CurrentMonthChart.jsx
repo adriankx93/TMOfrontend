@@ -46,7 +46,8 @@ export default function CurrentMonthChart() {
       setLoading(true);
       setError(null);
       const monthData = await sheetsService.getCurrentMonthShifts();
-      setData(monthData);
+console.log("[DEBUG] monthData", monthData);      
+setData(monthData);
     } catch (err) {
       setError(err.message || "Błąd podczas pobierania danych");
     } finally {
