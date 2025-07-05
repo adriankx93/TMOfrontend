@@ -260,7 +260,8 @@ export default function CurrentMonthChart() {
               <li>Klucz API jest prawidłowy</li>
               <li>Istnieje arkusz o nazwie aktualnego miesiąca (np. "Styczeń")</li>
               <li>Dane techników są w zakresie C7:E23</li>
-              <li>Dni miesiąca są w wierszu J4:AN4</li>
+              <li>Daty są w wierszu J3:AM3</li>
+              <li>Zmiany techników są w zakresie J7:AM23</li>
             </ul>
           </div>
           <button 
@@ -288,7 +289,7 @@ export default function CurrentMonthChart() {
                 Grafik zmian - {months[data.month]} {data.year}
               </h1>
               <p className="text-blue-100 text-lg mt-1">
-                Dane z arkusza "{months[data.month + 1]}" • Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL')}
+                Dane z arkusza "{months[data.month]}" • Daty z J3:AM3 • Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL')}
               </p>
             </div>
           </div>
@@ -345,7 +346,7 @@ export default function CurrentMonthChart() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-slate-800">Lista techników i obciążenie</h2>
-            <p className="text-slate-600">Szczegółowy podział pracy w miesiącu</p>
+            <p className="text-slate-600">Szczegółowy podział pracy w miesiącu (dane z C7:E23)</p>
           </div>
         </div>
         
@@ -353,7 +354,7 @@ export default function CurrentMonthChart() {
           <div className="text-center py-12 text-slate-500">
             <span className="text-4xl mb-4 block">📋</span>
             <div className="text-lg">Brak danych dla aktualnego miesiąca</div>
-            <div className="text-sm mt-2">Sprawdź czy arkusz "{months[data.month + 1]}" zawiera dane techników</div>
+            <div className="text-sm mt-2">Sprawdź czy arkusz "{months[data.month]}" zawiera dane techników w C7:E23 i daty w J3:AM3</div>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -387,7 +388,7 @@ export default function CurrentMonthChart() {
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                       <div className="text-center p-2 bg-yellow-50 rounded-lg">
                         <div className="font-bold text-yellow-700">☀️ {tech.dayShifts}</div>
-                        <div className="text-yellow-600">Dzienne</div>
+                        <div className="text-yellow-600">Dzienne + Pierwsza</div>
                       </div>
                       <div className="text-center p-2 bg-indigo-50 rounded-lg">
                         <div className="font-bold text-indigo-700">🌙 {tech.nightShifts}</div>
@@ -436,7 +437,7 @@ export default function CurrentMonthChart() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-slate-800">Szczegółowy harmonogram</h2>
-            <p className="text-slate-600">Dzienny rozkład zmian i obsady</p>
+            <p className="text-slate-600">Dzienny rozkład zmian i obsady (daty z J3:AM3, zmiany z J7:AM23)</p>
           </div>
         </div>
         
@@ -444,7 +445,7 @@ export default function CurrentMonthChart() {
           <div className="text-center py-12 text-slate-500">
             <span className="text-4xl mb-4 block">📅</span>
             <div className="text-lg">Brak danych zmian dla aktualnego miesiąca</div>
-            <div className="text-sm mt-2">Sprawdź czy arkusz "{months[data.month + 1]}" zawiera dane w zakresie J4:AN23</div>
+            <div className="text-sm mt-2">Sprawdź czy arkusz "{months[data.month]}" zawiera daty w J3:AM3 i zmiany w J7:AM23</div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -452,11 +453,11 @@ export default function CurrentMonthChart() {
               <thead>
                 <tr className="border-b-2 border-slate-200">
                   <th className="text-left py-4 px-4 font-bold text-slate-700">Data</th>
-                  <th className="text-left py-4 px-4 font-bold text-slate-700">Zmiana dzienna</th>
+                  <th className="text-left py-4 px-4 font-bold text-slate-700">Zmiana dzienna + pierwsza</th>
                   <th className="text-left py-4 px-4 font-bold text-slate-700">Zmiana nocna</th>
                   <th className="text-center py-4 px-4 font-bold text-slate-700">Urlopy</th>
                   <th className="text-center py-4 px-4 font-bold text-slate-700">L4</th>
-                  <th className="text-center py-4 px-4 font-bold text-slate-700">Łącznie</th>
+                  <th className="text-center py-4 px-4 font-bold text-slate-700">Łącznie pracujących</th>
                 </tr>
               </thead>
               <tbody>

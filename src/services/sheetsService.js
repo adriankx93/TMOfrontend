@@ -116,18 +116,18 @@ export const sheetsService = {
       const techniciansRange = await sheetsService.getSheetRange(sheetName, 'C7:E23');
       console.log('Dane techników (C7:E23):', techniciansRange);
       
-      // Pobierz dni miesiąca z wiersza J4:AN4
-      const daysRange = await sheetsService.getSheetRange(sheetName, 'J4:AN4');
-      console.log('Dni miesiąca (J4:AN4):', daysRange);
+      // Pobierz daty z wiersza J3:AM3
+      const datesRange = await sheetsService.getSheetRange(sheetName, 'J3:AM3');
+      console.log('Daty miesiąca (J3:AM3):', datesRange);
       
-      // Pobierz zmiany techników z zakresu J7:AN23
-      const shiftsRange = await sheetsService.getSheetRange(sheetName, 'J7:AN23');
-      console.log('Zmiany techników (J7:AN23):', shiftsRange);
+      // Pobierz zmiany techników z zakresu J7:AM23
+      const shiftsRange = await sheetsService.getSheetRange(sheetName, 'J7:AM23');
+      console.log('Zmiany techników (J7:AM23):', shiftsRange);
       
       // Przetwórz dane
       const technicians = sheetsService.parseCurrentMonthTechnicians(techniciansRange);
-      const days = daysRange[0] || [];
-      const shifts = sheetsService.parseCurrentMonthShifts(technicians, days, shiftsRange, currentYear, currentMonth);
+      const dates = datesRange[0] || [];
+      const shifts = sheetsService.parseCurrentMonthShifts(technicians, dates, shiftsRange, currentYear, currentMonth);
       
       return {
         technicians,
@@ -168,22 +168,90 @@ export const sheetsService = {
     return technicians;
   },
 
+  // Parsuj daty z formatu Excel/Google Sheets
+  parseSheetDate: (dateValue, year, month) => {
+    if (!dateValue) return null;
+    
+    // Jeśli to już jest liczba (dzień miesiąca)
+    if (typeof dateValue === 'number') {
+      const day = Math.floor(dateValue);
+      if (day >= 1 && day <= 31) {
+        return new Date(year, month - 1, day);
+      }
+    }
+    
+    // Jeśli to string
+    const dateStr = dateValue.toString().trim();
+    
+    // Sprawdź czy to tylko dzień (np. "1", "15", "31")
+    const dayOnly = parseInt(dateStr);
+    if (!isNaN(dayOnly) && dayOnly >= 1 && dayOnly <= 31) {
+      return new Date(year, month - 1, dayOnly);
+    }
+    
+    // Sprawdź czy to data w formacie DD/MM/YYYY lub DD.MM.YYYY
+    if (dateStr.includes('/') || dateStr.includes('.')) {
+      const separator = dateStr.includes('/') ? '/' : '.';
+      const parts = dateStr.split(separator);
+      
+      if (parts.length === 3) {
+        const day = parseInt(parts[0]);
+        const monthPart = parseInt(parts[1]);
+        const yearPart = parseInt(parts[2]);
+        
+        if (day >= 1 && day <= 31 && monthPart >= 1 && monthPart <= 12) {
+          return new Date(yearPart, monthPart - 1, day);
+        }
+      }
+    }
+    
+    // Sprawdź czy to data w formacie YYYY-MM-DD
+    if (dateStr.includes('-')) {
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    
+    // Jeśli to data serializowana z Excel (liczba dni od 1900-01-01)
+    const excelDate = parseFloat(dateStr);
+    if (!isNaN(excelDate) && excelDate > 25000) { // Rozumna wartość dla dat po 1968
+      // Excel liczy dni od 1 stycznia 1900, ale ma błąd z rokiem przestępnym 1900
+      const excelEpoch = new Date(1899, 11, 30); // 30 grudnia 1899
+      const date = new Date(excelEpoch.getTime() + excelDate * 24 * 60 * 60 * 1000);
+      return date;
+    }
+    
+    return null;
+  },
+
   // Parsuj zmiany z aktualnego miesiąca
-  parseCurrentMonthShifts: (technicians, days, shiftsData, year, month) => {
-    if (!technicians || !days || !shiftsData) return [];
+  parseCurrentMonthShifts: (technicians, dates, shiftsData, year, month) => {
+    if (!technicians || !dates || !shiftsData) return [];
     
     const shifts = [];
     
-    // Dla każdego dnia w miesiącu
-    days.forEach((day, dayIndex) => {
-      if (!day) return;
+    console.log('Parsowanie zmian - daty:', dates);
+    console.log('Parsowanie zmian - dane zmian:', shiftsData);
+    
+    // Dla każdej daty w wierszu J3:AM3
+    dates.forEach((dateValue, dateIndex) => {
+      if (!dateValue) return;
       
-      const dayNumber = parseInt(day);
-      if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return;
+      // Parsuj datę
+      const date = sheetsService.parseSheetDate(dateValue, year, month);
+      if (!date) {
+        console.warn(`Nie można sparsować daty: ${dateValue}`);
+        return;
+      }
       
-      // Utwórz datę dla tego dnia
-      const date = new Date(year, month - 1, dayNumber);
-      if (date.getMonth() !== month - 1) return; // Sprawdź czy data jest prawidłowa
+      // Sprawdź czy data należy do aktualnego miesiąca
+      if (date.getMonth() !== month - 1 || date.getFullYear() !== year) {
+        console.log(`Data ${date.toISOString().split('T')[0]} nie należy do aktualnego miesiąca ${month}/${year}`);
+        return;
+      }
+      
+      const dayNumber = date.getDate();
       
       const dayTechnicians = [];
       const nightTechnicians = [];
@@ -191,11 +259,11 @@ export const sheetsService = {
       const vacationTechnicians = [];
       const l4Technicians = [];
       
-      // Sprawdź każdego technika dla tego dnia
+      // Sprawdź każdego technika dla tej daty
       technicians.forEach((technician, techIndex) => {
         if (techIndex < shiftsData.length) {
           const techShifts = shiftsData[techIndex] || [];
-          const shiftValue = techShifts[dayIndex] ? techShifts[dayIndex].toString().trim().toLowerCase() : '';
+          const shiftValue = techShifts[dateIndex] ? techShifts[dateIndex].toString().trim().toLowerCase() : '';
           
           if (shiftValue) {
             switch (shiftValue) {
@@ -213,6 +281,20 @@ export const sheetsService = {
                 break;
               case 'l4':
                 l4Technicians.push(technician.fullName);
+                break;
+              default:
+                // Sprawdź inne możliwe warianty
+                if (shiftValue.includes('1')) {
+                  firstShiftTechnicians.push(technician.fullName);
+                } else if (shiftValue.includes('d')) {
+                  dayTechnicians.push(technician.fullName);
+                } else if (shiftValue.includes('n')) {
+                  nightTechnicians.push(technician.fullName);
+                } else if (shiftValue.includes('u')) {
+                  vacationTechnicians.push(technician.fullName);
+                } else if (shiftValue.includes('l4')) {
+                  l4Technicians.push(technician.fullName);
+                }
                 break;
             }
           }
