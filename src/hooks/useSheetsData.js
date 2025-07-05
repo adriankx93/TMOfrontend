@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { sheetsService } from '../services/sheetsService';
 
@@ -13,11 +12,18 @@ export const useSheetsData = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const sheetData = await sheetsService.getAllSheetData();
-      setData(sheetData);
       setError(null);
+      
+      console.log('useSheetsData: Rozpoczynam pobieranie danych...');
+      
+      const sheetData = await sheetsService.getAllSheetData();
+      
+      console.log('useSheetsData: Otrzymane dane:', sheetData);
+      
+      setData(sheetData);
     } catch (err) {
-      setError(err.message);
+      console.error('useSheetsData: Błąd:', err);
+      setError(err.message || 'Błąd podczas pobierania danych');
     } finally {
       setLoading(false);
     }
@@ -25,6 +31,11 @@ export const useSheetsData = () => {
 
   useEffect(() => {
     fetchData();
+    
+    // Automatyczne odświeżanie co 5 minut
+    const interval = setInterval(fetchData, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   return {

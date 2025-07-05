@@ -1,4 +1,3 @@
-
 const SHEETS_API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
 const SPREADSHEET_ID = '1gduTrxhu4I7Z8CKcBtxmia3_4-7GopgM';
 
@@ -11,14 +10,14 @@ export const sheetsService = {
       );
       
       if (!response.ok) {
-        throw new Error('Failed to fetch sheet data');
+        throw new Error(`Failed to fetch sheet data: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
       return data.values || [];
     } catch (error) {
       console.error('Error fetching sheet data:', error);
-      return [];
+      throw new Error(`Błąd pobierania danych z arkusza: ${error.message}`);
     }
   },
 
@@ -26,17 +25,16 @@ export const sheetsService = {
   parseTechniciansData: (rawData) => {
     if (!rawData || rawData.length < 2) return [];
     
-    const headers = rawData[0];
     const technicians = [];
     
     for (let i = 1; i < rawData.length; i++) {
       const row = rawData[i];
-      if (row.length > 0) {
+      if (row.length > 0 && row[0]) {
         const technician = {
           firstName: row[0] || '',
           lastName: row[1] || '',
-          specialization: row[2] || '',
-          shift: row[3] || '',
+          specialization: row[2] || 'Techniczny',
+          shift: row[3] || 'Dzienna',
           email: row[4] || '',
           phone: row[5] || '',
           status: row[6] || 'active',
@@ -62,20 +60,46 @@ export const sheetsService = {
         // Parsuj datę w różnych formatach
         let parsedDate = null;
         if (row[0]) {
-          // Próbuj różne formaty daty
-          const dateStr = row[0].toString();
+          const dateStr = row[0].toString().trim();
+          
           if (dateStr.includes('/')) {
             const parts = dateStr.split('/');
             if (parts.length === 3) {
-              parsedDate = new Date(parts[2], parts[1] - 1, parts[0]); // DD/MM/YYYY
+              // DD/MM/YYYY lub MM/DD/YYYY
+              const day = parseInt(parts[0]);
+              const month = parseInt(parts[1]);
+              const year = parseInt(parts[2]);
+              
+              if (year > 31) {
+                parsedDate = new Date(year, month - 1, day);
+              } else {
+                parsedDate = new Date(parts[2], parts[1] - 1, parts[0]);
+              }
             }
           } else if (dateStr.includes('-')) {
-            parsedDate = new Date(dateStr); // YYYY-MM-DD
+            // YYYY-MM-DD lub DD-MM-YYYY
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+              const first = parseInt(parts[0]);
+              if (first > 31) {
+                parsedDate = new Date(dateStr); // YYYY-MM-DD
+              } else {
+                parsedDate = new Date(parts[2], parts[1] - 1, parts[0]); // DD-MM-YYYY
+              }
+            }
           } else if (dateStr.includes('.')) {
             const parts = dateStr.split('.');
             if (parts.length === 3) {
               parsedDate = new Date(parts[2], parts[1] - 1, parts[0]); // DD.MM.YYYY
             }
+          } else {
+            // Próbuj bezpośrednio jako datę
+            parsedDate = new Date(dateStr);
+          }
+          
+          // Sprawdź czy data jest prawidłowa
+          if (parsedDate && isNaN(parsedDate.getTime())) {
+            parsedDate = null;
           }
         }
 
@@ -87,11 +111,16 @@ export const sheetsService = {
           nightTasks: parseInt(row[4]) || 0,
           notes: row[5] || ''
         };
-        shifts.push(shift);
+        
+        // Dodaj tylko jeśli data jest prawidłowa
+        if (parsedDate) {
+          shifts.push(shift);
+        }
       }
     }
     
-    return shifts;
+    // Sortuj według daty
+    return shifts.sort((a, b) => new Date(a.date) - new Date(b.date));
   },
 
   // Pobierz dane tylko z aktualnego miesiąca
@@ -102,10 +131,21 @@ export const sheetsService = {
       const currentMonth = currentDate.getMonth();
       const currentYear = currentDate.getFullYear();
       
+      console.log('Pobrane dane z arkusza:', allData);
+      console.log('Aktualny miesiąc:', currentMonth, 'rok:', currentYear);
+      
       const currentMonthShifts = allData.shifts.filter(shift => {
         const shiftDate = new Date(shift.date);
-        return shiftDate.getMonth() === currentMonth && shiftDate.getFullYear() === currentYear;
+        const isCurrentMonth = shiftDate.getMonth() === currentMonth && shiftDate.getFullYear() === currentYear;
+        
+        if (isCurrentMonth) {
+          console.log('Znaleziono zmianę z aktualnego miesiąca:', shift);
+        }
+        
+        return isCurrentMonth;
       });
+
+      console.log('Zmiany z aktualnego miesiąca:', currentMonthShifts);
 
       return {
         technicians: allData.technicians,
@@ -115,23 +155,32 @@ export const sheetsService = {
       };
     } catch (error) {
       console.error('Error fetching current month data:', error);
-      return { technicians: [], shifts: [], month: new Date().getMonth(), year: new Date().getFullYear() };
+      throw error;
     }
   },
 
   // Pobierz wszystkie dane z arkusza
   getAllSheetData: async () => {
     try {
+      console.log('Pobieranie danych z arkusza Google Sheets...');
+      
       const techniciansData = await sheetsService.getSheetData('Technicy');
       const shiftsData = await sheetsService.getSheetData('Zmiany');
       
-      return {
+      console.log('Surowe dane techników:', techniciansData);
+      console.log('Surowe dane zmian:', shiftsData);
+      
+      const parsedData = {
         technicians: sheetsService.parseTechniciansData(techniciansData),
         shifts: sheetsService.parseShiftsData(shiftsData)
       };
+      
+      console.log('Przetworzone dane:', parsedData);
+      
+      return parsedData;
     } catch (error) {
       console.error('Error fetching all sheet data:', error);
-      return { technicians: [], shifts: [] };
+      throw error;
     }
   }
 };

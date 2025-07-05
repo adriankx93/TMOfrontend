@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { sheetsService } from '../services/sheetsService';
 
@@ -19,32 +18,61 @@ export default function CurrentMonthChart() {
 
   useEffect(() => {
     fetchCurrentMonthData();
+    
+    // Automatyczne odświeżanie co 5 minut
+    const interval = setInterval(fetchCurrentMonthData, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchCurrentMonthData = async () => {
     try {
       setLoading(true);
-      const monthData = await sheetsService.getCurrentMonthShifts();
-      setData(monthData);
       setError(null);
+      
+      console.log('Rozpoczynam pobieranie danych aktualnego miesiąca...');
+      
+      const monthData = await sheetsService.getCurrentMonthShifts();
+      
+      console.log('Otrzymane dane miesiąca:', monthData);
+      
+      setData(monthData);
     } catch (err) {
-      setError(err.message);
+      console.error('Błąd podczas pobierania danych:', err);
+      setError(err.message || 'Błąd podczas pobierania danych z arkusza');
     } finally {
       setLoading(false);
     }
   };
 
   const getMonthStats = () => {
+    if (!data.shifts || data.shifts.length === 0) {
+      return {
+        totalDays: 0,
+        totalDayTasks: 0,
+        totalNightTasks: 0,
+        uniqueDayTechnicians: 0,
+        uniqueNightTechnicians: 0,
+        avgDayTasks: 0,
+        avgNightTasks: 0,
+        allTechnicians: new Set()
+      };
+    }
+
     const totalDays = data.shifts.length;
-    const totalDayTasks = data.shifts.reduce((sum, shift) => sum + shift.dayTasks, 0);
-    const totalNightTasks = data.shifts.reduce((sum, shift) => sum + shift.nightTasks, 0);
+    const totalDayTasks = data.shifts.reduce((sum, shift) => sum + (shift.dayTasks || 0), 0);
+    const totalNightTasks = data.shifts.reduce((sum, shift) => sum + (shift.nightTasks || 0), 0);
     
     const dayTechnicians = new Set();
     const nightTechnicians = new Set();
     
     data.shifts.forEach(shift => {
-      shift.dayTechnicians.forEach(tech => dayTechnicians.add(tech));
-      shift.nightTechnicians.forEach(tech => nightTechnicians.add(tech));
+      if (shift.dayTechnicians && Array.isArray(shift.dayTechnicians)) {
+        shift.dayTechnicians.forEach(tech => dayTechnicians.add(tech));
+      }
+      if (shift.nightTechnicians && Array.isArray(shift.nightTechnicians)) {
+        shift.nightTechnicians.forEach(tech => nightTechnicians.add(tech));
+      }
     });
 
     return {
@@ -60,21 +88,30 @@ export default function CurrentMonthChart() {
   };
 
   const getTechnicianWorkload = () => {
+    if (!data.shifts || data.shifts.length === 0) {
+      return [];
+    }
+
     const technicianStats = {};
 
     data.shifts.forEach(shift => {
-      [...shift.dayTechnicians, ...shift.nightTechnicians].forEach(tech => {
+      const allTechsInShift = [
+        ...(shift.dayTechnicians || []),
+        ...(shift.nightTechnicians || [])
+      ];
+      
+      allTechsInShift.forEach(tech => {
         if (!technicianStats[tech]) {
           technicianStats[tech] = { dayShifts: 0, nightShifts: 0, totalTasks: 0 };
         }
         
-        if (shift.dayTechnicians.includes(tech)) {
+        if (shift.dayTechnicians && shift.dayTechnicians.includes(tech)) {
           technicianStats[tech].dayShifts++;
-          technicianStats[tech].totalTasks += shift.dayTasks;
+          technicianStats[tech].totalTasks += shift.dayTasks || 0;
         }
-        if (shift.nightTechnicians.includes(tech)) {
+        if (shift.nightTechnicians && shift.nightTechnicians.includes(tech)) {
           technicianStats[tech].nightShifts++;
-          technicianStats[tech].totalTasks += shift.nightTasks;
+          technicianStats[tech].totalTasks += shift.nightTasks || 0;
         }
       });
     });
@@ -91,6 +128,10 @@ export default function CurrentMonthChart() {
   };
 
   const getSpecializationFromName = (techName) => {
+    if (!data.technicians || !Array.isArray(data.technicians)) {
+      return 'Techniczny';
+    }
+    
     const tech = data.technicians.find(t => 
       `${t.firstName} ${t.lastName}` === techName ||
       t.firstName === techName ||
@@ -136,6 +177,14 @@ export default function CurrentMonthChart() {
             ⚠️ Błąd wczytywania danych
           </div>
           <p className="text-slate-600 mb-4">{error}</p>
+          <div className="text-sm text-slate-500 mb-4">
+            Sprawdź czy:
+            <ul className="list-disc list-inside mt-2">
+              <li>Arkusz Google Sheets jest publiczny</li>
+              <li>Klucz API jest prawidłowy</li>
+              <li>Nazwy arkuszy to "Technicy" i "Zmiany"</li>
+            </ul>
+          </div>
           <button 
             onClick={fetchCurrentMonthData}
             className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
@@ -161,13 +210,14 @@ export default function CurrentMonthChart() {
                 Grafik zmian - {months[data.month]} {data.year}
               </h1>
               <p className="text-blue-100 text-lg mt-1">
-                Dane pobrane z arkusza Google Sheets
+                Dane pobrane z arkusza Google Sheets • Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL')}
               </p>
             </div>
           </div>
           <button 
             onClick={fetchCurrentMonthData}
             className="px-6 py-3 bg-white/20 backdrop-blur-xl text-white rounded-xl hover:bg-white/30 transition-colors border border-white/20"
+            disabled={loading}
           >
             🔄 Odśwież
           </button>
@@ -225,6 +275,7 @@ export default function CurrentMonthChart() {
           <div className="text-center py-12 text-slate-500">
             <span className="text-4xl mb-4 block">📋</span>
             <div className="text-lg">Brak danych dla aktualnego miesiąca</div>
+            <div className="text-sm mt-2">Sprawdź czy arkusz zawiera dane dla {months[data.month]} {data.year}</div>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -296,60 +347,74 @@ export default function CurrentMonthChart() {
           </div>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b-2 border-slate-200">
-                <th className="text-left py-4 px-4 font-bold text-slate-700">Data</th>
-                <th className="text-left py-4 px-4 font-bold text-slate-700">Zmiana dzienna</th>
-                <th className="text-left py-4 px-4 font-bold text-slate-700">Zmiana nocna</th>
-                <th className="text-center py-4 px-4 font-bold text-slate-700">Zadania dzień</th>
-                <th className="text-center py-4 px-4 font-bold text-slate-700">Zadania noc</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.shifts.map((shift, index) => (
-                <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="py-4 px-4 font-semibold text-slate-800">
-                    {new Date(shift.date).toLocaleDateString('pl-PL', {
-                      weekday: 'short',
-                      day: '2-digit',
-                      month: '2-digit'
-                    })}
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex flex-wrap gap-1">
-                      {shift.dayTechnicians.map((tech, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium border border-yellow-200">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex flex-wrap gap-1">
-                      {shift.nightTechnicians.map((tech, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium border border-indigo-200">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-4 px-4 text-center">
-                    <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-full font-bold text-lg border border-orange-200">
-                      {shift.dayTasks}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-center">
-                    <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-bold text-lg border border-blue-200">
-                      {shift.nightTasks}
-                    </span>
-                  </td>
+        {data.shifts.length === 0 ? (
+          <div className="text-center py-12 text-slate-500">
+            <span className="text-4xl mb-4 block">📅</span>
+            <div className="text-lg">Brak danych zmian dla aktualnego miesiąca</div>
+            <div className="text-sm mt-2">Sprawdź czy arkusz "Zmiany" zawiera dane dla {months[data.month]} {data.year}</div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b-2 border-slate-200">
+                  <th className="text-left py-4 px-4 font-bold text-slate-700">Data</th>
+                  <th className="text-left py-4 px-4 font-bold text-slate-700">Zmiana dzienna</th>
+                  <th className="text-left py-4 px-4 font-bold text-slate-700">Zmiana nocna</th>
+                  <th className="text-center py-4 px-4 font-bold text-slate-700">Zadania dzień</th>
+                  <th className="text-center py-4 px-4 font-bold text-slate-700">Zadania noc</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {data.shifts.map((shift, index) => (
+                  <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td className="py-4 px-4 font-semibold text-slate-800">
+                      {new Date(shift.date).toLocaleDateString('pl-PL', {
+                        weekday: 'short',
+                        day: '2-digit',
+                        month: '2-digit'
+                      })}
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex flex-wrap gap-1">
+                        {(shift.dayTechnicians || []).map((tech, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium border border-yellow-200">
+                            {tech}
+                          </span>
+                        ))}
+                        {(!shift.dayTechnicians || shift.dayTechnicians.length === 0) && (
+                          <span className="text-slate-400 text-sm">Brak przypisań</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex flex-wrap gap-1">
+                        {(shift.nightTechnicians || []).map((tech, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium border border-indigo-200">
+                            {tech}
+                          </span>
+                        ))}
+                        {(!shift.nightTechnicians || shift.nightTechnicians.length === 0) && (
+                          <span className="text-slate-400 text-sm">Brak przypisań</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-center">
+                      <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-full font-bold text-lg border border-orange-200">
+                        {shift.dayTasks || 0}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-center">
+                      <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-bold text-lg border border-blue-200">
+                        {shift.nightTasks || 0}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
