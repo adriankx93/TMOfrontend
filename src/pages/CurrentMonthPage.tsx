@@ -1,11 +1,10 @@
-// --- KONFIGURACJA ---
 const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:C18',          // tylko jedna kolumna z nazwiskami
+    technicians: 'C7:C24',       // TYLKO kolumna z nazwiskami
     dates: 'J32:AN32',
-    shifts: 'J7:AN18',              // zostawiasz zakres jak był
+    shifts: 'J7:AN24',           // zakres obejmuje wiersz z "1"
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -98,7 +97,7 @@ export const sheetsService = {
       throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
     }
 
-    // Tu odcinamy pierwszy wiersz (ten z "1")
+    // Ucinamy pierwszy wiersz z "1"
     const shiftsData = shiftsDataRaw.slice(1);
 
     let finalMonthIndex = monthIndex;
@@ -147,9 +146,9 @@ export const sheetsService = {
         return {
           id: i,
           shiftRowIndex: i,
-          firstName: "",
-          lastName: "",
-          specialization: "",
+          firstName: '',
+          lastName: '',
+          specialization: '',
           fullName
         };
       })
@@ -162,13 +161,7 @@ export const sheetsService = {
     return dates
       .map((cell, idx) => {
         let dayNumber = parseInt(cell);
-        if (isNaN(dayNumber)) {
-          const parsed = new Date(cell);
-          if (!isNaN(parsed.getTime())) {
-            dayNumber = parsed.getDate();
-          }
-        }
-        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
+        if (isNaN(dayNumber)) return null;
 
         const date = new Date(year, monthIndex, dayNumber);
 
@@ -185,7 +178,7 @@ export const sheetsService = {
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
           const rawValue = (row[idx] || '').toString().trim().toLowerCase();
-          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
+          const tokens = rawValue.split(/\s|,/).map(t => t.trim()).filter(Boolean);
 
           tokens.forEach(token => {
             if (token === CONFIG.shiftCodes.firstShift) {
