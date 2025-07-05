@@ -117,6 +117,10 @@ export const sheetsService = {
     const technicians = sheetsService.parseTechnicians(techniciansData);
     const dates = datesData[0];
     const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
+    console.log("[DEBUG] techniciansData:", JSON.stringify(techniciansData, null, 2));
+console.log("[DEBUG] datesData:", JSON.stringify(datesData, null, 2));
+console.log("[DEBUG] shiftsData:", JSON.stringify(shiftsData, null, 2));
+
 
     // DODAJEMY debugRawData
     return {
