@@ -1,160 +1,213 @@
-import { useState, useEffect } from "react";
-import { sheetsService } from "../services/sheetsService";
-import StatisticsCards from "./StatisticsCards";
-import TechnicianWorkload from "./TechnicianWorkload";
-import DailyScheduleTable from "./DailyScheduleTable";
+// --- KONFIGURACJA ---
+const CONFIG = {
+  spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
+  apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
+  ranges: {
+    technicians: 'C7:E18',
+    dates: 'J32:AN32',
+    shifts: 'J7:AN18',
+  },
+  monthNames: [
+    'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+    'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+  ],
+  shiftCodes: {
+    firstShift: '1',
+    day: 'd',
+    night: 'n',
+    vacation: 'u',
+    sickLeave: 'l4',
+  }
+};
 
-export default function CurrentMonthChart() {
-  const [data, setData] = useState({
-    technicians: [],
-    shifts: [],
-    month: new Date().getMonth(),
-    year: new Date().getFullYear(),
-    sheetName: ""
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [connectionTest, setConnectionTest] = useState(null);
-
-  const months = [
-    "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
-    "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
-  ];
-
-  useEffect(() => {
-    testConnection();
-    fetchCurrentMonthData();
-    const interval = setInterval(fetchCurrentMonthData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const testConnection = async () => {
+const _fetchFromSheets = async (url, errorMessagePrefix) => {
+  console.log(`[Sheets API] Wywołuję URL: ${url}`);
+  const response = await fetch(url);
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = `${errorMessagePrefix}: ${response.status} ${response.statusText}`;
     try {
-      const result = await sheetsService.testConnection();
-      setConnectionTest(result);
-    } catch (err) {
-      setConnectionTest({
-        success: false,
-        message: err.message,
-        sheets: []
-      });
+      const errorData = JSON.parse(errorText);
+      if (errorData.error?.message) {
+        errorMessage += ` - ${errorData.error.message}`;
+      }
+    } catch {
+      errorMessage += ` - ${errorText}`;
     }
-  };
+    throw new Error(errorMessage);
+  }
+  return await response.json();
+};
 
-  const fetchCurrentMonthData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const monthData = await sheetsService.getCurrentMonthShifts();
-      setData(monthData);
-    } catch (err) {
-      setError(err.message || "Błąd podczas pobierania danych");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getMonthStats = () => {
-    if (!data.shifts || data.shifts.length === 0) {
-      return {
-        totalDays: 0,
-        totalWorkingDays: 0,
-        avgWorkersPerDay: 0,
-        allTechnicians: new Set()
-      };
-    }
-    const totalDays = data.shifts.length;
-    const totalWorkingDays = data.shifts.filter(s => s.totalWorking > 0).length;
-
-    const allTechnicians = new Set();
-    let totalWorkers = 0;
-
-    data.shifts.forEach(shift => {
-      [...(shift.dayTechnicians || []), ...(shift.nightTechnicians || []), ...(shift.firstShiftTechnicians || [])]
-        .forEach(t => {
-          allTechnicians.add(t);
-          totalWorkers++;
-        });
-    });
-
+export const sheetsService = {
+  testConnection: async () => {
+    const sheets = await sheetsService.getAvailableSheets();
     return {
-      totalDays,
-      totalWorkingDays,
-      avgWorkersPerDay: totalDays > 0 ? (totalWorkers / totalDays).toFixed(1) : 0,
-      allTechnicians
+      success: true,
+      message: 'Połączenie z Google Sheets działa poprawnie',
+      sheets
     };
-  };
+  },
 
-  const getTechnicianWorkload = () => {
-    if (!data.shifts || data.shifts.length === 0) return [];
+  getAvailableSheets: async () => {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}?key=${CONFIG.apiKey}`;
+    const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
+    return data.sheets.map(s => s.properties.title.trim());
+  },
 
-    const stats = {};
-    data.shifts.forEach(shift => {
-      const add = (type, arr) => {
-        (arr || []).forEach(name => {
-          if (!stats[name]) {
-            stats[name] = { day: 0, night: 0, first: 0, vacation: 0, l4: 0 };
+  getMultipleRanges: async (sheetName, ranges) => {
+    const encodedSheetName = encodeURIComponent(sheetName);
+    const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values:batchGet?${rangesQuery}&key=${CONFIG.apiKey}`;
+    const data = await _fetchFromSheets(url, 'Błąd pobierania zakresów');
+    return data.valueRanges.map(r => r.values || []);
+  },
+
+  getCurrentMonthData: async () => {
+    const now = new Date();
+    const monthIndex = now.getMonth();
+    const year = now.getFullYear();
+    const expectedMonthName = CONFIG.monthNames[monthIndex];
+
+    const allSheets = await sheetsService.getAvailableSheets();
+
+    let sheetName = allSheets.find(name =>
+      name.toLowerCase().includes(expectedMonthName.toLowerCase()) &&
+      name.includes(year.toString())
+    );
+    if (!sheetName) {
+      sheetName = allSheets.find(name =>
+        name.toLowerCase().includes(expectedMonthName.toLowerCase())
+      );
+    }
+    if (!sheetName) {
+      throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(', ')}`);
+    }
+
+    const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
+      sheetName,
+      [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
+    );
+
+    if (!datesData.length || !datesData[0]?.length) {
+      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
+    }
+    if (!shiftsData.length) {
+      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
+    }
+    if (!techniciansData.length) {
+      throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
+    }
+
+    let finalMonthIndex = monthIndex;
+    let finalYear = year;
+
+    const sheetNameLower = sheetName.toLowerCase();
+    for (let i = 0; i < CONFIG.monthNames.length; i++) {
+      if (sheetNameLower.includes(CONFIG.monthNames[i])) {
+        finalMonthIndex = i;
+        break;
+      }
+    }
+    const yearMatch = sheetName.match(/20\d{2}/);
+    if (yearMatch) {
+      finalYear = parseInt(yearMatch[0]);
+    }
+
+    const technicians = sheetsService.parseTechnicians(techniciansData);
+    const dates = datesData[0];
+    const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
+
+    // DODAJEMY debugRawData
+    return {
+      month: finalMonthIndex,
+      year: finalYear,
+      sheetName,
+      technicians,
+      shifts,
+      debugRawData: {
+        techniciansData,
+        datesData,
+        shiftsData
+      }
+    };
+  },
+
+  getCurrentMonthShifts: async () => {
+    return await sheetsService.getCurrentMonthData();
+  },
+
+  parseTechnicians: (data) => {
+    if (!data || !Array.isArray(data)) return [];
+    return data
+      .map((row, i) => {
+        if (!row || !row[0] || !row[1]) return null;
+        return {
+          id: i,
+          shiftRowIndex: i,
+          firstName: row[0].toString().trim(),
+          lastName: row[1].toString().trim(),
+          specialization: row[2]?.toString().trim() || 'Techniczny',
+          fullName: `${row[0]} ${row[1]}`.trim()
+        };
+      })
+      .filter(Boolean);
+  },
+
+  parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
+    if (!technicians.length || !dates.length || !shiftsData.length) return [];
+
+    return dates
+      .map((cell, idx) => {
+        let dayNumber = parseInt(cell);
+        if (isNaN(dayNumber)) {
+          const parsed = new Date(cell);
+          if (!isNaN(parsed.getTime())) {
+            dayNumber = parsed.getDate();
           }
-          stats[name][type]++;
+        }
+        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
+
+        const date = new Date(year, monthIndex, dayNumber);
+
+        const shift = {
+          date: date.toISOString().split('T')[0],
+          dayNumber,
+          dayTechnicians: [],
+          nightTechnicians: [],
+          firstShiftTechnicians: [],
+          vacationTechnicians: [],
+          l4Technicians: []
+        };
+
+        technicians.forEach(tech => {
+          const row = shiftsData[tech.shiftRowIndex] || [];
+          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
+          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
+
+          tokens.forEach(token => {
+            if (token === CONFIG.shiftCodes.firstShift) {
+              shift.firstShiftTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.day) {
+              shift.dayTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.night) {
+              shift.nightTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.vacation) {
+              shift.vacationTechnicians.push(tech.fullName);
+            } else if (token === CONFIG.shiftCodes.sickLeave) {
+              shift.l4Technicians.push(tech.fullName);
+            }
+          });
         });
-      };
-      add("day", shift.dayTechnicians);
-      add("night", shift.nightTechnicians);
-      add("first", shift.firstShiftTechnicians);
-      add("vacation", shift.vacationTechnicians);
-      add("l4", shift.l4Technicians);
-    });
 
-    return Object.entries(stats).map(([name, s]) => ({
-      name,
-      dayShifts: s.day,
-      nightShifts: s.night,
-      firstShifts: s.first,
-      vacationDays: s.vacation,
-      l4Days: s.l4,
-      totalShifts: s.day + s.night,
-      workingDays: s.day + s.night,
-      totalDays: s.day + s.night + s.vacation + s.l4
-    })).sort((a, b) => b.totalShifts - a.totalShifts);
-  };
+        shift.totalWorking =
+          shift.dayTechnicians.length +
+          shift.nightTechnicians.length +
+          shift.firstShiftTechnicians.length;
 
-  const stats = getMonthStats();
-  const workload = getTechnicianWorkload();
-
-  if (loading) {
-    return <div className="p-8 text-center">Ładowanie danych...</div>;
-  }
-
-  if (error) {
-    return <div className="p-8 text-center text-red-500">{error}</div>;
-  }
-
-  return (
-    <div className="space-y-8">
-      <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-xl p-8 text-white">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">
-              Grafik zmian - {months[data.month]} {data.year}
-            </h1>
-            <p className="text-blue-100 text-lg mt-1">
-              Dane z arkusza "{data.sheetName}"
-            </p>
-          </div>
-          <button
-            onClick={fetchCurrentMonthData}
-            className="px-6 py-3 bg-white/20 backdrop-blur-xl rounded-xl border border-white/20"
-          >
-            🔄 Odśwież
-          </button>
-        </div>
-      </div>
-
-      <StatisticsCards stats={stats} />
-
-      <TechnicianWorkload workload={workload} />
-
-      <DailyScheduleTable shifts={data.shifts} />
-    </div>
-  );
-}
+        return shift;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.dayNumber - b.dayNumber);
+  },
+};
