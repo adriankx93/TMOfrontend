@@ -1,5 +1,3 @@
-// src/services/sheetsService.js
-// --- KONFIGURACJA ---
 const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
@@ -22,7 +20,6 @@ const CONFIG = {
 };
 
 const _fetchFromSheets = async (url, errorMessagePrefix) => {
-  console.log(`[Sheets API] Wywołuję URL: ${url}`);
   const response = await fetch(url);
   if (!response.ok) {
     const errorText = await response.text();
@@ -173,10 +170,14 @@ export const sheetsService = {
       };
 
       technicians.forEach(tech => {
-        const row = shiftsData[tech.shiftRowIndex] || [];
-        // Upewniamy się, że kolumny są wyrównane z datami
-        const safeCell = idx < row.length ? row[idx] : '';
-        const rawValue = (safeCell || '').toLowerCase().trim();
+        let row = shiftsData[tech.shiftRowIndex] || [];
+
+        // WAŻNE: Uzupełnij pustymi, aby długość była zgodna z datami
+        if (row.length < dates.length) {
+          row = [...row, ...Array(dates.length - row.length).fill('')];
+        }
+
+        const rawValue = (row[idx] || '').toLowerCase().trim();
         const tokens = rawValue.split(/\s|,/).filter(Boolean);
 
         tokens.forEach(token => {
@@ -199,8 +200,7 @@ export const sheetsService = {
       });
 
       shift.totalWorking =
-        shift.dayTechnicians.length +
-        shift.nightTechnicians.length;
+        shift.dayTechnicians.length + shift.nightTechnicians.length;
 
       return shift;
     }).filter(Boolean);
