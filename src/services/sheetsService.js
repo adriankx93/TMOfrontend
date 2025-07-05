@@ -1,11 +1,13 @@
-const SHEETS_API_KEY = import.meta.env.VITE_SHEETS_API_KEY;
-const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
+// --- STAŁE z Twoimi wartościami ---
+const SHEETS_API_KEY = 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY';
+const SPREADSHEET_ID = '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ';
 
+// --- KONFIGURACJA ---
 const CONFIG = {
   ranges: {
     technicians: 'C7:E23',
-    dates: 'J3:AM3',
-    shifts: 'J7:AM23',
+    dates: 'J3:AN3', // AN jeśli masz 31 dni
+    shifts: 'J7:AN23',
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -41,8 +43,10 @@ const _fetchFromSheets = async (url, errorMessagePrefix) => {
 export const sheetsService = {
   getAvailableSheets: async () => {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}?key=${SHEETS_API_KEY}`;
+    console.log('[Sheets API] Pobieram listę arkuszy...');
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
     const sheetNames = data.sheets.map(s => s.properties.title.trim());
+    console.log('[Sheets API] Dostępne arkusze:', sheetNames);
     return sheetNames;
   },
 
@@ -50,7 +54,9 @@ export const sheetsService = {
     const encodedSheetName = encodeURIComponent(sheetName);
     const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values:batchGet?${rangesQuery}&key=${SHEETS_API_KEY}`;
+    console.log(`[Sheets API] Pobieram zakresy: ${ranges.join(', ')} z arkusza "${sheetName}"...`);
     const data = await _fetchFromSheets(url, 'Błąd pobierania zakresów');
+    console.log('[Sheets API] Odpowiedź:', data);
     return data.valueRanges.map(r => r.values || []);
   },
 
@@ -60,12 +66,14 @@ export const sheetsService = {
     const year = now.getFullYear();
     const expectedSheetName = CONFIG.monthNames[monthIndex];
 
+    console.log(`[Sheets API] Szukam arkusza "${expectedSheetName}"`);
+
     const allSheets = await sheetsService.getAvailableSheets();
     const sheetName = allSheets.find(
       name => name.toLowerCase() === expectedSheetName.toLowerCase()
     );
     if (!sheetName) {
-      throw new Error(`Nie znaleziono arkusza "${expectedSheetName}". Dostępne arkusze: ${allSheets.join(", ")}`);
+      throw new Error(`Nie znaleziono arkusza "${expectedSheetName}". Dostępne arkusze: ${allSheets.join(', ')}`);
     }
 
     const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
@@ -102,7 +110,6 @@ export const sheetsService = {
         if (!row[0] || !row[1]) return null;
         return {
           id: i,
-          // Indeks w shiftsData odpowiada indeksowi w techniciansData
           shiftRowIndex: i,
           firstName: row[0].trim(),
           lastName: row[1].trim(),
