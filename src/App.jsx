@@ -19,6 +19,12 @@ import EditUserPage from "./pages/EditUserPage";
 import InventoryPage from "./pages/InventoryPage";
 import MaterialsPage from "./pages/MaterialsPage";
 import BuildingsPage from "./pages/BuildingsPage";
+import InspectionsPage from "./pages/InspectionsPage";
+import DefectsPage from "./pages/DefectsPage";
+import EquipmentPage from "./pages/EquipmentPage";
+import ToolsPage from "./pages/ToolsPage";
+import NotebookPage from "./pages/NotebookPage";
+import TrendAnalysisPage from "./pages/TrendAnalysisPage";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
