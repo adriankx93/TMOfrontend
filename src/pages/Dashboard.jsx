@@ -209,61 +209,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">👷</span>
-            </div>
-            <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">
-              {dashboardStats.activeTechnicians}
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Technicy aktywni</h3>
-          <p className="text-slate-400 text-sm">Na dzisiejszej zmianie</p>
-        </div>
-
-        <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">📋</span>
-            </div>
-            <div className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-bold">
-              {dashboardStats.currentTasks}
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Zadania w toku</h3>
-          <p className="text-slate-400 text-sm">Przypisane i w realizacji</p>
-        </div>
-
-        <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">🔄</span>
-            </div>
-            <div className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-bold">
-              {dashboardStats.poolTasks}
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Pula zadań</h3>
-          <p className="text-slate-400 text-sm">Oczekujące na przypisanie</p>
-        </div>
-
-        <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">✅</span>
-            </div>
-            <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-bold">
-              {dashboardStats.completedToday}
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Wykonane dziś</h3>
-          <p className="text-slate-400 text-sm">Zakończone zadania</p>
-        </div>
-      </div>
-
       {/* Current Shift Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Current Shift */}
@@ -411,6 +356,61 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">👷</span>
+            </div>
+            <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">
+              {dashboardStats.activeTechnicians}
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-1">Technicy aktywni</h3>
+          <p className="text-slate-400 text-sm">Na dzisiejszej zmianie</p>
+        </div>
+
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">📋</span>
+            </div>
+            <div className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-bold">
+              {dashboardStats.currentTasks}
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-1">Zadania w toku</h3>
+          <p className="text-slate-400 text-sm">Przypisane i w realizacji</p>
+        </div>
+
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">🔄</span>
+            </div>
+            <div className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-bold">
+              {dashboardStats.poolTasks}
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-1">Pula zadań</h3>
+          <p className="text-slate-400 text-sm">Oczekujące na przypisanie</p>
+        </div>
+
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">✅</span>
+            </div>
+            <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-bold">
+              {dashboardStats.completedToday}
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-1">Wykonane dziś</h3>
+          <p className="text-slate-400 text-sm">Zakończone zadania</p>
         </div>
       </div>
 
