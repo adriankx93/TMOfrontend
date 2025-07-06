@@ -148,9 +148,9 @@ export default function Dashboard() {
                 <span className="text-white text-2xl">🏢</span>
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">CAFM Dashboard</h1>
+                <h1 className="text-4xl font-bold text-white mb-2">TechSPIE Dashboard</h1>
                 <p className="text-slate-300 text-lg">
-                  Computer Aided Facility Management - Miasteczko Orange
+                  Technical Facility Management System - Miasteczko Orange
                 </p>
               </div>
             </div>

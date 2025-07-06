@@ -12,11 +12,17 @@ export default function Sidebar() {
   const navItems = [
     { to: "/", label: "Dashboard", icon: "🏠", description: "Przegląd systemu" },
     { to: "/zadania", label: "Zadania", icon: "📋", description: "Zarządzanie zadaniami" },
+    { to: "/przeglady", label: "Przeglądy", icon: "🔍", description: "Przeglądy i inspekcje" },
+    { to: "/usterki", label: "Usterki", icon: "⚠️", description: "Zgłoszenia i awarie" },
+    { to: "/urzadzenia", label: "Urządzenia", icon: "⚙️", description: "Sprzęt i maszyny" },
     { to: "/budynki", label: "Budynki", icon: "🏢", description: "Infrastruktura" },
     { to: "/technicy", label: "Zespół", icon: "👥", description: "Technicy i specjaliści" },
+    { to: "/narzedzia", label: "Narzędzia", icon: "🔧", description: "Inwentaryzacja narzędzi" },
     { to: "/magazyn", label: "Magazyn", icon: "📦", description: "Inwentarz i zasoby" },
     { to: "/materialy", label: "Materiały", icon: "🛒", description: "Zamówienia i dostawy" },
+    { to: "/notatnik", label: "Notatnik", icon: "📝", description: "Notatki i komunikacja" },
     { to: "/raporty", label: "Analityka", icon: "📊", description: "Raporty i KPI" },
+    { to: "/analiza-trendow", label: "Trendy", icon: "📈", description: "Analiza awaryjności" },
     { to: "/ustawienia", label: "Ustawienia", icon: "⚙️", description: "Konfiguracja systemu" }
   ];
 
@@ -33,9 +39,9 @@ export default function Sidebar() {
           </div>
           <div>
             <div className="font-bold text-xl text-white">
-              CAFM System
+              TechSPIE
             </div>
-            <div className="text-xs text-slate-400 font-medium">Miasteczko Orange</div>
+            <div className="text-xs text-slate-400 font-medium">CMMS/CAFM System</div>
           </div>
         </div>
 
@@ -132,7 +138,7 @@ export default function Sidebar() {
         </div>
         
         <div className="text-slate-500 text-xs text-center mt-4">
-          © {new Date().getFullYear()} CAFM System v2.0
+          © {new Date().getFullYear()} TechSPIE v1.0
         </div>
       </div>
     </aside>

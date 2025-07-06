@@ -58,6 +58,12 @@ export default function App() {
           <Route path="/technicians" element={<TechniciansPage />} />
           <Route path="/technicy" element={<TechniciansPage />} />
           <Route path="/raporty" element={<ReportsPage />} />
+          <Route path="/przeglady" element={<InspectionsPage />} />
+          <Route path="/usterki" element={<DefectsPage />} />
+          <Route path="/urzadzenia" element={<EquipmentPage />} />
+          <Route path="/narzedzia" element={<ToolsPage />} />
+          <Route path="/notatnik" element={<NotebookPage />} />
+          <Route path="/analiza-trendow" element={<TrendAnalysisPage />} />
           <Route path="/ustawienia" element={<SettingsPage />} />
           <Route path="/profil" element={<ProfilePage />} />
           <Route path="/uzytkownicy" element={<UsersPage />} />
