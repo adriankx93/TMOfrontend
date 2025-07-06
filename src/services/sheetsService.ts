@@ -161,10 +161,8 @@ export const sheetsService = {
 
     return dates
       .map((cell, idx) => {
-        let dayNumber = parseInt(cell);
-        if (isNaN(dayNumber)) {
-          dayNumber = idx + 1;
-        }
+        // Używamy indeksu + 1 jako numer dnia, ignorując zawartość komórki z datami
+        const dayNumber = idx + 1;
 
         const date = new Date(year, monthIndex, dayNumber);
 
