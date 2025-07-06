@@ -5,8 +5,8 @@ const CONFIG: SheetConfig = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E23', // Imię, nazwisko, specjalizacja
-    dates: 'J4:AN4',        // Zawsze stały zakres: J = dzień 1, AN = dzień 31
+    technicians: 'C7:C23', // TYLKO JEDNA KOLUMNA z imieniem i nazwiskiem
+    dates: 'J4:AN4',
     shifts: 'J7:AN23',
   },
   monthNames: [
@@ -49,15 +49,6 @@ const _fetchFromSheets = async (url: string, errorMessagePrefix: string): Promis
 };
 
 export const sheetsService = {
-  testConnection: async (): Promise<{ success: boolean; message: string; sheets: string[] }> => {
-    const sheets = await sheetsService.getAvailableSheets();
-    return {
-      success: true,
-      message: 'Połączenie z Google Sheets działa poprawnie',
-      sheets
-    };
-  },
-
   getAvailableSheets: async (): Promise<string[]> => {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}?key=${CONFIG.apiKey}`;
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
@@ -156,10 +147,10 @@ export const sheetsService = {
         return {
           id: i,
           shiftRowIndex: i,
-          firstName: row[0].toString().trim(),
-          lastName: row[1]?.toString().trim() || '',
-          specialization: row[2]?.toString().trim() || 'Techniczny',
-          fullName: `${row[0]} ${row[1]}`.trim()
+          firstName: '',
+          lastName: '',
+          specialization: '',
+          fullName: row[0].toString().trim()
         };
       })
       .filter((tech): tech is Technician => tech !== null);
@@ -172,13 +163,6 @@ export const sheetsService = {
       .map((cell, idx) => {
         let dayNumber = parseInt(cell);
         if (isNaN(dayNumber)) {
-          const parsed = new Date(cell);
-          if (!isNaN(parsed.getTime())) {
-            dayNumber = parsed.getDate();
-          }
-        }
-        // Każdy indeks odpowiada kolejnemu dniu miesiąca (J=1)
-        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) {
           dayNumber = idx + 1;
         }
 
