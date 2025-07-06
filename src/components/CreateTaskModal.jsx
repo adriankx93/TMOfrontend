@@ -216,8 +216,8 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
               >
                 <option value="">Zostaw w puli zadań</option>
                 {technicians.map((tech) => (
-                  <option key={tech._id} value={tech._id}>
-                    {tech.firstName} {tech.lastName} - {tech.specialization}
+                  <option key={tech._id || tech.id} value={tech._id || tech.id}>
+                    {tech.fullName || `${tech.firstName} ${tech.lastName}`} - {tech.specialization}
                   </option>
                 ))}
               </select>
