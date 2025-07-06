@@ -5,7 +5,7 @@ export const authService = {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Test user credentials
-    if (email === "admin" && password === "admin1234") {
+    if (email === "admin" && password === "test1234") {
       const user = {
         id: "1",
         email: "admin@orange.pl",
@@ -56,7 +56,7 @@ export const authService = {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     // Mock password validation
-    if (currentPassword !== "admin1234") {
+    if (currentPassword !== "test1234") {
       throw new Error("Nieprawidłowe obecne hasło");
     }
     

@@ -26,92 +26,10 @@ export default function MaterialsPage() {
   const [selectedMaterial, setSelectedMaterial] = useState(null);
 
   useEffect(() => {
-    generateSampleData();
+    // Initialize with empty materials list
+    setMaterials([]);
   }, []);
 
-  const generateSampleData = () => {
-    const sampleMaterials = [
-      {
-        id: "1",
-        name: "Żarówki LED 15W",
-        category: "Materiały elektryczne",
-        quantity: 20,
-        unit: "szt",
-        urgency: 'high',
-        requestedBy: "Jan Kowalski",
-        requestDate: new Date().toISOString(),
-        reason: "Awaria oświetlenia w hali A - brak zapasów",
-        estimatedCost: 15.99,
-        supplier: "ElektroMax Sp. z o.o.",
-        status: 'requested',
-        notes: "Pilne - hala bez oświetlenia",
-        taskId: "TASK-001"
-      },
-      {
-        id: "2",
-        name: "Filtry HVAC G4",
-        category: "HVAC",
-        quantity: 8,
-        unit: "szt",
-        urgency: 'critical',
-        requestedBy: "Anna Nowak",
-        requestDate: new Date(Date.now() - 86400000).toISOString(),
-        reason: "Wymiana filtrów - przekroczony czas eksploatacji",
-        estimatedCost: 89.99,
-        supplier: "AirTech Solutions",
-        status: 'approved',
-        notes: "Zamawiać co 3 miesiące",
-        taskId: "TASK-002"
-      },
-      {
-        id: "3",
-        name: "Kable ethernet Cat6",
-        category: "Elektronika",
-        quantity: 50,
-        unit: "m",
-        urgency: 'medium',
-        requestedBy: "Piotr Wiśniewski",
-        requestDate: new Date(Date.now() - 172800000).toISOString(),
-        reason: "Rozbudowa sieci w biurze administracyjnym",
-        estimatedCost: 2.50,
-        supplier: "TechnoNet",
-        status: 'ordered',
-        notes: "Dostawa planowana na przyszły tydzień"
-      },
-      {
-        id: "4",
-        name: "Śruby M8x25",
-        category: "Narzędzia",
-        quantity: 100,
-        unit: "szt",
-        urgency: 'low',
-        requestedBy: "Marek Zieliński",
-        requestDate: new Date(Date.now() - 259200000).toISOString(),
-        reason: "Montaż nowych uchwytów na dachu",
-        estimatedCost: 0.35,
-        supplier: "MetalParts",
-        status: 'delivered',
-        notes: "Dostarczone - można przenieść do magazynu"
-      },
-      {
-        id: "5",
-        name: "Czujniki ruchu PIR",
-        category: "Bezpieczeństwo",
-        quantity: 6,
-        unit: "szt",
-        urgency: 'high',
-        requestedBy: "Katarzyna Lewandowska",
-        requestDate: new Date(Date.now() - 345600000).toISOString(),
-        reason: "Awaria systemu alarmowego - wymiana czujników",
-        estimatedCost: 45.00,
-        supplier: "SecureTech",
-        status: 'rejected',
-        notes: "Odrzucone - za drogi dostawca, szukać alternatywy"
-      }
-    ];
-
-    setMaterials(sampleMaterials);
-  };
 
   const getUrgencyColor = (urgency) => {
     switch(urgency) {

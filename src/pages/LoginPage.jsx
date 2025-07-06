@@ -98,7 +98,7 @@ export default function LoginPage() {
           <div className="text-sm text-blue-800 font-medium mb-2">Dane testowe:</div>
           <div className="text-sm text-blue-700">
             <div>Login: <strong>admin</strong></div>
-            <div>Hasło: <strong>admin1234</strong></div>
+            <div>Hasło: <strong>test1234</strong></div>
           </div>
         </div>
 

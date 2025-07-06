@@ -39,93 +39,10 @@ export default function InventoryPage() {
   ];
 
   useEffect(() => {
-    generateSampleData();
+    // Initialize with empty inventory
+    setInventory([]);
   }, []);
 
-  const generateSampleData = () => {
-    const sampleItems: InventoryItem[] = [
-      {
-        id: "1",
-        name: "Żarówki LED 12W",
-        category: "Materiały elektryczne",
-        quantity: 45,
-        minQuantity: 20,
-        unit: "szt",
-        location: "Magazyn A - Półka 3",
-        lastUpdated: new Date().toISOString(),
-        supplier: "ElektroMax Sp. z o.o.",
-        cost: 15.99,
-        status: 'available'
-      },
-      {
-        id: "2",
-        name: "Kable ethernet Cat6",
-        category: "Elektronika",
-        quantity: 8,
-        minQuantity: 15,
-        unit: "m",
-        location: "Magazyn B - Sektor IT",
-        lastUpdated: new Date().toISOString(),
-        supplier: "TechnoNet",
-        cost: 2.50,
-        status: 'low'
-      },
-      {
-        id: "3",
-        name: "Filtry HVAC",
-        category: "HVAC",
-        quantity: 2,
-        minQuantity: 10,
-        unit: "szt",
-        location: "Magazyn C - Klimatyzacja",
-        lastUpdated: new Date().toISOString(),
-        supplier: "AirTech Solutions",
-        cost: 89.99,
-        status: 'critical'
-      },
-      {
-        id: "4",
-        name: "Śruby M6x20",
-        category: "Narzędzia",
-        quantity: 0,
-        minQuantity: 100,
-        unit: "szt",
-        location: "Magazyn A - Półka 1",
-        lastUpdated: new Date().toISOString(),
-        supplier: "MetalParts",
-        cost: 0.25,
-        status: 'out_of_stock'
-      },
-      {
-        id: "5",
-        name: "Kamery IP 4K",
-        category: "Bezpieczeństwo",
-        quantity: 12,
-        minQuantity: 5,
-        unit: "szt",
-        location: "Magazyn B - Bezpieczeństwo",
-        lastUpdated: new Date().toISOString(),
-        supplier: "SecureTech",
-        cost: 299.99,
-        status: 'available'
-      },
-      {
-        id: "6",
-        name: "Środek czyszczący uniwersalny",
-        category: "Sprzątanie",
-        quantity: 25,
-        minQuantity: 10,
-        unit: "l",
-        location: "Magazyn C - Chemia",
-        lastUpdated: new Date().toISOString(),
-        supplier: "CleanPro",
-        cost: 12.50,
-        status: 'available'
-      }
-    ];
-
-    setInventory(sampleItems);
-  };
 
   const getStatusColor = (status: string) => {
     switch(status) {
