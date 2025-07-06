@@ -129,21 +129,21 @@ export default function TaskList({ type }) {
 
   return (
     <>
-      <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-8">
+      <div className="glass-card p-8">
         <div className="space-y-4">
           {filteredTasks.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 text-slate-400">
               <div className="text-6xl mb-4">📋</div>
-              <h3 className="text-xl font-semibold text-slate-600 mb-2">Brak zadań</h3>
-              <p className="text-slate-500">W tej kategorii nie ma jeszcze żadnych zadań.</p>
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">Brak zadań</h3>
+              <p className="text-slate-400">W tej kategorii nie ma jeszcze żadnych zadań.</p>
             </div>
           ) : (
             filteredTasks.map((task) => (
-              <div key={task._id} className="p-6 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all duration-200 border border-slate-200/50">
+              <div key={task._id} className="p-6 glass-card-light rounded-2xl hover:bg-slate-600/30 transition-all duration-200">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-slate-800 mb-2">{task.title}</h4>
-                    <div className="flex items-center gap-4 text-sm text-slate-600 mb-3">
+                    <h4 className="font-semibold text-white mb-2">{task.title}</h4>
+                    <div className="flex items-center gap-4 text-sm text-slate-300 mb-3">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
                         <span>{getTechnicianName(task.assignedTo)}</span>
@@ -168,18 +168,18 @@ export default function TaskList({ type }) {
                     </div>
                     
                     {task.description && (
-                      <p className="text-sm text-slate-600 mb-3">{task.description}</p>
+                      <p className="text-sm text-slate-400 mb-3">{task.description}</p>
                     )}
 
                     {task.progress !== undefined && (
                       <div className="mb-3">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-slate-600">Postęp</span>
-                          <span className="font-semibold text-slate-800">{task.progress || 0}%</span>
+                        <div className="flex justify-between text-sm text-slate-300 mb-1">
+                          <span>Postęp</span>
+                          <span className="font-semibold text-white">{task.progress || 0}%</span>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div className="w-full bg-slate-700 rounded-full h-2">
                           <div 
-                            className="bg-gradient-to-r from-orange-500 to-red-600 h-2 rounded-full transition-all duration-300"
+                            className="gradient-primary h-2 rounded-full transition-all duration-300"
                             style={{ width: `${task.progress || 0}%` }}
                           ></div>
                         </div>
@@ -197,10 +197,10 @@ export default function TaskList({ type }) {
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-4 border-t border-slate-200">
+                <div className="flex gap-2 pt-4 border-t border-slate-600">
                   <button 
                     onClick={() => openDetailsModal(task)}
-                    className="px-4 py-2 bg-blue-100 text-blue-800 rounded-xl hover:bg-blue-200 transition-all duration-200 font-medium"
+                    className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
                   >
                     Szczegóły
                   </button>
@@ -208,7 +208,7 @@ export default function TaskList({ type }) {
                   {task.status === 'pool' && (
                     <button 
                       onClick={() => openAssignModal(task)}
-                      className="px-4 py-2 bg-green-100 text-green-800 rounded-xl hover:bg-green-200 transition-all duration-200 font-medium"
+                      className="px-4 py-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all duration-200 font-medium"
                       disabled={loading}
                     >
                       Przypisz
@@ -219,7 +219,7 @@ export default function TaskList({ type }) {
                     <>
                       <button 
                         onClick={() => handleStatusChange(task._id, task.status === 'assigned' ? 'in_progress' : 'assigned')}
-                        className="px-4 py-2 bg-amber-100 text-amber-800 rounded-xl hover:bg-amber-200 transition-all duration-200 font-medium"
+                        className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
                         {task.status === 'assigned' ? 'Rozpocznij' : 'Wstrzymaj'}
@@ -227,7 +227,7 @@ export default function TaskList({ type }) {
                       
                       <button 
                         onClick={() => handleCompleteTask(task._id)}
-                        className="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-xl hover:bg-emerald-200 transition-all duration-200 font-medium"
+                        className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
                         Zakończ
@@ -235,7 +235,7 @@ export default function TaskList({ type }) {
                       
                       <button 
                         onClick={() => handleMoveToPool(task._id)}
-                        className="px-4 py-2 bg-purple-100 text-purple-800 rounded-xl hover:bg-purple-200 transition-all duration-200 font-medium"
+                        className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
                         Do puli
@@ -246,7 +246,7 @@ export default function TaskList({ type }) {
                   {task.status === 'overdue' && (
                     <button 
                       onClick={() => handleMoveToPool(task._id)}
-                      className="px-4 py-2 bg-blue-100 text-blue-800 rounded-xl hover:bg-blue-200 transition-all duration-200 font-medium"
+                      className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
                       disabled={loading}
                     >
                       Przenieś do puli
@@ -255,7 +255,7 @@ export default function TaskList({ type }) {
                   
                   <button 
                     onClick={() => handleDeleteTask(task._id)}
-                    className="px-4 py-2 bg-red-100 text-red-800 rounded-xl hover:bg-red-200 transition-all duration-200 font-medium"
+                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all duration-200 font-medium"
                     disabled={loading}
                   >
                     Usuń

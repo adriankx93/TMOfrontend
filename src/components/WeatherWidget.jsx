@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { weatherService } from "../services/weatherService";
 
 export default function WeatherWidget() {
   const [weather, setWeather] = useState(null);
@@ -15,8 +14,23 @@ export default function WeatherWidget() {
   const fetchWeather = async () => {
     try {
       setLoading(true);
-      const data = await weatherService.getCurrentWeather();
-      setWeather(data);
+      
+      // Mock weather data - w rzeczywistej aplikacji można użyć API pogodowego
+      const mockWeather = {
+        temperature: Math.round(15 + Math.random() * 10), // 15-25°C
+        humidity: Math.round(45 + Math.random() * 30), // 45-75%
+        pressure: Math.round(1010 + Math.random() * 20), // 1010-1030 hPa
+        windSpeed: Math.round(5 + Math.random() * 10), // 5-15 km/h
+        description: getRandomWeatherDescription(),
+        icon: getRandomWeatherIcon(),
+        city: "Warszawa",
+        country: "PL",
+        visibility: Math.round(8 + Math.random() * 7), // 8-15 km
+        uvIndex: Math.round(Math.random() * 10), // 0-10
+        feelsLike: Math.round(15 + Math.random() * 10 + (Math.random() - 0.5) * 4)
+      };
+      
+      setWeather(mockWeather);
     } catch (error) {
       console.error('Error fetching weather:', error);
     } finally {
@@ -24,54 +38,118 @@ export default function WeatherWidget() {
     }
   };
 
+  const getRandomWeatherDescription = () => {
+    const descriptions = [
+      "Słonecznie",
+      "Częściowo pochmurno", 
+      "Pochmurno",
+      "Lekki deszcz",
+      "Mgła",
+      "Bezchmurnie",
+      "Przelotne opady",
+      "Zachmurzenie zmienne"
+    ];
+    return descriptions[Math.floor(Math.random() * descriptions.length)];
+  };
+
+  const getRandomWeatherIcon = () => {
+    const icons = ["☀️", "⛅", "☁️", "🌧️", "🌫️", "🌤️", "🌦️", "⛈️"];
+    return icons[Math.floor(Math.random() * icons.length)];
+  };
+
   if (loading) {
     return (
-      <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-4 animate-pulse">
-        <div className="h-4 bg-white/30 rounded mb-2"></div>
-        <div className="h-8 bg-white/30 rounded"></div>
+      <div className="glass-card-light p-6 min-w-[300px] animate-pulse">
+        <div className="h-4 bg-slate-600 rounded mb-2"></div>
+        <div className="h-8 bg-slate-600 rounded mb-4"></div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-4 bg-slate-600 rounded"></div>
+          <div className="h-4 bg-slate-600 rounded"></div>
+        </div>
       </div>
     );
   }
 
   if (!weather) {
     return (
-      <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-4">
-        <div className="text-white/80 text-sm">Brak danych pogodowych</div>
+      <div className="glass-card-light p-6 min-w-[300px]">
+        <div className="text-slate-400 text-sm text-center">
+          <span className="text-2xl mb-2 block">🌡️</span>
+          Brak danych pogodowych
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-4 text-white">
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-2xl">{weather.icon}</span>
-        <div>
-          <div className="font-semibold">{weather.city}</div>
-          <div className="text-sm text-white/80">{weather.description}</div>
+    <div className="glass-card-light p-6 min-w-[300px]">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <span className="text-4xl">{weather.icon}</span>
+          <div>
+            <div className="font-bold text-white text-lg">{weather.city}</div>
+            <div className="text-sm text-slate-400">{weather.description}</div>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-3xl font-bold text-white">{weather.temperature}°C</div>
+          <div className="text-sm text-slate-400">Odczuwalna {weather.feelsLike}°C</div>
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <div className="text-3xl font-bold">{weather.temperature}°C</div>
-          <div className="text-white/80">Temperatura</div>
+      {/* Main metrics */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="text-center p-3 glass-card-light rounded-xl">
+          <div className="text-slate-400 text-xs mb-1">Wilgotność</div>
+          <div className="font-bold text-white">{weather.humidity}%</div>
         </div>
-        <div>
-          <div className="text-xl font-bold">{weather.humidity}%</div>
-          <div className="text-white/80">Wilgotność</div>
+        <div className="text-center p-3 glass-card-light rounded-xl">
+          <div className="text-slate-400 text-xs mb-1">Wiatr</div>
+          <div className="font-bold text-white">{weather.windSpeed} km/h</div>
+        </div>
+      </div>
+
+      {/* Additional metrics */}
+      <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
+        <div className="text-center">
+          <div className="text-slate-400">Ciśnienie</div>
+          <div className="font-semibold text-white">{weather.pressure} hPa</div>
+        </div>
+        <div className="text-center">
+          <div className="text-slate-400">Widoczność</div>
+          <div className="font-semibold text-white">{weather.visibility} km</div>
+        </div>
+        <div className="text-center">
+          <div className="text-slate-400">UV Index</div>
+          <div className="font-semibold text-white">{weather.uvIndex}</div>
         </div>
       </div>
       
-      <div className="mt-3 pt-3 border-t border-white/20 grid grid-cols-2 gap-4 text-xs">
-        <div>
-          <span className="text-white/80">Ciśnienie: </span>
-          <span className="font-semibold">{weather.pressure} hPa</span>
-        </div>
-        <div>
-          <span className="text-white/80">Wiatr: </span>
-          <span className="font-semibold">{weather.windSpeed} km/h</span>
+      {/* Footer */}
+      <div className="pt-4 border-t border-slate-600">
+        <div className="flex items-center justify-between text-xs text-slate-400">
+          <span>Ostatnia aktualizacja</span>
+          <span>{new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       </div>
     </div>
   );
+}
+
+function getRandomWeatherDescription() {
+  const descriptions = [
+    "Słonecznie",
+    "Częściowo pochmurno",
+    "Pochmurno", 
+    "Lekki deszcz",
+    "Mgła",
+    "Bezchmurnie"
+  ];
+  return descriptions[Math.floor(Math.random() * descriptions.length)];
+}
+
+function getRandomWeatherIcon() {
+  const icons = ["☀️", "⛅", "☁️", "🌧️", "🌫️", "🌤️"];
+  return icons[Math.floor(Math.random() * icons.length)];
 }

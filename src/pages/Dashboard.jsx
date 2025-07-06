@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { useTechnicians } from "../hooks/useTechnicians";
 import { sheetsService } from "../services/sheetsService";
-import WeatherWidget from "../components/WeatherWidget";
 
 export default function Dashboard() {
   const { tasks } = useTasks();
   const { technicians } = useTechnicians();
   const [todayShift, setTodayShift] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [weather, setWeather] = useState(null);
   const [dashboardStats, setDashboardStats] = useState({
     activeTechnicians: 0,
     currentTasks: 0,
@@ -18,11 +18,29 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchTodayShift();
+    fetchWeatherData();
     calculateStats();
     
-    const interval = setInterval(fetchTodayShift, 10 * 60 * 1000);
+    const interval = setInterval(() => {
+      fetchTodayShift();
+      fetchWeatherData();
+    }, 10 * 60 * 1000);
     return () => clearInterval(interval);
   }, [tasks, technicians]);
+
+  const fetchWeatherData = async () => {
+    // Mock weather data - w rzeczywistej aplikacji można użyć API pogodowego
+    const mockWeather = {
+      temperature: Math.round(15 + Math.random() * 10),
+      humidity: Math.round(45 + Math.random() * 30),
+      pressure: Math.round(1010 + Math.random() * 20),
+      windSpeed: Math.round(5 + Math.random() * 10),
+      description: "Częściowo pochmurno",
+      icon: "⛅",
+      city: "Warszawa"
+    };
+    setWeather(mockWeather);
+  };
 
   const fetchTodayShift = async () => {
     try {
@@ -109,7 +127,6 @@ export default function Dashboard() {
   const currentShiftTechnicians = getCurrentShiftTechnicians();
   const nextShiftTechnicians = getNextShiftTechnicians();
 
-  // Get tasks for current shift
   const getCurrentShiftTasks = () => {
     const currentShift = isDay ? "Dzienna" : "Nocna";
     return tasks.filter(task => 
@@ -121,49 +138,137 @@ export default function Dashboard() {
   const currentShiftTasks = getCurrentShiftTasks();
 
   return (
-    <div className="space-y-8">
-      {/* Header with Weather */}
-      <div className="bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 rounded-3xl shadow-2xl p-8 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative z-10">
-          <div className="flex justify-between items-start mb-6">
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-2">Dashboard TMO</h1>
-              <p className="text-orange-100 text-lg">
-                System zarządzania Miasteczka Orange
-              </p>
-              <div className="flex items-center gap-4 mt-3 text-orange-100">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                  <span className="text-sm">System aktywny</span>
-                </div>
-                <div className="text-sm">
-                  {new Date().toLocaleDateString('pl-PL', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </div>
-                <div className="text-lg font-bold">
-                  {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
-                </div>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header with System Status */}
+      <div className="glass-card p-8">
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue">
+                <span className="text-white text-2xl">🏢</span>
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">CAFM Dashboard</h1>
+                <p className="text-slate-300 text-lg">
+                  Computer Aided Facility Management - Miasteczko Orange
+                </p>
               </div>
             </div>
             
-            {/* Weather Widget */}
-            <div className="w-80">
-              <WeatherWidget />
+            <div className="flex items-center gap-6 text-slate-300">
+              <div className="flex items-center gap-2">
+                <div className="status-indicator bg-green-400"></div>
+                <span className="text-sm font-medium">System Online</span>
+              </div>
+              <div className="text-sm font-medium">
+                {new Date().toLocaleDateString('pl-PL', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </div>
+              <div className="text-lg font-bold text-white">
+                {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
+              </div>
             </div>
           </div>
+          
+          {/* Weather Widget */}
+          {weather && (
+            <div className="glass-card-light p-6 min-w-[280px]">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{weather.icon}</span>
+                  <div>
+                    <div className="font-semibold text-white">{weather.city}</div>
+                    <div className="text-sm text-slate-400">{weather.description}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-white">{weather.temperature}°C</div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="text-center">
+                  <div className="text-slate-400">Wilgotność</div>
+                  <div className="font-semibold text-white">{weather.humidity}%</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-slate-400">Wiatr</div>
+                  <div className="font-semibold text-white">{weather.windSpeed} km/h</div>
+                </div>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-slate-600 text-xs text-slate-400 text-center">
+                Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL')}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Current Shift - Enhanced */}
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">👷</span>
+            </div>
+            <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">
+              {dashboardStats.activeTechnicians}
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-1">Technicy aktywni</h3>
+          <p className="text-slate-400 text-sm">Na dzisiejszej zmianie</p>
+        </div>
+
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">📋</span>
+            </div>
+            <div className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-bold">
+              {dashboardStats.currentTasks}
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-1">Zadania w toku</h3>
+          <p className="text-slate-400 text-sm">Przypisane i w realizacji</p>
+        </div>
+
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">🔄</span>
+            </div>
+            <div className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-bold">
+              {dashboardStats.poolTasks}
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-1">Pula zadań</h3>
+          <p className="text-slate-400 text-sm">Oczekujące na przypisanie</p>
+        </div>
+
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">✅</span>
+            </div>
+            <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-bold">
+              {dashboardStats.completedToday}
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-1">Wykonane dziś</h3>
+          <p className="text-slate-400 text-sm">Zakończone zadania</p>
+        </div>
+      </div>
+
+      {/* Current Shift Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Current Shift */}
-        <div className="lg:col-span-2 bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl overflow-hidden">
-          <div className={`bg-gradient-to-r ${isDay ? 'from-yellow-400 to-orange-500' : 'from-blue-500 to-indigo-600'} px-8 py-6`}>
+        <div className="lg:col-span-2 glass-card overflow-hidden">
+          <div className={`${isDay ? 'gradient-warning' : 'gradient-primary'} px-8 py-6`}>
             <div className="flex items-center justify-between text-white">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
@@ -186,28 +291,27 @@ export default function Dashboard() {
           <div className="p-8">
             {loading ? (
               <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-slate-200 rounded w-1/4"></div>
+                <div className="h-4 bg-slate-700 rounded w-1/4"></div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="h-20 bg-slate-200 rounded"></div>
-                  <div className="h-20 bg-slate-200 rounded"></div>
+                  <div className="h-20 bg-slate-700 rounded"></div>
+                  <div className="h-20 bg-slate-700 rounded"></div>
                 </div>
               </div>
             ) : (
               <div className="space-y-6">
-                {/* Current Shift Technicians */}
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4">Technicy na aktualnej zmianie</h3>
+                  <h3 className="text-lg font-bold text-white mb-4">Technicy na aktualnej zmianie</h3>
                   {currentShiftTechnicians.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {currentShiftTechnicians.map((techName, index) => (
-                        <div key={index} className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all duration-200">
-                          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">
+                        <div key={index} className="flex items-center gap-3 p-4 glass-card-light rounded-xl hover:bg-slate-600/30 transition-all duration-200">
+                          <div className="w-10 h-10 gradient-accent rounded-full flex items-center justify-center text-white font-bold">
                             {techName.split(' ').map(n => n[0]).join('')}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-800">{techName}</div>
-                            <div className="text-sm text-emerald-600 flex items-center gap-1">
-                              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                            <div className="font-semibold text-white">{techName}</div>
+                            <div className="text-sm text-emerald-400 flex items-center gap-1">
+                              <div className="status-indicator bg-emerald-400"></div>
                               Aktywny
                             </div>
                           </div>
@@ -215,44 +319,43 @@ export default function Dashboard() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-slate-500">
+                    <div className="text-center py-8 text-slate-400">
                       <span className="text-4xl mb-4 block">👷</span>
                       Brak techników na aktualnej zmianie
                     </div>
                   )}
                 </div>
 
-                {/* Current Shift Tasks */}
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-4">Zadania na aktualnej zmianie</h3>
+                  <h3 className="text-lg font-bold text-white mb-4">Zadania na aktualnej zmianie</h3>
                   {currentShiftTasks.length > 0 ? (
                     <div className="space-y-3">
                       {currentShiftTasks.slice(0, 3).map((task) => (
-                        <div key={task._id} className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-200">
-                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                        <div key={task._id} className="flex items-center gap-3 p-4 glass-card-light rounded-xl">
+                          <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400">
                             📋
                           </div>
                           <div className="flex-1">
-                            <div className="font-semibold text-slate-800">{task.title}</div>
-                            <div className="text-sm text-slate-600">{task.location} • {task.category}</div>
+                            <div className="font-semibold text-white">{task.title}</div>
+                            <div className="text-sm text-slate-400">{task.location} • {task.category}</div>
                           </div>
                           <div className={`px-3 py-1 rounded-xl text-sm font-semibold ${
                             task.status === 'in_progress' 
-                              ? 'bg-amber-100 text-amber-800' 
-                              : 'bg-blue-100 text-blue-800'
+                              ? 'bg-amber-500/20 text-amber-400' 
+                              : 'bg-blue-500/20 text-blue-400'
                           }`}>
                             {task.status === 'in_progress' ? 'W trakcie' : 'Przypisane'}
                           </div>
                         </div>
                       ))}
                       {currentShiftTasks.length > 3 && (
-                        <div className="text-center text-sm text-slate-500">
+                        <div className="text-center text-sm text-slate-400">
                           ... i {currentShiftTasks.length - 3} więcej zadań
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="text-center py-6 text-slate-500">
+                    <div className="text-center py-6 text-slate-400">
                       <span className="text-3xl mb-2 block">📋</span>
                       Brak zadań na aktualnej zmianie
                     </div>
@@ -264,8 +367,8 @@ export default function Dashboard() {
         </div>
 
         {/* Next Shift Preview */}
-        <div className="bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl overflow-hidden">
-          <div className={`bg-gradient-to-r ${!isDay ? 'from-yellow-400 to-orange-500' : 'from-blue-500 to-indigo-600'} px-6 py-4`}>
+        <div className="glass-card overflow-hidden">
+          <div className={`${!isDay ? 'gradient-warning' : 'gradient-primary'} px-6 py-4`}>
             <div className="text-white text-center">
               <div className="text-2xl mb-2">{!isDay ? '☀️' : '🌙'}</div>
               <h3 className="text-lg font-bold">{getNextShiftName()}</h3>
@@ -274,33 +377,32 @@ export default function Dashboard() {
           </div>
 
           <div className="p-6">
-            <h4 className="font-bold text-slate-800 mb-4">Następna zmiana</h4>
+            <h4 className="font-bold text-white mb-4">Następna zmiana</h4>
             {nextShiftTechnicians.length > 0 ? (
               <div className="space-y-3">
                 {nextShiftTechnicians.map((techName, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                    <div className="w-8 h-8 bg-gradient-to-br from-slate-400 to-slate-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                  <div key={index} className="flex items-center gap-3 p-3 glass-card-light rounded-xl">
+                    <div className="w-8 h-8 bg-slate-500/30 rounded-full flex items-center justify-center text-slate-400 text-sm font-bold">
                       {techName.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                      <div className="font-medium text-slate-800 text-sm">{techName}</div>
-                      <div className="text-xs text-slate-500">Oczekuje</div>
+                      <div className="font-medium text-white text-sm">{techName}</div>
+                      <div className="text-xs text-slate-400">Oczekuje</div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 text-slate-500">
+              <div className="text-center py-6 text-slate-400">
                 <span className="text-2xl mb-2 block">⏰</span>
                 <div className="text-sm">Brak techników na następnej zmianie</div>
               </div>
             )}
 
-            {/* Shift transition info */}
-            <div className="mt-6 pt-4 border-t border-slate-200">
-              <div className="text-sm text-slate-600 text-center">
-                <div className="font-semibold">Zmiana za:</div>
-                <div className="text-lg font-bold text-orange-600">
+            <div className="mt-6 pt-4 border-t border-slate-600">
+              <div className="text-sm text-slate-400 text-center">
+                <div className="font-semibold text-white">Zmiana za:</div>
+                <div className="text-lg font-bold text-orange-400">
                   {isDay 
                     ? `${19 - currentHour}h ${60 - new Date().getMinutes()}min`
                     : `${7 + (24 - currentHour)}h ${60 - new Date().getMinutes()}min`
@@ -312,100 +414,88 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-8 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl">👷</span>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-600">{dashboardStats.activeTechnicians}</div>
-              <div className="text-slate-600 font-medium">Technicy aktywni</div>
-            </div>
-          </div>
-          <div className="text-sm text-slate-500">Na dzisiejszej zmianie</div>
-        </div>
-
-        <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-8 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl">📋</span>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-blue-600">{dashboardStats.currentTasks}</div>
-              <div className="text-slate-600 font-medium">Zadania w toku</div>
-            </div>
-          </div>
-          <div className="text-sm text-slate-500">Przypisane i w realizacji</div>
-        </div>
-
-        <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-8 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl">🔄</span>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-amber-600">{dashboardStats.poolTasks}</div>
-              <div className="text-slate-600 font-medium">Pula zadań</div>
-            </div>
-          </div>
-          <div className="text-sm text-slate-500">Oczekujące na przypisanie</div>
-        </div>
-
-        <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-8 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl">✅</span>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-emerald-600">{dashboardStats.completedToday}</div>
-              <div className="text-slate-600 font-medium">Wykonane dziś</div>
-            </div>
-          </div>
-          <div className="text-sm text-slate-500">Zakończone zadania</div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-8">
-        <h3 className="text-xl font-bold text-slate-800 mb-6">Szybkie akcje</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <button 
-            onClick={() => window.location.href = '/zadania'}
-            className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-2xl border border-blue-200 transition-all duration-200 text-left group"
-          >
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">📋</div>
-            <div className="font-semibold text-blue-800">Nowe zadanie</div>
-            <div className="text-sm text-blue-600">Utwórz zadanie dla technika</div>
-          </button>
+      {/* System Health & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* System Health */}
+        <div className="glass-card p-8">
+          <h3 className="text-xl font-bold text-white mb-6">Status systemu</h3>
           
-          <button 
-            onClick={() => window.location.href = '/technicy'}
-            className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 rounded-2xl border border-emerald-200 transition-all duration-200 text-left group"
-          >
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">👷</div>
-            <div className="font-semibold text-emerald-800">Zespół</div>
-            <div className="text-sm text-emerald-600">Zarządzaj technikami</div>
-          </button>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 glass-card-light rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="status-indicator bg-green-400"></div>
+                <span className="font-semibold text-white">Baza danych</span>
+              </div>
+              <span className="text-green-400 text-sm font-medium">Operacyjna</span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 glass-card-light rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="status-indicator bg-green-400"></div>
+                <span className="font-semibold text-white">Google Sheets API</span>
+              </div>
+              <span className="text-green-400 text-sm font-medium">Synchronizacja aktywna</span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 glass-card-light rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="status-indicator bg-amber-400"></div>
+                <span className="font-semibold text-white">Powiadomienia</span>
+              </div>
+              <span className="text-amber-400 text-sm font-medium">Częściowo aktywne</span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 glass-card-light rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="status-indicator bg-green-400"></div>
+                <span className="font-semibold text-white">Monitoring</span>
+              </div>
+              <span className="text-green-400 text-sm font-medium">Online</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="glass-card p-8">
+          <h3 className="text-xl font-bold text-white mb-6">Szybkie akcje</h3>
           
-          <button 
-            onClick={() => window.location.href = '/budynki'}
-            className="p-6 bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 rounded-2xl border border-purple-200 transition-all duration-200 text-left group"
-          >
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">🏢</div>
-            <div className="font-semibold text-purple-800">Budynki</div>
-            <div className="text-sm text-purple-600">Struktura kompleksu</div>
-          </button>
-          
-          <button 
-            onClick={() => window.location.href = '/raporty'}
-            className="p-6 bg-gradient-to-br from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 rounded-2xl border border-orange-200 transition-all duration-200 text-left group"
-          >
-            <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">📊</div>
-            <div className="font-semibold text-orange-800">Raporty</div>
-            <div className="text-sm text-orange-600">Analiza wydajności</div>
-          </button>
+          <div className="grid grid-cols-2 gap-4">
+            <button 
+              onClick={() => window.location.href = '/zadania'}
+              className="p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
+            >
+              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">📋</div>
+              <div className="font-semibold text-blue-300">Nowe zadanie</div>
+              <div className="text-sm text-slate-400">Utwórz zadanie</div>
+            </button>
+            
+            <button 
+              onClick={() => window.location.href = '/technicy'}
+              className="p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
+            >
+              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">👷</div>
+              <div className="font-semibold text-emerald-300">Zespół</div>
+              <div className="text-sm text-slate-400">Zarządzaj technikami</div>
+            </button>
+            
+            <button 
+              onClick={() => window.location.href = '/budynki'}
+              className="p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
+            >
+              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">🏢</div>
+              <div className="font-semibold text-purple-300">Budynki</div>
+              <div className="text-sm text-slate-400">Infrastruktura</div>
+            </button>
+            
+            <button 
+              onClick={() => window.location.href = '/raporty'}
+              className="p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
+            >
+              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">📊</div>
+              <div className="font-semibold text-orange-300">Raporty</div>
+              <div className="text-sm text-slate-400">Analiza wydajności</div>
+            </button>
+          </div>
         </div>
       </div>
     </div>

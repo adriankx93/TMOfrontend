@@ -81,7 +81,7 @@ export default function BuildingOverview() {
         {complex.buildings.map((building) => (
           <div 
             key={building.id}
-            className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+            className="glass-card p-6 hover:bg-slate-700/50 hover:scale-[1.02] transition-all duration-300 cursor-pointer"
             onClick={() => setSelectedBuilding(building)}
           >
             <div className="flex items-center gap-4 mb-4">
@@ -89,38 +89,38 @@ export default function BuildingOverview() {
                 {getBuildingIcon(building)}
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-slate-800">{building.name}</h3>
-                <div className="text-sm text-slate-600">{building.description}</div>
+                <h3 className="font-bold text-white">{building.name}</h3>
+                <div className="text-sm text-slate-400">{building.description}</div>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div className="text-slate-500">Powierzchnia</div>
-                  <div className="font-semibold">{building.totalArea.toLocaleString()} m²</div>
+                  <div className="text-slate-400">Powierzchnia</div>
+                  <div className="font-semibold text-white">{building.totalArea.toLocaleString()} m²</div>
                 </div>
                 <div>
-                  <div className="text-slate-500">Piętra</div>
-                  <div className="font-semibold">{building.floors.length}</div>
+                  <div className="text-slate-400">Piętra</div>
+                  <div className="font-semibold text-white">{building.floors.length}</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div className="text-slate-500">Pomieszczenia</div>
-                  <div className="font-semibold">
+                  <div className="text-slate-400">Pomieszczenia</div>
+                  <div className="font-semibold text-white">
                     {building.floors.reduce((sum, floor) => sum + floor.rooms.length, 0)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-slate-500">Pom. techniczne</div>
-                  <div className="font-semibold">{building.technicalRooms.length}</div>
+                  <div className="text-slate-400">Pom. techniczne</div>
+                  <div className="font-semibold text-white">{building.technicalRooms.length}</div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-200">
-                <div className="text-xs text-slate-500 text-center">
+              <div className="pt-3 border-t border-slate-600">
+                <div className="text-xs text-slate-400 text-center">
                   Kliknij aby zobaczyć szczegóły
                 </div>
               </div>
