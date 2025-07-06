@@ -1,12 +1,11 @@
 import { SheetData, Technician, Shift, SheetConfig } from '../types/sheets';
 
-// Konfiguracja
 const CONFIG: SheetConfig = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E23', // Imię, nazwisko, specjalizacja
-    dates: 'J32:AN32',
+    technicians: 'C7:E23',
+    dates: 'J4:AN4',
     shifts: 'J7:AN23',
   },
   monthNames: [
@@ -30,7 +29,6 @@ interface GoogleSheetsResponse {
 
 const _fetchFromSheets = async (url: string, errorMessagePrefix: string): Promise<GoogleSheetsResponse> => {
   const response = await fetch(url);
-
   if (!response.ok) {
     const errorText = await response.text();
     let errorMessage = `${errorMessagePrefix}: ${response.status} ${response.statusText}`;
@@ -44,7 +42,6 @@ const _fetchFromSheets = async (url: string, errorMessagePrefix: string): Promis
     }
     throw new Error(errorMessage);
   }
-
   return await response.json();
 };
 
@@ -170,20 +167,19 @@ export const sheetsService = {
 
     return dates
       .map((cell, idx) => {
-        let dayNumber = parseInt(cell);
-        if (isNaN(dayNumber)) {
-          const parsed = new Date(cell);
-          if (!isNaN(parsed.getTime())) {
-            dayNumber = parsed.getDate();
-          }
-        }
-        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
+        let date: Date | null = null;
 
-        const date = new Date(year, monthIndex, dayNumber);
+        if (typeof cell === "string" && /^\d{4}-\d{2}-\d{2}$/.test(cell)) {
+          date = new Date(cell);
+        } else {
+          const dayNumber = parseInt(cell);
+          if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
+          date = new Date(year, monthIndex, dayNumber);
+        }
 
         const shift: Shift = {
-          date: date.toISOString().split('T')[0],
-          dayNumber,
+          date: date.toISOString().split("T")[0],
+          dayNumber: date.getDate(),
           dayTechnicians: [],
           nightTechnicians: [],
           firstShiftTechnicians: [],
@@ -193,7 +189,7 @@ export const sheetsService = {
 
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
-          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
+          const rawValue = (row[idx] || "").toString().trim().toLowerCase();
           const tokens = rawValue.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
 
           tokens.forEach(token => {
@@ -219,7 +215,8 @@ export const sheetsService = {
 
         shift.totalWorking =
           shift.dayTechnicians.length +
-          shift.nightTechnicians.length;
+          shift.nightTechnicians.length +
+          shift.firstShiftTechnicians.length;
 
         return shift;
       })
