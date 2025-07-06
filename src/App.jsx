@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { authService } from "./services/authService";
 import Sidebar from "./components/Sidebar";
+import LoginPage from "./pages/LoginPage";
 
 import Dashboard from "./pages/Dashboard";
 import TasksPage from "./pages/TasksPage";
@@ -14,8 +17,31 @@ import ProfilePage from "./pages/ProfilePage";
 import UsersPage from "./pages/UsersPage";
 import EditUserPage from "./pages/EditUserPage";
 import InventoryPage from "./pages/InventoryPage";
+import MaterialsPage from "./pages/MaterialsPage";
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const authenticated = authService.isAuthenticated();
+    setIsAuthenticated(authenticated);
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen flex">
       <Sidebar />
@@ -25,6 +51,7 @@ export default function App() {
           <Route path="/zadania" element={<TasksPage />} />
           <Route path="/shifts" element={<ShiftsPage />} />
           <Route path="/magazyn" element={<InventoryPage />} />
+          <Route path="/materialy" element={<MaterialsPage />} />
           <Route path="/current-month" element={<CurrentMonthPage />} />
           <Route path="/technicians" element={<TechniciansPage />} />
           <Route path="/raporty" element={<ReportsPage />} />

@@ -1,11 +1,21 @@
 import { NavLink } from "react-router-dom";
 
+import { authService } from "../services/authService";
+
 export default function Sidebar() {
+  const user = authService.getCurrentUser();
+
+  const handleLogout = () => {
+    authService.logout();
+    window.location.reload();
+  };
+
   const navItems = [
     { to: "/", label: "Dashboard", icon: "📊" },
     { to: "/zadania", label: "Zadania", icon: "📋" },
     { to: "/technicy", label: "Technicy", icon: "👷" },
     { to: "/magazyn", label: "Magazyn", icon: "📦" },
+    { to: "/materialy", label: "Materiały", icon: "🛒" },
     { to: "/raporty", label: "Raporty", icon: "📈" },
     { to: "/ustawienia", label: "Ustawienia", icon: "⚙️" }
   ];
@@ -82,15 +92,21 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div className="p-6 border-t border-slate-700/50">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-lg">
-            A
+            {user?.firstName?.[0] || 'A'}
           </div>
           <div>
-            <div className="font-semibold text-sm text-white">Koordynator</div>
-            <div className="text-xs text-slate-400">admin@orange.pl</div>
+            <div className="font-semibold text-sm text-white">{user?.firstName} {user?.lastName}</div>
+            <div className="text-xs text-slate-400">{user?.email}</div>
           </div>
         </div>
+        <button
+          onClick={handleLogout}
+          className="w-full py-2 px-4 bg-slate-700/50 hover:bg-slate-600/50 rounded-xl text-sm text-slate-300 hover:text-white transition-all duration-200"
+        >
+          Wyloguj się
+        </button>
         <div className="text-slate-500 text-xs">
           © {new Date().getFullYear()} TMO Orange
         </div>

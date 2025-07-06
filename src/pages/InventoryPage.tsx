@@ -215,7 +215,7 @@ export default function InventoryPage() {
           <div className="text-slate-600 font-medium">Brak</div>
         </div>
         <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
-          <div className="text-2xl font-bold text-purple-600">{stats.totalValue.toFixed(0)} zł</div>
+          <div className="text-2xl font-bold text-purple-600">{stats.totalValue.toFixed(0)}</div>
           <div className="text-slate-600 font-medium">Wartość</div>
         </div>
       </div>
@@ -311,7 +311,7 @@ export default function InventoryPage() {
                 </div>
                 <div className="flex justify-between items-center text-sm mt-1">
                   <span className="text-slate-500">Wartość:</span>
-                  <span className="font-semibold text-green-600">{(item.quantity * item.cost).toFixed(2)} zł</span>
+                  <span className="font-semibold text-green-600">{(item.quantity * item.cost).toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -379,10 +379,10 @@ export default function InventoryPage() {
 
                   <div className="bg-slate-50 rounded-2xl p-4">
                     <h3 className="font-bold text-slate-800 mb-3">Wartość</h3>
-                    <div className="text-2xl font-bold text-green-600 mb-1">{selectedItem.cost.toFixed(2)} zł</div>
+                    <div className="text-2xl font-bold text-green-600 mb-1">{selectedItem.cost.toFixed(2)}</div>
                     <div className="text-sm text-slate-600">za {selectedItem.unit}</div>
                     <div className="text-lg font-semibold text-slate-800 mt-2">
-                      Łącznie: {(selectedItem.quantity * selectedItem.cost).toFixed(2)} zł
+                      Łącznie: {(selectedItem.quantity * selectedItem.cost).toFixed(2)}
                     </div>
                   </div>
 

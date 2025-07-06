@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { useTasks } from "../hooks/useTasks";
-import { useTechnicians } from "../hooks/useTechnicians";
+import { sheetsService } from "../services/sheetsService";
 
 export default function CreateTaskModal({ onClose, onTaskCreated }) {
   const { createTask } = useTasks();
-  const { technicians } = useTechnicians();
+  const [technicians, setTechnicians] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,6 +20,28 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
     estimatedDuration: "30",
     category: "Elektryka"
   });
+
+  useEffect(() => {
+    // Fetch technicians from sheets service
+    fetchTechnicians();
+  }, []);
+
+  const fetchTechnicians = async () => {
+    try {
+      const data = await sheetsService.getCurrentMonthData();
+      const techniciansList = data.technicians.map(tech => ({
+        _id: tech.id,
+        firstName: tech.firstName,
+        lastName: tech.lastName,
+        specialization: tech.specialization,
+        fullName: tech.fullName
+      }));
+      setTechnicians(techniciansList);
+    } catch (error) {
+      console.error('Error fetching technicians:', error);
+      setTechnicians([]);
+    }
+  };
 
   const locations = [
     "Hala A",

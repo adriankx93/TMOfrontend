@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { useTechnicians } from "../hooks/useTechnicians";
 import { sheetsService } from "../services/sheetsService";
+import WeatherWidget from "../components/WeatherWidget";
 
 export default function Dashboard() {
   const { tasks } = useTasks();
@@ -75,9 +76,24 @@ export default function Dashboard() {
     }
   };
 
+  const getNextShiftTechnicians = () => {
+    if (!todayShift) return [];
+    
+    if (currentHour >= 7 && currentHour < 19) {
+      return todayShift.nightTechnicians;
+    } else {
+      return todayShift.dayTechnicians;
+    }
+  };
+
   const getCurrentShiftName = () => {
     if (currentHour >= 7 && currentHour < 19) return "Zmiana dzienna";
     return "Zmiana nocna";
+  };
+
+  const getNextShiftName = () => {
+    if (currentHour >= 7 && currentHour < 19) return "Zmiana nocna";
+    return "Zmiana dzienna";
   };
 
   const getCurrentShiftTime = () => {
@@ -85,16 +101,33 @@ export default function Dashboard() {
     return "19:00 - 07:00";
   };
 
+  const getNextShiftTime = () => {
+    if (currentHour >= 7 && currentHour < 19) return "19:00 - 07:00";
+    return "07:00 - 19:00";
+  };
+
   const currentShiftTechnicians = getCurrentShiftTechnicians();
+  const nextShiftTechnicians = getNextShiftTechnicians();
+
+  // Get tasks for current shift
+  const getCurrentShiftTasks = () => {
+    const currentShift = isDay ? "Dzienna" : "Nocna";
+    return tasks.filter(task => 
+      task.shift === currentShift && 
+      ['assigned', 'in_progress'].includes(task.status)
+    );
+  };
+
+  const currentShiftTasks = getCurrentShiftTasks();
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Header with Weather */}
       <div className="bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 rounded-3xl shadow-2xl p-8 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
-          <div className="flex justify-between items-center mb-6">
-            <div>
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex-1">
               <h1 className="text-4xl font-bold mb-2">Dashboard TMO</h1>
               <p className="text-orange-100 text-lg">
                 System zarządzania Miasteczka Orange
@@ -112,119 +145,170 @@ export default function Dashboard() {
                     day: 'numeric' 
                   })}
                 </div>
+                <div className="text-lg font-bold">
+                  {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold">
-                {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
-              </div>
-              <div className="text-orange-100">Czas lokalny</div>
+            
+            {/* Weather Widget */}
+            <div className="w-80">
+              <WeatherWidget />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Today's Shift - Key Information */}
-      <div className="bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl overflow-hidden">
-        <div className={`bg-gradient-to-r ${isDay ? 'from-yellow-400 to-orange-500' : 'from-blue-500 to-indigo-600'} px-8 py-6`}>
-          <div className="flex items-center justify-between text-white">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
-                {isDay ? '☀️' : '🌙'}
+      {/* Current Shift - Enhanced */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Current Shift */}
+        <div className="lg:col-span-2 bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl overflow-hidden">
+          <div className={`bg-gradient-to-r ${isDay ? 'from-yellow-400 to-orange-500' : 'from-blue-500 to-indigo-600'} px-8 py-6`}>
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
+                  {isDay ? '☀️' : '🌙'}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">{getCurrentShiftName()}</h2>
+                  <p className="text-white/80 text-lg">{getCurrentShiftTime()}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">{getCurrentShiftName()}</h2>
-                <p className="text-white/80 text-lg">{getCurrentShiftTime()}</p>
+              <div className="text-right">
+                <div className="text-4xl font-bold">
+                  {loading ? '...' : currentShiftTechnicians.length}
+                </div>
+                <div className="text-white/80">Na zmianie</div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-4xl font-bold">
-                {loading ? '...' : (todayShift ? todayShift.totalWorking : 0)}
+          </div>
+
+          <div className="p-8">
+            {loading ? (
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-slate-200 rounded w-1/4"></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-20 bg-slate-200 rounded"></div>
+                  <div className="h-20 bg-slate-200 rounded"></div>
+                </div>
               </div>
-              <div className="text-white/80">Pracuje dziś</div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Current Shift Technicians */}
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800 mb-4">Technicy na aktualnej zmianie</h3>
+                  {currentShiftTechnicians.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {currentShiftTechnicians.map((techName, index) => (
+                        <div key={index} className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all duration-200">
+                          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">
+                            {techName.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-800">{techName}</div>
+                            <div className="text-sm text-emerald-600 flex items-center gap-1">
+                              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                              Aktywny
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-slate-500">
+                      <span className="text-4xl mb-4 block">👷</span>
+                      Brak techników na aktualnej zmianie
+                    </div>
+                  )}
+                </div>
+
+                {/* Current Shift Tasks */}
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800 mb-4">Zadania na aktualnej zmianie</h3>
+                  {currentShiftTasks.length > 0 ? (
+                    <div className="space-y-3">
+                      {currentShiftTasks.slice(0, 3).map((task) => (
+                        <div key={task._id} className="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            📋
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-slate-800">{task.title}</div>
+                            <div className="text-sm text-slate-600">{task.location} • {task.category}</div>
+                          </div>
+                          <div className={`px-3 py-1 rounded-xl text-sm font-semibold ${
+                            task.status === 'in_progress' 
+                              ? 'bg-amber-100 text-amber-800' 
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {task.status === 'in_progress' ? 'W trakcie' : 'Przypisane'}
+                          </div>
+                        </div>
+                      ))}
+                      {currentShiftTasks.length > 3 && (
+                        <div className="text-center text-sm text-slate-500">
+                          ... i {currentShiftTasks.length - 3} więcej zadań
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-slate-500">
+                      <span className="text-3xl mb-2 block">📋</span>
+                      Brak zadań na aktualnej zmianie
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="p-8">
-          {loading ? (
-            <div className="animate-pulse space-y-4">
-              <div className="h-4 bg-slate-200 rounded w-1/4"></div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="h-20 bg-slate-200 rounded"></div>
-                <div className="h-20 bg-slate-200 rounded"></div>
-                <div className="h-20 bg-slate-200 rounded"></div>
-              </div>
+        {/* Next Shift Preview */}
+        <div className="bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-2xl overflow-hidden">
+          <div className={`bg-gradient-to-r ${!isDay ? 'from-yellow-400 to-orange-500' : 'from-blue-500 to-indigo-600'} px-6 py-4`}>
+            <div className="text-white text-center">
+              <div className="text-2xl mb-2">{!isDay ? '☀️' : '🌙'}</div>
+              <h3 className="text-lg font-bold">{getNextShiftName()}</h3>
+              <p className="text-white/80">{getNextShiftTime()}</p>
             </div>
-          ) : todayShift ? (
-            <div>
-              <h3 className="text-lg font-bold text-slate-800 mb-4">Technicy na aktualnej zmianie</h3>
-              {currentShiftTechnicians.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {currentShiftTechnicians.map((techName, index) => (
-                    <div key={index} className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl">
-                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">
-                        {techName.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-800">{techName}</div>
-                        <div className="text-sm text-slate-600">Aktywny</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-slate-500">
-                  <span className="text-4xl mb-4 block">👷</span>
-                  Brak techników na aktualnej zmianie
-                </div>
-              )}
+          </div>
 
-              {/* Additional shift info */}
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">Wszystkie zmiany dziś</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Dzienna:</span>
-                      <span className="font-semibold">{todayShift.dayTechnicians.length}</span>
+          <div className="p-6">
+            <h4 className="font-bold text-slate-800 mb-4">Następna zmiana</h4>
+            {nextShiftTechnicians.length > 0 ? (
+              <div className="space-y-3">
+                {nextShiftTechnicians.map((techName, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                    <div className="w-8 h-8 bg-gradient-to-br from-slate-400 to-slate-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      {techName.split(' ').map(n => n[0]).join('')}
                     </div>
-                    <div className="flex justify-between">
-                      <span>Nocna:</span>
-                      <span className="font-semibold">{todayShift.nightTechnicians.length}</span>
+                    <div>
+                      <div className="font-medium text-slate-800 text-sm">{techName}</div>
+                      <div className="text-xs text-slate-500">Oczekuje</div>
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-slate-500">
+                <span className="text-2xl mb-2 block">⏰</span>
+                <div className="text-sm">Brak techników na następnej zmianie</div>
+              </div>
+            )}
 
-                <div className="bg-green-50 rounded-2xl p-4 border border-green-200">
-                  <h4 className="font-semibold text-green-800 mb-2">Nieobecności</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Urlopy:</span>
-                      <span className="font-semibold">{todayShift.vacationTechnicians.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Zwolnienia L4:</span>
-                      <span className="font-semibold">{todayShift.l4Technicians.length}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-purple-50 rounded-2xl p-4 border border-purple-200">
-                  <h4 className="font-semibold text-purple-800 mb-2">Efektywność</h4>
-                  <div className="text-3xl font-bold text-purple-600">
-                    {Math.round(((todayShift.dayTechnicians.length + todayShift.nightTechnicians.length) / (todayShift.dayTechnicians.length + todayShift.nightTechnicians.length + todayShift.vacationTechnicians.length + todayShift.l4Technicians.length)) * 100) || 0}%
-                  </div>
-                  <div className="text-sm text-purple-600">Dostępność zespołu</div>
+            {/* Shift transition info */}
+            <div className="mt-6 pt-4 border-t border-slate-200">
+              <div className="text-sm text-slate-600 text-center">
+                <div className="font-semibold">Zmiana za:</div>
+                <div className="text-lg font-bold text-orange-600">
+                  {isDay 
+                    ? `${19 - currentHour}h ${60 - new Date().getMinutes()}min`
+                    : `${7 + (24 - currentHour)}h ${60 - new Date().getMinutes()}min`
+                  }
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-8 text-slate-500">
-              <span className="text-4xl mb-4 block">📅</span>
-              Brak danych o dzisiejszych zmianach
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -295,8 +379,8 @@ export default function Dashboard() {
           
           <button className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 rounded-2xl border border-emerald-200 transition-all duration-200 text-left group">
             <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">👷</div>
-            <div className="font-semibold text-emerald-800">Dodaj technika</div>
-            <div className="text-sm text-emerald-600">Nowy członek zespołu</div>
+            <div className="font-semibold text-emerald-800">Zespół</div>
+            <div className="text-sm text-emerald-600">Zarządzaj technikami</div>
           </button>
           
           <button className="p-6 bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 rounded-2xl border border-purple-200 transition-all duration-200 text-left group">
