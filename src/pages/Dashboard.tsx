@@ -1,4 +1,3 @@
-a możesz dodaćto:
 import { fetchWeatherApi } from 'openmeteo';
 
 const params = {
