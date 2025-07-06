@@ -23,6 +23,7 @@ export default function Sidebar() {
     { to: "/notatnik", label: "Notatnik", icon: "📝", description: "Notatki i komunikacja" },
     { to: "/raporty", label: "Analityka", icon: "📊", description: "Raporty i KPI" },
     { to: "/analiza-trendow", label: "Trendy", icon: "📈", description: "Analiza awaryjności" },
+    { to: "/current-month", label: "Grafik zmian", icon: "📅", description: "Dane z arkusza Google" },
     { to: "/ustawienia", label: "Ustawienia", icon: "⚙️", description: "Konfiguracja systemu" }
   ];
 
@@ -56,7 +57,7 @@ export default function Sidebar() {
               {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
             </div>
           </div>
-          
+
           <div className="text-xs text-slate-400 mb-2">Aktualna zmiana</div>
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-white">{currentShift}</span>
@@ -74,8 +75,8 @@ export default function Sidebar() {
               to={item.to}
               className={({ isActive }) =>
                 `group flex items-center gap-4 py-4 px-4 rounded-xl font-medium transition-all duration-200 ${
-                  isActive 
-                    ? "gradient-primary text-white shadow-lg glow-blue transform scale-[1.02]" 
+                  isActive
+                    ? "gradient-primary text-white shadow-lg glow-blue transform scale-[1.02]"
                     : "text-slate-300 hover:text-white hover:bg-slate-800/50 hover:transform hover:scale-[1.01]"
                 }`
               }
@@ -85,33 +86,12 @@ export default function Sidebar() {
                   {item.icon}
                 </span>
                 <div>
-                  <div className="font-semibold">Grafik zmian</div>
-                  <div className="text-xs opacity-70">Harmonogram zespołu</div>
+                  <div className="font-semibold">{item.label}</div>
                   <div className="text-xs opacity-70">{item.description}</div>
                 </div>
               </div>
             </NavLink>
           ))}
-          
-          <NavLink
-            to="/current-month"
-            className={({ isActive }) =>
-              `group flex items-center gap-4 py-4 px-4 rounded-xl font-medium transition-all duration-200 ${
-                isActive 
-                  ? "gradient-primary text-white shadow-lg glow-blue transform scale-[1.02]" 
-                  : "text-slate-300 hover:text-white hover:bg-slate-800/50 hover:transform hover:scale-[1.01]"
-              }`
-            }
-          >
-            <div className="flex items-center gap-4 flex-1">
-              <span className="text-xl group-hover:scale-110 transition-transform duration-200">
-                📅
-              </span>
-              <div>
-                <div className="font-semibold">Grafik zmian</div>
-                <div className="text-xs opacity-70">Dane z arkusza</div>
-            </div>
-          </NavLink>
         </div>
       </nav>
 
@@ -123,11 +103,13 @@ export default function Sidebar() {
               {user?.firstName?.[0] || 'A'}
             </div>
             <div className="flex-1">
-              <div className="font-semibold text-sm text-white">{user?.firstName} {user?.lastName}</div>
+              <div className="font-semibold text-sm text-white">
+                {user?.firstName} {user?.lastName}
+              </div>
               <div className="text-xs text-slate-400">{user?.role}</div>
             </div>
           </div>
-          
+
           <button
             onClick={handleLogout}
             className="w-full py-2 px-4 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg text-sm text-slate-300 hover:text-white transition-all duration-200 flex items-center gap-2"
@@ -136,7 +118,7 @@ export default function Sidebar() {
             <span>Wyloguj się</span>
           </button>
         </div>
-        
+
         <div className="text-slate-500 text-xs text-center mt-4">
           © {new Date().getFullYear()} TechSPIE v1.0
         </div>
