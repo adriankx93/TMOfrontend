@@ -5,7 +5,7 @@ const CONFIG: SheetConfig = {
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E23',
-    dates: 'J4:AN4', // Zakres na wypadek, gdybyś potrzebował – ale nie będziemy używać zawartości
+    dates: 'J4:AN4',
     shifts: 'J7:AN23',
   },
   monthNames: [
@@ -46,21 +46,10 @@ const _fetchFromSheets = async (url: string, errorMessagePrefix: string): Promis
 };
 
 export const sheetsService = {
-  testConnection: async (): Promise<{ success: boolean; message: string; sheets: string[] }> => {
-    const sheets = await sheetsService.getAvailableSheets();
-    return {
-      success: true,
-      message: 'Połączenie z Google Sheets działa poprawnie',
-      sheets
-    };
-  },
-
   getAvailableSheets: async (): Promise<string[]> => {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}?key=${CONFIG.apiKey}`;
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
-    if (!data.sheets) {
-      throw new Error('Brak arkuszy w odpowiedzi API');
-    }
+    if (!data.sheets) throw new Error('Brak arkuszy w odpowiedzi API');
     return data.sheets.map(s => s.properties.title.trim());
   },
 
@@ -69,9 +58,7 @@ export const sheetsService = {
     const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values:batchGet?${rangesQuery}&key=${CONFIG.apiKey}`;
     const data = await _fetchFromSheets(url, 'Błąd pobierania zakresów');
-    if (!data.valueRanges) {
-      throw new Error('Brak danych w odpowiedzi API');
-    }
+    if (!data.valueRanges) throw new Error('Brak danych w odpowiedzi API');
     return data.valueRanges.map(r => r.values || []);
   },
 
@@ -80,34 +67,28 @@ export const sheetsService = {
     const monthIndex = now.getMonth();
     const year = now.getFullYear();
     const expectedMonthName = CONFIG.monthNames[monthIndex];
-
     const allSheets = await sheetsService.getAvailableSheets();
 
     let sheetName = allSheets.find(name =>
       name.toLowerCase().includes(expectedMonthName.toLowerCase()) &&
       name.includes(year.toString())
     );
-
     if (!sheetName) {
       sheetName = allSheets.find(name =>
         name.toLowerCase().includes(expectedMonthName.toLowerCase())
       );
     }
-
     if (!sheetName) {
-      throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(', ')}`);
+      throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}".`);
     }
 
-    const [techniciansData, , shiftsData] = await sheetsService.getMultipleRanges(
+    const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
       sheetName,
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
 
-    if (!shiftsData.length) {
-      throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
-    }
-    if (!techniciansData.length) {
-      throw new Error(`Brak danych techników w zakresie ${CONFIG.ranges.technicians}.`);
+    if (!shiftsData.length || !techniciansData.length || !datesData.length || !datesData[0]?.length) {
+      throw new Error(`Brak danych.`);
     }
 
     let finalMonthIndex = monthIndex;
@@ -127,13 +108,9 @@ export const sheetsService = {
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
 
-    // Twórz daty od 1 do 31
-    const daysInMonth = 31;
-    const dates = Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString());
-
     const shifts = sheetsService.parseShifts(
       technicians,
-      dates,
+      datesData[0],
       shiftsData,
       finalYear,
       finalMonthIndex
@@ -148,12 +125,7 @@ export const sheetsService = {
     };
   },
 
-  getCurrentMonthShifts: async (): Promise<SheetData> => {
-    return await sheetsService.getCurrentMonthData();
-  },
-
   parseTechnicians: (data: any[][]): Technician[] => {
-    if (!data || !Array.isArray(data)) return [];
     return data
       .map((row, i) => {
         if (!row || !row[0]) return null;
@@ -171,15 +143,14 @@ export const sheetsService = {
   },
 
   parseShifts: (technicians: Technician[], dates: any[], shiftsData: any[][], year: number, monthIndex: number): Shift[] => {
-    if (!technicians.length || !dates.length || !shiftsData.length) return [];
-
     return dates
       .map((cell, idx) => {
         const dayNumber = parseInt(cell);
-        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
-
-        const date = new Date(year, monthIndex, dayNumber);
-
+        if (isNaN(dayNumber)) return null;
+        let date = new Date(year, monthIndex, dayNumber);
+        if (dayNumber > 25 && monthIndex > 0) {
+          date = new Date(year, monthIndex - 1, dayNumber); // poprzedni miesiąc
+        }
         const shift: Shift = {
           date: date.toISOString().split('T')[0],
           dayNumber,
@@ -189,12 +160,10 @@ export const sheetsService = {
           vacationTechnicians: [],
           l4Technicians: []
         };
-
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
           const rawValue = (row[idx] || '').toString().trim().toLowerCase();
           const tokens = rawValue.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
-
           tokens.forEach(token => {
             switch (token) {
               case CONFIG.shiftCodes.firstShift:
@@ -215,11 +184,7 @@ export const sheetsService = {
             }
           });
         });
-
-        shift.totalWorking =
-          shift.dayTechnicians.length +
-          shift.nightTechnicians.length;
-
+        shift.totalWorking = shift.dayTechnicians.length + shift.nightTechnicians.length;
         return shift;
       })
       .filter((shift): shift is Shift => shift !== null)
