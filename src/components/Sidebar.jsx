@@ -107,9 +107,9 @@ export default function Sidebar() {
               <span className="text-xl group-hover:scale-110 transition-transform duration-200">
                 📅
               </span>
+              <div>
                 <div className="font-semibold">Grafik zmian</div>
                 <div className="text-xs opacity-70">Dane z arkusza</div>
-              </div>
             </div>
           </NavLink>
         </div>
