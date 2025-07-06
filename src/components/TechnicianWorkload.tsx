@@ -65,7 +65,6 @@ export default function TechnicianWorkload({ workload }: TechnicianWorkloadProps
                 <div className="flex justify-between text-sm text-slate-600 mb-1">
                   <span>Dzienne: {tech.dayShifts}</span>
                   <span>Nocne: {tech.nightShifts}</span>
-                  <span>Pierwsze: {tech.firstShifts}</span>
                 </div>
                 <div className="w-full bg-slate-200 rounded-full h-3">
                   <div 

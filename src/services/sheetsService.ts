@@ -299,8 +299,7 @@ export const sheetsService = {
 
         shift.totalWorking =
           shift.dayTechnicians.length +
-          shift.nightTechnicians.length +
-          shift.firstShiftTechnicians.length;
+          shift.nightTechnicians.length;
 
         console.log(`[sheetsService] Dzień ${dayNumber} - łącznie pracujących: ${shift.totalWorking}`);
         return shift;

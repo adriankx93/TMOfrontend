@@ -27,7 +27,6 @@ export default function DailyScheduleTable({ shifts }: DailyScheduleTableProps) 
           <thead>
             <tr className="border-b border-slate-200">
               <th className="text-left py-3 px-4 font-semibold text-slate-700">Data</th>
-              <th className="text-left py-3 px-4 font-semibold text-slate-700">Pierwsza zmiana</th>
               <th className="text-left py-3 px-4 font-semibold text-slate-700">Zmiana dzienna</th>
               <th className="text-left py-3 px-4 font-semibold text-slate-700">Zmiana nocna</th>
               <th className="text-left py-3 px-4 font-semibold text-slate-700">Urlopy</th>
@@ -40,18 +39,6 @@ export default function DailyScheduleTable({ shifts }: DailyScheduleTableProps) 
               <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
                 <td className="py-3 px-4 font-medium text-slate-800">
                   {new Date(shift.date).toLocaleDateString('pl-PL')}
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex flex-wrap gap-1">
-                    {shift.firstShiftTechnicians.map((tech, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-lg text-sm">
-                        {tech}
-                      </span>
-                    ))}
-                    {shift.firstShiftTechnicians.length === 0 && (
-                      <span className="text-slate-400 text-sm">-</span>
-                    )}
-                  </div>
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex flex-wrap gap-1">
@@ -103,7 +90,7 @@ export default function DailyScheduleTable({ shifts }: DailyScheduleTableProps) 
                 </td>
                 <td className="py-3 px-4 text-center">
                   <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold">
-                    {shift.totalWorking}
+                    {shift.dayTechnicians.length + shift.nightTechnicians.length}
                   </span>
                 </td>
               </tr>

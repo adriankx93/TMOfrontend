@@ -67,8 +67,7 @@ export default function CurrentMonthChart() {
     data.shifts.forEach(shift => {
       [
         ...shift.dayTechnicians,
-        ...shift.nightTechnicians,
-        ...shift.firstShiftTechnicians
+        ...shift.nightTechnicians
       ].forEach(techName => {
         allTechnicians.add(techName);
         totalWorkers++;
@@ -125,7 +124,6 @@ export default function CurrentMonthChart() {
       shift.firstShiftTechnicians.forEach(techName => {
         const workload = workloadMap.get(techName);
         if (workload) {
-          workload.firstShifts++;
           workload.totalShifts++;
         }
       });

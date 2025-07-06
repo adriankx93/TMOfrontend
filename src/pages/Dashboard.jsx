@@ -68,23 +68,19 @@ export default function Dashboard() {
   const getCurrentShiftTechnicians = () => {
     if (!todayShift) return [];
     
-    if (currentHour >= 6 && currentHour < 14) {
-      return todayShift.firstShiftTechnicians;
-    } else if (currentHour >= 7 && currentHour < 19) {
-      return [...todayShift.firstShiftTechnicians, ...todayShift.dayTechnicians];
+    if (currentHour >= 7 && currentHour < 19) {
+      return todayShift.dayTechnicians;
     } else {
       return todayShift.nightTechnicians;
     }
   };
 
   const getCurrentShiftName = () => {
-    if (currentHour >= 6 && currentHour < 14) return "Pierwsza zmiana";
     if (currentHour >= 7 && currentHour < 19) return "Zmiana dzienna";
     return "Zmiana nocna";
   };
 
   const getCurrentShiftTime = () => {
-    if (currentHour >= 6 && currentHour < 14) return "06:00 - 14:00";
     if (currentHour >= 7 && currentHour < 19) return "07:00 - 19:00";
     return "19:00 - 07:00";
   };
@@ -190,10 +186,6 @@ export default function Dashboard() {
                   <h4 className="font-semibold text-blue-800 mb-2">Wszystkie zmiany dziś</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span>Pierwsza:</span>
-                      <span className="font-semibold">{todayShift.firstShiftTechnicians.length}</span>
-                    </div>
-                    <div className="flex justify-between">
                       <span>Dzienna:</span>
                       <span className="font-semibold">{todayShift.dayTechnicians.length}</span>
                     </div>
@@ -221,7 +213,7 @@ export default function Dashboard() {
                 <div className="bg-purple-50 rounded-2xl p-4 border border-purple-200">
                   <h4 className="font-semibold text-purple-800 mb-2">Efektywność</h4>
                   <div className="text-3xl font-bold text-purple-600">
-                    {Math.round((todayShift.totalWorking / (todayShift.totalWorking + todayShift.vacationTechnicians.length + todayShift.l4Technicians.length)) * 100) || 0}%
+                    {Math.round(((todayShift.dayTechnicians.length + todayShift.nightTechnicians.length) / (todayShift.dayTechnicians.length + todayShift.nightTechnicians.length + todayShift.vacationTechnicians.length + todayShift.l4Technicians.length)) * 100) || 0}%
                   </div>
                   <div className="text-sm text-purple-600">Dostępność zespołu</div>
                 </div>

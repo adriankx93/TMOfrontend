@@ -113,21 +113,6 @@ export default function TodayShiftOverview() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <div className="text-sm font-semibold text-slate-700 mb-2">Pierwsza zmiana</div>
-              <div className="space-y-1">
-                {todayShift.firstShiftTechnicians.length > 0 ? (
-                  todayShift.firstShiftTechnicians.map((tech, idx) => (
-                    <div key={idx} className="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                      {tech}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-sm text-slate-500">Brak</div>
-                )}
-              </div>
-            </div>
-            
-            <div>
               <div className="text-sm font-semibold text-slate-700 mb-2">Zmiana dzienna</div>
               <div className="space-y-1">
                 {todayShift.dayTechnicians.length > 0 ? (
@@ -201,10 +186,10 @@ export default function TodayShiftOverview() {
         <div className="flex justify-between items-center p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
           <div>
             <div className="font-semibold text-emerald-800">Łącznie pracuje dziś</div>
-            <div className="text-sm text-emerald-600">Wszystkie zmiany</div>
+            <div className="text-sm text-emerald-600">Zmiana dzienna i nocna</div>
           </div>
           <div className="text-3xl font-bold text-emerald-600">
-            {todayShift.totalWorking}
+            {todayShift.dayTechnicians.length + todayShift.nightTechnicians.length}
           </div>
         </div>
       </div>

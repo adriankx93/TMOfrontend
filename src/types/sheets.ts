@@ -12,7 +12,6 @@ export interface Shift {
   dayNumber: number;
   dayTechnicians: string[];
   nightTechnicians: string[];
-  firstShiftTechnicians: string[];
   vacationTechnicians: string[];
   l4Technicians: string[];
   totalWorking: number;
@@ -61,7 +60,6 @@ export interface TechnicianWorkload {
   totalShifts: number;
   dayShifts: number;
   nightShifts: number;
-  firstShifts: number;
   vacationDays: number;
   sickDays: number;
   specialization: string;

@@ -42,11 +42,6 @@ export default function TechniciansFromSheets() {
         let isWorking = false;
 
         if (todayShift) {
-          if (todayShift.firstShiftTechnicians.includes(tech.fullName)) {
-            todayShifts.push("Pierwsza");
-            currentShift = "Pierwsza (06:00-14:00)";
-            isWorking = true;
-          }
           if (todayShift.dayTechnicians.includes(tech.fullName)) {
             todayShifts.push("Dzienna");
             currentShift = "Dzienna (07:00-19:00)";
@@ -68,8 +63,7 @@ export default function TechniciansFromSheets() {
         // Calculate monthly stats
         const monthlyShifts = data.shifts.filter(shift => 
           shift.dayTechnicians.includes(tech.fullName) ||
-          shift.nightTechnicians.includes(tech.fullName) ||
-          shift.firstShiftTechnicians.includes(tech.fullName)
+          shift.nightTechnicians.includes(tech.fullName)
         ).length;
 
         const efficiency = Math.min(100, Math.max(75, 75 + Math.random() * 25));
