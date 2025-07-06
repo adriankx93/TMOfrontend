@@ -5,7 +5,7 @@ const CONFIG: SheetConfig = {
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
     technicians: 'C7:E23',
-    dates: 'J4:AN4',
+    dates: 'J4:AN4', // Zakres na wypadek, gdybyś potrzebował – ale nie będziemy używać zawartości
     shifts: 'J7:AN23',
   },
   monthNames: [
@@ -98,14 +98,11 @@ export const sheetsService = {
       throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(', ')}`);
     }
 
-    const [techniciansData, datesData, shiftsData] = await sheetsService.getMultipleRanges(
+    const [techniciansData, , shiftsData] = await sheetsService.getMultipleRanges(
       sheetName,
       [CONFIG.ranges.technicians, CONFIG.ranges.dates, CONFIG.ranges.shifts]
     );
 
-    if (!datesData.length || !datesData[0]?.length) {
-      throw new Error(`Brak dat w zakresie ${CONFIG.ranges.dates}.`);
-    }
     if (!shiftsData.length) {
       throw new Error(`Brak danych zmian w zakresie ${CONFIG.ranges.shifts}.`);
     }
@@ -129,8 +126,18 @@ export const sheetsService = {
     }
 
     const technicians = sheetsService.parseTechnicians(techniciansData);
-    const dates = datesData[0];
-    const shifts = sheetsService.parseShifts(technicians, dates, shiftsData, finalYear, finalMonthIndex);
+
+    // Twórz daty od 1 do 31
+    const daysInMonth = 31;
+    const dates = Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString());
+
+    const shifts = sheetsService.parseShifts(
+      technicians,
+      dates,
+      shiftsData,
+      finalYear,
+      finalMonthIndex
+    );
 
     return {
       month: finalMonthIndex,
@@ -150,13 +157,14 @@ export const sheetsService = {
     return data
       .map((row, i) => {
         if (!row || !row[0]) return null;
+        const raw = row[0].toString().trim();
         return {
           id: i,
           shiftRowIndex: i,
-          firstName: row[0].toString().trim(),
-          lastName: row[1]?.toString().trim() || '',
-          specialization: row[2]?.toString().trim() || 'Techniczny',
-          fullName: `${row[0]} ${row[1]}`.trim()
+          firstName: raw,
+          lastName: '',
+          specialization: '',
+          fullName: raw
         };
       })
       .filter((tech): tech is Technician => tech !== null);
@@ -173,7 +181,7 @@ export const sheetsService = {
         const date = new Date(year, monthIndex, dayNumber);
 
         const shift: Shift = {
-          date: date.toISOString().split("T")[0],
+          date: date.toISOString().split('T')[0],
           dayNumber,
           dayTechnicians: [],
           nightTechnicians: [],
@@ -184,7 +192,7 @@ export const sheetsService = {
 
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
-          const rawValue = (row[idx] || "").toString().trim().toLowerCase();
+          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
           const tokens = rawValue.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
 
           tokens.forEach(token => {
@@ -210,8 +218,7 @@ export const sheetsService = {
 
         shift.totalWorking =
           shift.dayTechnicians.length +
-          shift.nightTechnicians.length +
-          shift.firstShiftTechnicians.length;
+          shift.nightTechnicians.length;
 
         return shift;
       })
