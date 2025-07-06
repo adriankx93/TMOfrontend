@@ -44,19 +44,67 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
   };
 
   const locations = [
-    "Hala A",
-    "Hala B", 
-    "Hala C",
-    "Biuro administracyjne",
-    "Parking",
-    "Dach budynku A",
-    "Dach budynku B",
-    "Magazyn A",
-    "Magazyn B",
-    "Magazyn C",
-    "Korytarze A-C",
+    // Budynek A
+    "Budynek A - Parter",
+    "Budynek A - 1 piętro",
+    "Budynek A - 2 piętro", 
+    "Budynek A - 3 piętro",
+    "Budynek A - 4 piętro",
+    "Budynek A - Dach",
+    "Budynek A - Rozdzielnia główna A",
+    "Budynek A - Centrala HVAC A",
+    
+    // Budynek B
+    "Budynek B - Parter",
+    "Budynek B - 1 piętro",
+    "Budynek B - 2 piętro",
+    "Budynek B - 3 piętro", 
+    "Budynek B - 4 piętro",
+    "Budynek B - Dach",
+    "Budynek B - Rozdzielnia główna B",
+    
+    // Budynek C
+    "Budynek C - Parter",
+    "Budynek C - 1 piętro",
+    "Budynek C - 2 piętro",
+    "Budynek C - 3 piętro",
+    "Budynek C - 4 piętro", 
+    "Budynek C - Centrum danych",
+    
+    // Budynek D
+    "Budynek D - Parter",
+    "Budynek D - 1 piętro",
+    "Budynek D - 2 piętro",
+    "Budynek D - 3 piętro",
+    "Budynek D - 4 piętro",
+    
+    // Budynek E Compensa
+    "Budynek E Compensa - Parter",
+    "Budynek E Compensa - 1 piętro",
+    "Budynek E Compensa - 2 piętro",
+    "Budynek E Compensa - 3 piętro",
+    "Budynek E Compensa - 4 piętro",
+    "Budynek E Compensa - Rozdzielnia E Compensa",
+    
+    // Budynek E Bayer
+    "Budynek E Bayer - Parter",
+    "Budynek E Bayer - 1 piętro", 
+    "Budynek E Bayer - 2 piętro",
+    "Budynek E Bayer - 3 piętro",
+    "Budynek E Bayer - 4 piętro",
+    "Budynek E Bayer - Rozdzielnia E Bayer",
+    
+    // Garaże
+    "Garaż -1",
+    "Garaż -2",
+    "Garaż -1 - Rozdzielnia garażu -1",
+    "Garaż -2 - Rozdzielnia garażu -2",
+    
+    // Obszary zewnętrzne
+    "Teren zewnętrzny",
+    "Parking naziemny",
     "Wjazd główny",
-    "Cały obiekt"
+    "Cały kompleks"
   ];
 
   const categories = [

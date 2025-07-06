@@ -3,9 +3,9 @@ const CONFIG = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E23', // ZAKRES obejmujący WSZYSTKICH techników
+    technicians: 'C7:E30', // ROZSZERZONY ZAKRES dla wszystkich techników
     dates: 'K4:AN4',
-    shifts: 'J7:AN23',
+    shifts: 'J7:AN30', // ROZSZERZONY ZAKRES dla wszystkich techników
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',

@@ -18,6 +18,7 @@ import UsersPage from "./pages/UsersPage";
 import EditUserPage from "./pages/EditUserPage";
 import InventoryPage from "./pages/InventoryPage";
 import MaterialsPage from "./pages/MaterialsPage";
+import BuildingsPage from "./pages/BuildingsPage";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -49,6 +50,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/zadania" element={<TasksPage />} />
+          <Route path="/budynki" element={<BuildingsPage />} />
           <Route path="/shifts" element={<ShiftsPage />} />
           <Route path="/magazyn" element={<InventoryPage />} />
           <Route path="/materialy" element={<MaterialsPage />} />

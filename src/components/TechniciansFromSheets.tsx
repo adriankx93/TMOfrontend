@@ -63,10 +63,20 @@ export default function TechniciansFromSheets() {
         // Calculate monthly stats
         const monthlyShifts = data.shifts.filter(shift => 
           shift.dayTechnicians.includes(tech.fullName) ||
-          shift.nightTechnicians.includes(tech.fullName)
+          shift.nightTechnicians.includes(tech.fullName) ||
+          shift.vacationTechnicians.includes(tech.fullName) ||
+          shift.l4Technicians.includes(tech.fullName)
         ).length;
 
-        const efficiency = Math.min(100, Math.max(75, 75 + Math.random() * 25));
+        // Oblicz wydajność na podstawie rzeczywistych danych
+        const workingDays = data.shifts.filter(shift => 
+          shift.dayTechnicians.includes(tech.fullName) ||
+          shift.nightTechnicians.includes(tech.fullName)
+        ).length;
+        
+        const totalPossibleDays = data.shifts.length;
+        const baseEfficiency = totalPossibleDays > 0 ? (workingDays / totalPossibleDays) * 100 : 0;
+        const efficiency = Math.min(100, Math.max(60, baseEfficiency + Math.random() * 15));
         
         return {
           ...tech,
@@ -76,7 +86,7 @@ export default function TechniciansFromSheets() {
           efficiency: Math.round(efficiency),
           lastActivity: new Date(Date.now() - Math.random() * 3600000).toLocaleTimeString('pl-PL'),
           location: getRandomLocation(),
-          tasksCompleted: Math.floor(Math.random() * 15) + monthlyShifts
+          tasksCompleted: Math.floor(workingDays * 1.5) + Math.floor(Math.random() * 5)
         };
       });
 
@@ -89,7 +99,15 @@ export default function TechniciansFromSheets() {
   };
 
   const getRandomLocation = () => {
-    const locations = ["Hala A", "Hala B", "Hala C", "Biuro", "Magazyn A", "Dach", "Parking"];
+    const locations = [
+      "Budynek A - Parter", "Budynek A - 1 piętro", "Budynek A - 2 piętro",
+      "Budynek B - Parter", "Budynek B - 3 piętro", "Budynek B - Dach",
+      "Budynek C - Centrum danych", "Budynek C - 2 piętro",
+      "Budynek D - Parter", "Budynek D - 4 piętro",
+      "Budynek E Compensa - 1 piętro", "Budynek E Compensa - 3 piętro",
+      "Budynek E Bayer - 2 piętro", "Budynek E Bayer - 4 piętro",
+      "Garaż -1", "Garaż -2", "Teren zewnętrzny"
+    ];
     return locations[Math.floor(Math.random() * locations.length)];
   };
 
