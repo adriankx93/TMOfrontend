@@ -167,19 +167,14 @@ export const sheetsService = {
 
     return dates
       .map((cell, idx) => {
-        let date: Date | null = null;
+        const dayNumber = parseInt(cell);
+        if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
 
-        if (typeof cell === "string" && /^\d{4}-\d{2}-\d{2}$/.test(cell)) {
-          date = new Date(cell);
-        } else {
-          const dayNumber = parseInt(cell);
-          if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 31) return null;
-          date = new Date(year, monthIndex, dayNumber);
-        }
+        const date = new Date(year, monthIndex, dayNumber);
 
         const shift: Shift = {
           date: date.toISOString().split("T")[0],
-          dayNumber: date.getDate(),
+          dayNumber,
           dayTechnicians: [],
           nightTechnicians: [],
           firstShiftTechnicians: [],
