@@ -30,7 +30,7 @@ export default function Sidebar() {
   const shiftTime = currentShift === "Dzienna" ? "07:00 - 19:00" : "19:00 - 07:00";
 
   return (
-    <aside className="w-80 bg-slate-900 border-r border-slate-700/50 min-h-screen flex flex-col shadow-2xl fixed left-0 top-0 z-40 overflow-y-auto">
+    <aside className="w-80 bg-slate-900 border-r border-slate-700/50 min-h-screen flex flex-col shadow-2xl">
       {/* Header */}
       <div className="p-8 border-b border-slate-700/50">
         <div className="flex items-center gap-4 mb-6">
@@ -66,7 +66,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-6 py-8" aria-label="Główna nawigacja">
+      <nav className="flex-1 px-6 py-8 overflow-y-auto" aria-label="Główna nawigacja">
         <div className="space-y-2">
           {navItems.map((item) => (
             <NavLink
@@ -86,7 +86,8 @@ export default function Sidebar() {
                 </span>
                 <div>
                   <div className="font-semibold">Grafik zmian</div>
-                  <div className="font-semibold">{item.label}</div>
+                  <div className="text-xs opacity-70">Harmonogram zespołu</div>
+                  <div className="text-xs opacity-70">{item.description}</div>
                 </div>
               </div>
             </NavLink>
