@@ -47,10 +47,12 @@ export default function Dashboard() {
       setLoading(true);
       const data = await sheetsService.getCurrentMonthData();
       
+      // Pobierz dzisiejszą datę w strefie czasowej Polski
       const today = new Date();
+      const todayDay = today.getDate(); // Dzień miesiąca (1-31)
+      
       const shift = data.shifts.find(shift => {
-        const shiftDate = new Date(shift.date);
-        return shiftDate.toDateString() === today.toDateString();
+        return shift.dayNumber === todayDay;
       });
 
       setTodayShift(shift || null);

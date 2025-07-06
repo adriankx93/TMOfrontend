@@ -85,6 +85,8 @@ export default function Sidebar() {
                   {item.icon}
                 </span>
                 <div>
+                  <div className="font-semibold">Grafik zmian</div>
+                  <div className="font-semibold">{item.label}</div>
                 </div>
               </div>
             </NavLink>
