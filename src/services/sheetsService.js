@@ -1,11 +1,13 @@
-// --- KONFIGURACJA ---
-const CONFIG = {
+import { SheetData, Technician, Shift, SheetConfig } from '../types/sheets';
+
+// Konfiguracja
+const CONFIG: SheetConfig = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E23', // Zakres dla techników (imię, nazwisko, specjalizacja)
-    dates: 'J32:AN32', // Daty w wierszu 32
-    shifts: 'J7:AN23', // Dane zmian dla techników
+    technicians: 'C7:E23', // Imię, nazwisko, specjalizacja
+    dates: 'J32:AN32',
+    shifts: 'J7:AN23',
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
@@ -20,8 +22,15 @@ const CONFIG = {
   }
 };
 
-const _fetchFromSheets = async (url, errorMessagePrefix) => {
+interface GoogleSheetsResponse {
+  sheets?: Array<{ properties: { title: string } }>;
+  valueRanges?: Array<{ values?: any[][] }>;
+  error?: { message: string };
+}
+
+const _fetchFromSheets = async (url: string, errorMessagePrefix: string): Promise<GoogleSheetsResponse> => {
   const response = await fetch(url);
+
   if (!response.ok) {
     const errorText = await response.text();
     let errorMessage = `${errorMessagePrefix}: ${response.status} ${response.statusText}`;
@@ -35,11 +44,12 @@ const _fetchFromSheets = async (url, errorMessagePrefix) => {
     }
     throw new Error(errorMessage);
   }
+
   return await response.json();
 };
 
 export const sheetsService = {
-  testConnection: async () => {
+  testConnection: async (): Promise<{ success: boolean; message: string; sheets: string[] }> => {
     const sheets = await sheetsService.getAvailableSheets();
     return {
       success: true,
@@ -48,21 +58,27 @@ export const sheetsService = {
     };
   },
 
-  getAvailableSheets: async () => {
+  getAvailableSheets: async (): Promise<string[]> => {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}?key=${CONFIG.apiKey}`;
     const data = await _fetchFromSheets(url, 'Nie udało się pobrać listy arkuszy');
+    if (!data.sheets) {
+      throw new Error('Brak arkuszy w odpowiedzi API');
+    }
     return data.sheets.map(s => s.properties.title.trim());
   },
 
-  getMultipleRanges: async (sheetName, ranges) => {
+  getMultipleRanges: async (sheetName: string, ranges: string[]): Promise<any[][][]> => {
     const encodedSheetName = encodeURIComponent(sheetName);
     const rangesQuery = ranges.map(r => `ranges=${encodedSheetName}!${r}`).join('&');
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.spreadsheetId}/values:batchGet?${rangesQuery}&key=${CONFIG.apiKey}`;
     const data = await _fetchFromSheets(url, 'Błąd pobierania zakresów');
+    if (!data.valueRanges) {
+      throw new Error('Brak danych w odpowiedzi API');
+    }
     return data.valueRanges.map(r => r.values || []);
   },
 
-  getCurrentMonthData: async () => {
+  getCurrentMonthData: async (): Promise<SheetData> => {
     const now = new Date();
     const monthIndex = now.getMonth();
     const year = now.getFullYear();
@@ -74,11 +90,13 @@ export const sheetsService = {
       name.toLowerCase().includes(expectedMonthName.toLowerCase()) &&
       name.includes(year.toString())
     );
+
     if (!sheetName) {
       sheetName = allSheets.find(name =>
         name.toLowerCase().includes(expectedMonthName.toLowerCase())
       );
     }
+
     if (!sheetName) {
       throw new Error(`Nie znaleziono arkusza "${expectedMonthName} ${year}". Sprawdzone arkusze: ${allSheets.join(', ')}`);
     }
@@ -126,29 +144,28 @@ export const sheetsService = {
     };
   },
 
-  getCurrentMonthShifts: async () => {
+  getCurrentMonthShifts: async (): Promise<SheetData> => {
     return await sheetsService.getCurrentMonthData();
   },
 
-  parseTechnicians: (data) => {
+  parseTechnicians: (data: any[][]): Technician[] => {
     if (!data || !Array.isArray(data)) return [];
     return data
       .map((row, i) => {
         if (!row || !row[0]) return null;
-        const parts = row[0].split(' ');
         return {
           id: i,
           shiftRowIndex: i,
-          firstName: parts.slice(0, -1).join(' ').trim() || 'Technik',
-          lastName: parts.slice(-1)[0].trim() || '',
-          specialization: row[1]?.toString().trim() || '',
-          fullName: row[0].trim()
+          firstName: row[0].toString().trim(),
+          lastName: row[1]?.toString().trim() || '',
+          specialization: row[2]?.toString().trim() || 'Techniczny',
+          fullName: `${row[0]} ${row[1]}`.trim()
         };
       })
-      .filter(Boolean);
+      .filter((tech): tech is Technician => tech !== null);
   },
 
-  parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
+  parseShifts: (technicians: Technician[], dates: any[], shiftsData: any[][], year: number, monthIndex: number): Shift[] => {
     if (!technicians.length || !dates.length || !shiftsData.length) return [];
 
     return dates
@@ -164,7 +181,7 @@ export const sheetsService = {
 
         const date = new Date(year, monthIndex, dayNumber);
 
-        const shift = {
+        const shift: Shift = {
           date: date.toISOString().split('T')[0],
           dayNumber,
           dayTechnicians: [],
@@ -177,31 +194,36 @@ export const sheetsService = {
         technicians.forEach(tech => {
           const row = shiftsData[tech.shiftRowIndex] || [];
           const rawValue = (row[idx] || '').toString().trim().toLowerCase();
-          const tokens = rawValue.split(/\s|,/).map(s => s.trim()).filter(Boolean);
+          const tokens = rawValue.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
 
           tokens.forEach(token => {
-            if (token === CONFIG.shiftCodes.firstShift) {
-              shift.firstShiftTechnicians.push(tech.fullName);
-            } else if (token === CONFIG.shiftCodes.day) {
-              shift.dayTechnicians.push(tech.fullName);
-            } else if (token === CONFIG.shiftCodes.night) {
-              shift.nightTechnicians.push(tech.fullName);
-            } else if (token === CONFIG.shiftCodes.vacation) {
-              shift.vacationTechnicians.push(tech.fullName);
-            } else if (token === CONFIG.shiftCodes.sickLeave) {
-              shift.l4Technicians.push(tech.fullName);
+            switch (token) {
+              case CONFIG.shiftCodes.firstShift:
+                shift.firstShiftTechnicians.push(tech.fullName);
+                break;
+              case CONFIG.shiftCodes.day:
+                shift.dayTechnicians.push(tech.fullName);
+                break;
+              case CONFIG.shiftCodes.night:
+                shift.nightTechnicians.push(tech.fullName);
+                break;
+              case CONFIG.shiftCodes.vacation:
+                shift.vacationTechnicians.push(tech.fullName);
+                break;
+              case CONFIG.shiftCodes.sickLeave:
+                shift.l4Technicians.push(tech.fullName);
+                break;
             }
           });
         });
 
         shift.totalWorking =
           shift.dayTechnicians.length +
-          shift.nightTechnicians.length +
-          shift.firstShiftTechnicians.length;
+          shift.nightTechnicians.length;
 
         return shift;
       })
-      .filter(Boolean)
+      .filter((shift): shift is Shift => shift !== null)
       .sort((a, b) => a.dayNumber - b.dayNumber);
   },
 };
