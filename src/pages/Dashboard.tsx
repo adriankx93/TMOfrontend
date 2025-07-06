@@ -1,4 +1,3 @@
-w dashboard źle pokazuje pogodę oraz za mało tu bajerów ogólnie zmiany mi się podobają ich nie ruszaj no i na dole Technicy aktywni się nie zgadzają bo pokazuje w zmianie że jest 3:
 import { useEffect, useState } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { useTechnicians } from "../hooks/useTechnicians";
