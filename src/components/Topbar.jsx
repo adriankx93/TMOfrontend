@@ -12,29 +12,29 @@ export default function Topbar({ title, subtitle, action }) {
   });
 
   return (
-    <header className="bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl rounded-3xl mb-8 p-6">
+    <header className="glass-card mb-8 p-6 animate-slide-in-up">
       <div className="flex justify-between items-center">
         {/* Title Section */}
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <span className="text-white text-xl">🏢</span>
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue">
+            <span className="text-white text-2xl">⚡</span>
           </div>
           <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-white mb-1">
               {title}
             </h1>
-            <p className="text-slate-500 text-sm font-medium">
+            <p className="text-slate-400 text-lg font-medium">
               {subtitle}
             </p>
           </div>
         </div>
 
         {/* Right Section */}
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-6 items-center">
           {/* Time and Date */}
-          <div className="hidden lg:block text-right mr-4">
-            <div className="text-lg font-bold text-slate-800">{currentTime}</div>
-            <div className="text-sm text-slate-500 capitalize">{currentDate}</div>
+          <div className="hidden lg:block text-right">
+            <div className="text-2xl font-bold text-white">{currentTime}</div>
+            <div className="text-sm text-slate-400 capitalize">{currentDate}</div>
           </div>
 
           {/* Action Button */}
@@ -46,28 +46,22 @@ export default function Topbar({ title, subtitle, action }) {
               <span className="text-slate-400">🔍</span>
             </div>
             <input
-              className="pl-12 pr-4 py-3 w-80 rounded-2xl border border-slate-200 bg-slate-50/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all duration-200 placeholder-slate-400 font-medium"
-              placeholder="Szukaj zadań, techników..."
+              className="input-field pl-12 pr-4 py-3 w-80 placeholder-slate-400"
+              placeholder="Szukaj w systemie..."
             />
           </div>
 
           {/* Notifications */}
-          <button className="relative p-3 rounded-2xl bg-slate-100 hover:bg-slate-200 transition-all duration-200 group">
+          <button className="relative p-3 glass-card-light hover:bg-slate-600/30 transition-all duration-200 group">
             <span className="text-xl group-hover:scale-110 transition-transform duration-200">🔔</span>
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center glow-red">
               <span className="text-white text-xs font-bold">3</span>
             </div>
           </button>
 
-          {/* Profile */}
-          <button className="flex items-center gap-3 p-2 rounded-2xl hover:bg-slate-100 transition-all duration-200 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center font-bold text-white shadow-lg group-hover:scale-105 transition-transform duration-200">
-              K
-            </div>
-            <div className="hidden lg:block text-left">
-              <div className="font-semibold text-slate-800 text-sm">Koordynator</div>
-              <div className="text-slate-500 text-xs">Online</div>
-            </div>
+          {/* Quick Actions */}
+          <button className="p-3 glass-card-light hover:bg-slate-600/30 transition-all duration-200 group">
+            <span className="text-xl group-hover:scale-110 transition-transform duration-200">⚙️</span>
           </button>
         </div>
       </div>

@@ -9,52 +9,76 @@ export default function TasksPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const tabs = [
-    { id: "current", label: "Bieżące zadania", icon: "📋" },
-    { id: "pool", label: "Pula zadań", icon: "🔄" },
-    { id: "completed", label: "Zakończone", icon: "✅" },
-    { id: "overdue", label: "Przeterminowane", icon: "⚠️" }
+    { id: "current", label: "Aktywne", icon: "⚡", count: 12, color: "blue" },
+    { id: "pool", label: "Pula zadań", icon: "🔄", count: 5, color: "amber" },
+    { id: "completed", label: "Zakończone", icon: "✅", count: 28, color: "green" },
+    { id: "overdue", label: "Przeterminowane", icon: "⚠️", count: 3, color: "red" }
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       <Topbar 
         title="Zarządzanie zadaniami" 
-        subtitle="Przypisuj i monitoruj zadania dla techników"
+        subtitle="System CMMS - Maintenance Management"
         action={
           <button 
             onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+            className="btn-primary flex items-center gap-2"
           >
-            + Nowe zadanie
+            <span>➕</span>
+            <span>Nowe zadanie</span>
           </button>
         }
       />
 
-      {/* Tabs */}
-      <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-2">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {tabs.map((tab) => (
+          <div key={tab.id} className="metric-card">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`w-12 h-12 bg-${tab.color}-500/20 rounded-xl flex items-center justify-center`}>
+                <span className="text-2xl">{tab.icon}</span>
+              </div>
+              <div className={`px-3 py-1 bg-${tab.color}-500/20 text-${tab.color}-400 rounded-full text-sm font-bold`}>
+                {tab.count}
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-1">{tab.label}</h3>
+            <p className="text-slate-400 text-sm">Zadania w kategorii</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Advanced Tabs */}
+      <div className="glass-card p-2">
         <div className="flex gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all duration-200 flex-1 ${
                 activeTab === tab.id
-                  ? "bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg"
-                  : "text-slate-600 hover:bg-slate-100"
+                  ? `gradient-primary text-white shadow-lg glow-${tab.color}`
+                  : "text-slate-400 hover:text-white hover:bg-slate-700/50"
               }`}
             >
               <span className="text-lg">{tab.icon}</span>
-              <span>{tab.label}</span>
+              <div className="text-left">
+                <div>{tab.label}</div>
+                <div className="text-xs opacity-70">{tab.count} zadań</div>
+              </div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Content */}
-      {activeTab === "current" && <TaskList type="current" />}
-      {activeTab === "pool" && <TaskPool />}
-      {activeTab === "completed" && <TaskList type="completed" />}
-      {activeTab === "overdue" && <TaskList type="overdue" />}
+      <div className="animate-slide-in-up">
+        {activeTab === "current" && <TaskList type="current" />}
+        {activeTab === "pool" && <TaskPool />}
+        {activeTab === "completed" && <TaskList type="completed" />}
+        {activeTab === "overdue" && <TaskList type="overdue" />}
+      </div>
 
       {/* Create Task Modal */}
       {showCreateModal && (
