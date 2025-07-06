@@ -232,16 +232,25 @@ export const buildingService = {
 function generateFloors(buildingCode: string, floorCount: number): Floor[] {
   const floors: Floor[] = [];
   
-  for (let i = 0; i < floorCount; i++) {
+  // Generuj 5 pięter (0-4) plus dach (5)
+  for (let i = 0; i <= floorCount; i++) {
     const floorNumber = i;
-    const floorName = i === 0 ? 'Parter' : `${i} piętro`;
+    let floorName: string;
+    
+    if (i === 0) {
+      floorName = 'Parter';
+    } else if (i === floorCount) {
+      floorName = 'Dach';
+    } else {
+      floorName = `${i} piętro`;
+    }
     
     floors.push({
       id: `${buildingCode.toLowerCase()}-floor-${i}`,
       number: floorNumber,
       name: floorName,
-      area: 500,
-      rooms: generateRooms(buildingCode, i),
+      area: i === floorCount ? 200 : 500, // Dach ma mniejszą powierzchnię
+      rooms: i === floorCount ? [] : generateRooms(buildingCode, i), // Dach nie ma pokoi
       facilities: generateFloorFacilities(buildingCode, i)
     });
   }
@@ -351,35 +360,66 @@ function generateRoomEquipment(roomType: Room['type']): Equipment[] {
 }
 
 function generateFloorFacilities(buildingCode: string, floorNumber: number): Facility[] {
-  return [
-    {
-      id: `facility-${buildingCode.toLowerCase()}-${floorNumber}-elevator`,
-      name: 'Winda',
-      type: 'elevator',
-      location: `${buildingCode} - ${floorNumber === 0 ? 'Parter' : `${floorNumber} piętro`}`,
-      status: 'operational',
-      lastInspection: '2024-01-15',
-      nextInspection: '2024-07-15'
-    },
-    {
-      id: `facility-${buildingCode.toLowerCase()}-${floorNumber}-stairs`,
-      name: 'Klatka schodowa',
-      type: 'stairs',
-      location: `${buildingCode} - ${floorNumber === 0 ? 'Parter' : `${floorNumber} piętro`}`,
-      status: 'operational',
-      lastInspection: '2024-01-10',
-      nextInspection: '2024-07-10'
-    },
-    {
-      id: `facility-${buildingCode.toLowerCase()}-${floorNumber}-exit`,
-      name: 'Wyjście ewakuacyjne',
-      type: 'emergency_exit',
-      location: `${buildingCode} - ${floorNumber === 0 ? 'Parter' : `${floorNumber} piętro`}`,
-      status: 'operational',
-      lastInspection: '2024-01-05',
-      nextInspection: '2024-07-05'
-    }
-  ];
+  const facilities: Facility[] = [];
+  
+  // Standardowe udogodnienia dla wszystkich pięter
+  if (floorNumber < 5) { // Nie dodawaj wind i schodów na dach
+    facilities.push(
+      {
+        id: `facility-${buildingCode.toLowerCase()}-${floorNumber}-elevator`,
+        name: 'Winda',
+        type: 'elevator',
+        location: `${buildingCode} - ${floorNumber === 0 ? 'Parter' : `${floorNumber} piętro`}`,
+        status: 'operational',
+        lastInspection: '2024-01-15',
+        nextInspection: '2024-07-15'
+      },
+      {
+        id: `facility-${buildingCode.toLowerCase()}-${floorNumber}-stairs`,
+        name: 'Klatka schodowa',
+        type: 'stairs',
+        location: `${buildingCode} - ${floorNumber === 0 ? 'Parter' : `${floorNumber} piętro`}`,
+        status: 'operational',
+        lastInspection: '2024-01-10',
+        nextInspection: '2024-07-10'
+      },
+      {
+        id: `facility-${buildingCode.toLowerCase()}-${floorNumber}-exit`,
+        name: 'Wyjście ewakuacyjne',
+        type: 'emergency_exit',
+        location: `${buildingCode} - ${floorNumber === 0 ? 'Parter' : `${floorNumber} piętro`}`,
+        status: 'operational',
+        lastInspection: '2024-01-05',
+        nextInspection: '2024-07-05'
+      }
+    );
+  }
+  
+  // Specjalne udogodnienia dla dachu
+  if (floorNumber === 5) {
+    facilities.push(
+      {
+        id: `facility-${buildingCode.toLowerCase()}-roof-hvac`,
+        name: 'Centrala HVAC',
+        type: 'emergency_exit', // Używamy tego typu jako placeholder
+        location: `${buildingCode} - Dach`,
+        status: 'operational',
+        lastInspection: '2024-01-10',
+        nextInspection: '2024-07-10'
+      },
+      {
+        id: `facility-${buildingCode.toLowerCase()}-roof-access`,
+        name: 'Dostęp do dachu',
+        type: 'emergency_exit',
+        location: `${buildingCode} - Dach`,
+        status: 'operational',
+        lastInspection: '2024-01-12',
+        nextInspection: '2024-07-12'
+      }
+    );
+  }
+  
+  return facilities;
 }
 
 function generateGarageFacilities(garageCode: string): Facility[] {

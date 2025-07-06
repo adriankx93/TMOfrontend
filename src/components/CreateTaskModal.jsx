@@ -50,6 +50,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
     "Budynek A - 2 piętro", 
     "Budynek A - 3 piętro",
     "Budynek A - 4 piętro",
+    "Budynek A - 5 piętro",
     "Budynek A - Dach",
     "Budynek A - Rozdzielnia główna A",
     "Budynek A - Centrala HVAC A",
@@ -60,6 +61,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
     "Budynek B - 2 piętro",
     "Budynek B - 3 piętro", 
     "Budynek B - 4 piętro",
+    "Budynek B - 5 piętro",
     "Budynek B - Dach",
     "Budynek B - Rozdzielnia główna B",
     
@@ -69,6 +71,8 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
     "Budynek C - 2 piętro",
     "Budynek C - 3 piętro",
     "Budynek C - 4 piętro", 
+    "Budynek C - 5 piętro",
+    "Budynek C - Dach",
     "Budynek C - Centrum danych",
     
     // Budynek D
@@ -77,6 +81,8 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
     "Budynek D - 2 piętro",
     "Budynek D - 3 piętro",
     "Budynek D - 4 piętro",
+    "Budynek D - 5 piętro",
+    "Budynek D - Dach",
     
     // Budynek E Compensa
     "Budynek E Compensa - Parter",
@@ -84,6 +90,8 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
     "Budynek E Compensa - 2 piętro",
     "Budynek E Compensa - 3 piętro",
     "Budynek E Compensa - 4 piętro",
+    "Budynek E Compensa - 5 piętro",
+    "Budynek E Compensa - Dach",
     "Budynek E Compensa - Rozdzielnia E Compensa",
     
     // Budynek E Bayer
@@ -92,6 +100,8 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
     "Budynek E Bayer - 2 piętro",
     "Budynek E Bayer - 3 piętro",
     "Budynek E Bayer - 4 piętro",
+    "Budynek E Bayer - 5 piętro",
+    "Budynek E Bayer - Dach",
     "Budynek E Bayer - Rozdzielnia E Bayer",
     
     // Garaże
