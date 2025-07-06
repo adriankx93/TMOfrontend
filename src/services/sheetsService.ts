@@ -5,9 +5,9 @@ const CONFIG: SheetConfig = {
   spreadsheetId: '1SVXZOpWk949RMxhHULOqxZe9kNJkAVyvXFtUq-5lbjQ',
   apiKey: 'AIzaSyDUv_kAUkinXFE8H1UXGSM-GV-cUeNp8JY',
   ranges: {
-    technicians: 'C7:E30', // ROZSZERZONY ZAKRES dla wszystkich techników
+    technicians: 'C7:E18', // Zakres dla techników (imię, nazwisko, specjalizacja)
     dates: 'J32:AN32',
-    shifts: 'J7:AN30', // ROZSZERZONY ZAKRES dla wszystkich techników
+    shifts: 'J7:AN18', // Dane zmian dla techników
   },
   monthNames: [
     'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',

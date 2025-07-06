@@ -28,7 +28,7 @@ export default function TechniciansFromSheets() {
   const fetchTechniciansData = async () => {
     try {
       setLoading(true);
-      const data = await sheetsService.getCurrentMonthData();
+      const data = await sheetsService.getCurrentMonthShifts();
       
       const today = new Date();
       const todayShift = data.shifts.find(shift => {
@@ -92,6 +92,7 @@ export default function TechniciansFromSheets() {
 
       setTechnicians(enhancedTechnicians);
     } catch (err) {
+      console.error('Error fetching technicians data:', err);
       setError(err instanceof Error ? err.message : "Błąd pobierania danych");
     } finally {
       setLoading(false);

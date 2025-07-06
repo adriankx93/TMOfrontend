@@ -56,6 +56,7 @@ export default function App() {
           <Route path="/materialy" element={<MaterialsPage />} />
           <Route path="/current-month" element={<CurrentMonthPage />} />
           <Route path="/technicians" element={<TechniciansPage />} />
+          <Route path="/technicy" element={<TechniciansPage />} />
           <Route path="/raporty" element={<ReportsPage />} />
           <Route path="/ustawienia" element={<SettingsPage />} />
           <Route path="/profil" element={<ProfilePage />} />

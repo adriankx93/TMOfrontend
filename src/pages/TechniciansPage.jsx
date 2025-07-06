@@ -1,5 +1,5 @@
 import Topbar from "../components/Topbar";
-import TechniciansFromSheets from "../components/TechniciansFromSheets";
+import TechniciansFromSheets from "../components/TechniciansFromSheets.tsx";
 
 export default function TechniciansPage() {
   return (
