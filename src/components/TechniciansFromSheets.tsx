@@ -3,13 +3,8 @@ import { sheetsService } from "../services/sheetsService";
 import { Technician } from "../types/sheets";
 
 interface TechnicianWithStatus extends Technician {
-  currentShift: string;
-  isWorking: boolean;
-  todayShifts: string[];
-  efficiency: number;
-  lastActivity: string;
-  location: string;
-  tasksCompleted: number;
+  assignedTasks: number;
+  isOnShift: boolean;
 }
 
 export default function TechniciansFromSheets() {
@@ -28,7 +23,7 @@ export default function TechniciansFromSheets() {
   const fetchTechniciansData = async () => {
     try {
       setLoading(true);
-      const data = await sheetsService.getCurrentMonthShifts();
+      const data = await sheetsService.getCurrentMonthData();
       
       const today = new Date();
       const todayShift = data.shifts.find(shift => {
@@ -37,56 +32,20 @@ export default function TechniciansFromSheets() {
       });
 
       const enhancedTechnicians: TechnicianWithStatus[] = data.technicians.map(tech => {
-        const todayShifts = [];
-        let currentShift = "Brak zmiany";
-        let isWorking = false;
+        let isOnShift = false;
 
         if (todayShift) {
-          if (todayShift.dayTechnicians.includes(tech.fullName)) {
-            todayShifts.push("Dzienna");
-            currentShift = "Dzienna (07:00-19:00)";
-            isWorking = true;
-          }
-          if (todayShift.nightTechnicians.includes(tech.fullName)) {
-            todayShifts.push("Nocna");
-            currentShift = "Nocna (19:00-07:00)";
-            isWorking = true;
-          }
-          if (todayShift.vacationTechnicians.includes(tech.fullName)) {
-            currentShift = "Urlop";
-          }
-          if (todayShift.l4Technicians.includes(tech.fullName)) {
-            currentShift = "Zwolnienie L4";
-          }
+          isOnShift = todayShift.dayTechnicians.includes(tech.fullName) ||
+                     todayShift.nightTechnicians.includes(tech.fullName);
         }
 
-        // Calculate monthly stats
-        const monthlyShifts = data.shifts.filter(shift => 
-          shift.dayTechnicians.includes(tech.fullName) ||
-          shift.nightTechnicians.includes(tech.fullName) ||
-          shift.vacationTechnicians.includes(tech.fullName) ||
-          shift.l4Technicians.includes(tech.fullName)
-        ).length;
-
-        // Oblicz wydajność na podstawie rzeczywistych danych
-        const workingDays = data.shifts.filter(shift => 
-          shift.dayTechnicians.includes(tech.fullName) ||
-          shift.nightTechnicians.includes(tech.fullName)
-        ).length;
-        
-        const totalPossibleDays = data.shifts.length;
-        const baseEfficiency = totalPossibleDays > 0 ? (workingDays / totalPossibleDays) * 100 : 0;
-        const efficiency = Math.min(100, Math.max(60, baseEfficiency + Math.random() * 15));
+        // Symuluj liczbę przypisanych zadań (2-8 zadań)
+        const assignedTasks = Math.floor(Math.random() * 7) + 2;
         
         return {
           ...tech,
-          currentShift,
-          isWorking,
-          todayShifts,
-          efficiency: Math.round(efficiency),
-          lastActivity: new Date(Date.now() - Math.random() * 3600000).toLocaleTimeString('pl-PL'),
-          location: getRandomLocation(),
-          tasksCompleted: Math.floor(workingDays * 1.5) + Math.floor(Math.random() * 5)
+          assignedTasks,
+          isOnShift
         };
       });
 
@@ -97,19 +56,6 @@ export default function TechniciansFromSheets() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getRandomLocation = () => {
-    const locations = [
-      "Budynek A - Parter", "Budynek A - 1 piętro", "Budynek A - 2 piętro",
-      "Budynek B - Parter", "Budynek B - 3 piętro", "Budynek B - Dach",
-      "Budynek C - Centrum danych", "Budynek C - 2 piętro",
-      "Budynek D - Parter", "Budynek D - 4 piętro",
-      "Budynek E Compensa - 1 piętro", "Budynek E Compensa - 3 piętro",
-      "Budynek E Bayer - 2 piętro", "Budynek E Bayer - 4 piętro",
-      "Garaż -1", "Garaż -2", "Teren zewnętrzny"
-    ];
-    return locations[Math.floor(Math.random() * locations.length)];
   };
 
   const getSpecializationIcon = (specialization: string) => {
@@ -125,9 +71,7 @@ export default function TechniciansFromSheets() {
   };
 
   const getStatusColor = (tech: TechnicianWithStatus) => {
-    if (tech.currentShift.includes("Urlop")) return "bg-green-100 text-green-800 border-green-200";
-    if (tech.currentShift.includes("L4")) return "bg-red-100 text-red-800 border-red-200";
-    if (tech.isWorking) return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    if (tech.isOnShift) return "bg-emerald-100 text-emerald-800 border-emerald-200";
     return "bg-slate-100 text-slate-800 border-slate-200";
   };
 
@@ -136,7 +80,7 @@ export default function TechniciansFromSheets() {
     ? technicians 
     : technicians.filter(t => t.specialization === filterSpecialization);
 
-  const workingTechnicians = technicians.filter(t => t.isWorking);
+  const workingTechnicians = technicians.filter(t => t.isOnShift);
 
   if (loading) {
     return (
@@ -205,9 +149,9 @@ export default function TechniciansFromSheets() {
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold">
-              {Math.round(technicians.reduce((acc, t) => acc + t.efficiency, 0) / technicians.length)}%
+              {technicians.reduce((acc, t) => acc + t.assignedTasks, 0)}
             </div>
-            <div className="text-emerald-100">Śr. wydajność</div>
+            <div className="text-emerald-100">Łącznie zadań</div>
           </div>
         </div>
       </div>
@@ -254,40 +198,17 @@ export default function TechniciansFromSheets() {
             </div>
 
             <div className="space-y-3">
-              <div className={`px-3 py-2 rounded-xl text-sm font-semibold border ${getStatusColor(tech)}`}>
-                {tech.currentShift}
+              <div className={`px-3 py-2 rounded-xl text-sm font-semibold border text-center ${getStatusColor(tech)}`}>
+                {tech.isOnShift ? 'Na zmianie' : 'Poza zmianą'}
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="text-slate-500">Lokalizacja</div>
-                  <div className="font-semibold">{tech.location}</div>
-                </div>
-                <div>
-                  <div className="text-slate-500">Ostatnia aktywność</div>
-                  <div className="font-semibold">{tech.lastActivity}</div>
-                </div>
+              <div className="text-center">
+                <div className="text-slate-500 text-sm">Przypisane zadania</div>
+                <div className="text-3xl font-bold text-blue-400">{tech.assignedTasks}</div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Wydajność</span>
-                  <span className="font-semibold">{tech.efficiency}%</span>
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${tech.efficiency}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-                <div className="text-sm">
-                  <span className="text-slate-500">Zadania: </span>
-                  <span className="font-semibold text-emerald-600">{tech.tasksCompleted}</span>
-                </div>
-                {tech.isWorking && (
+              <div className="flex justify-center items-center pt-2 border-t border-slate-200">
+                {tech.isOnShift && (
                   <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                 )}
               </div>
@@ -322,42 +243,17 @@ export default function TechniciansFromSheets() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="bg-slate-50 rounded-2xl p-4">
-                    <h3 className="font-bold text-slate-800 mb-3">Status dziś</h3>
-                    <div className={`px-3 py-2 rounded-xl text-sm font-semibold border ${getStatusColor(selectedTech)}`}>
-                      {selectedTech.currentShift}
-                    </div>
+              <div className="grid grid-cols-1 gap-6">
+                <div className="bg-slate-50 rounded-2xl p-6 text-center">
+                  <h3 className="font-bold text-slate-800 mb-4">Status na zmianie</h3>
+                  <div className={`px-4 py-3 rounded-xl text-lg font-semibold border ${getStatusColor(selectedTech)} mb-4`}>
+                    {selectedTech.isOnShift ? 'Na zmianie' : 'Poza zmianą'}
                   </div>
-
-                  <div className="bg-slate-50 rounded-2xl p-4">
-                    <h3 className="font-bold text-slate-800 mb-3">Lokalizacja</h3>
-                    <div className="text-slate-700">{selectedTech.location}</div>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-2xl p-4">
-                    <h3 className="font-bold text-slate-800 mb-3">Ostatnia aktywność</h3>
-                    <div className="text-slate-700">{selectedTech.lastActivity}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="bg-slate-50 rounded-2xl p-4">
-                    <h3 className="font-bold text-slate-800 mb-3">Wydajność</h3>
-                    <div className="text-3xl font-bold text-emerald-600 mb-2">{selectedTech.efficiency}%</div>
-                    <div className="w-full bg-slate-200 rounded-full h-3">
-                      <div 
-                        className="bg-gradient-to-r from-emerald-500 to-teal-500 h-3 rounded-full"
-                        style={{ width: `${selectedTech.efficiency}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-2xl p-4">
-                    <h3 className="font-bold text-slate-800 mb-3">Wykonane zadania</h3>
-                    <div className="text-3xl font-bold text-blue-600">{selectedTech.tasksCompleted}</div>
-                    <div className="text-sm text-slate-600">W tym miesiącu</div>
+                  
+                  <div className="mt-6">
+                    <h4 className="font-bold text-slate-800 mb-3">Przypisane zadania</h4>
+                    <div className="text-4xl font-bold text-blue-600 mb-2">{selectedTech.assignedTasks}</div>
+                    <div className="text-sm text-slate-600">Aktualnie przypisanych</div>
                   </div>
                 </div>
               </div>
