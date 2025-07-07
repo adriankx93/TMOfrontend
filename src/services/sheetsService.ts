@@ -213,3 +213,9 @@ export const sheetsService = {
       .sort((a, b) => a.dayNumber - b.dayNumber);
   },
 };
+
+// >>> TO DODAJ NA SAMYM KOŃCU (po obiekcie sheetsService):
+export async function getEmployees() {
+  const data = await sheetsService.getCurrentMonthData();
+  return data.technicians;
+}
