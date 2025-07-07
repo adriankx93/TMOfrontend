@@ -6,7 +6,10 @@ export default function ProtokolGenerator() {
   const [dane, setDane] = useState(null);
   const [error, setError] = useState(null);
 
-  // Funkcja do pobrania i wyciągnięcia danych z HTML
+  // <<<< TWÓJ ADRES BACKENDU >>>>
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+  // przykład dla produkcji: "https://tmobackend-xxx.onrender.com"
+
   const fetchAndParse = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -14,22 +17,26 @@ export default function ProtokolGenerator() {
     setDane(null);
 
     try {
-      const res = await fetch(url, { credentials: "omit" });
-      if (!res.ok) throw new Error("Nie udało się pobrać strony!");
+      // PROXY przez backend! (NIE fetch(url) bo to nie zadziała na SPIE)
+      const api = `${BACKEND_URL}/api/protokol?url=${encodeURIComponent(url)}`;
+      const res = await fetch(api);
+      if (!res.ok) throw new Error("Nie udało się pobrać zgłoszenia!");
       const html = await res.text();
 
-      const doc = new DOMParser().parseFromString(html, "text/html");
+      const doc = new window.DOMParser().parseFromString(html, "text/html");
 
-      // Pomocnicza do pobierania wartości z tabeli
       const getField = (label) => {
         const labelEl = Array.from(doc.querySelectorAll("td.nportal_opis"))
-          .find((td) => td.textContent.replace(/[\s:]/g, "").toLowerCase() === label.replace(/[\s:]/g, "").toLowerCase());
+          .find((td) =>
+            td.textContent.replace(/[\s:]/g, "").toLowerCase() ===
+            label.replace(/[\s:]/g, "").toLowerCase()
+          );
         return labelEl
           ? labelEl.nextElementSibling?.textContent.trim() || ""
           : "";
       };
 
-      // Dane główne
+      // Dane z tabeli
       const zgłaszający = getField("ZGŁASZAJACY");
       const status = getField("STATUS");
       const typ = getField("TYP");
@@ -69,7 +76,7 @@ export default function ProtokolGenerator() {
     }
   };
 
-  // Drukuje tylko kartę zgłoszenia, w przyjaznej wersji A4
+  // Drukowanie jednej strony z kartą zgłoszenia
   const handlePrint = () => {
     if (!dane) return;
     const printWindow = window.open("", "_blank");
@@ -123,7 +130,7 @@ export default function ProtokolGenerator() {
             .value { color: #152336; font-size: 1rem; flex: 1; }
             .adres { font-weight: 600; color: #2d3c4d; margin: 12px 0 6px 0; font-size: 1.05rem;}
             .tresc { margin: 5px 0 14px 0; color: #202020; font-size: 1.04rem; white-space: pre-line; }
-            .link { color: #195c97; text-decoration: underline; word-break: break-all; font-size: 0.99em;}
+            .link { color: #1753d1; text-decoration: underline; word-break: break-all; font-size: 0.99em;}
             .drukuj-btn {
               margin: 24px auto 0 auto;
               display: block;
@@ -223,7 +230,7 @@ export default function ProtokolGenerator() {
             <div className="row">
               <div className="label">Link:</div>
               <div className="value">
-                <a href={dane.link} target="_blank" rel="noopener noreferrer" className="link" style={{ color: "#195c97" }}>
+                <a href={dane.link} target="_blank" rel="noopener noreferrer" className="link" style={{ color: "#1753d1" }}>
                   {dane.link}
                 </a>
               </div>
