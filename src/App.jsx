@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { authService } from "./services/authService";
 import Sidebar from "./components/Sidebar";
-import LoginPage from "./pages/LoginPage";
 
 import Dashboard from "./pages/Dashboard";
 import TasksPage from "./pages/TasksPage";
@@ -27,28 +25,6 @@ import NotebookPage from "./pages/NotebookPage";
 import TrendAnalysisPage from "./pages/TrendAnalysisPage";
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if user is authenticated
-    const authenticated = authService.isAuthenticated();
-    setIsAuthenticated(authenticated);
-    setLoading(false);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
-
   return (
     <div className="bg-slate-900 min-h-screen flex">
       <Sidebar />

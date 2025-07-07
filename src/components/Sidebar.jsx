@@ -1,12 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { authService } from "../services/authService";
 
 export default function Sidebar() {
-  const user = authService.getCurrentUser();
-
-  const handleLogout = () => {
-    authService.logout();
-    window.location.reload();
+  // Mock user data since authentication is disabled
+  const user = {
+    firstName: "Administrator",
+    lastName: "Systemu",
+    role: "Admin"
   };
 
   const navItems = [
@@ -123,13 +122,10 @@ export default function Sidebar() {
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="w-full py-2 px-4 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg text-sm text-slate-300 hover:text-white transition-all duration-200 flex items-center gap-2"
-          >
-            <span>🚪</span>
-            <span>Wyloguj się</span>
-          </button>
+          <div className="w-full py-2 px-4 bg-slate-700/50 rounded-lg text-sm text-slate-300 text-center">
+            <span>🔓</span>
+            <span className="ml-2">Tryb demo</span>
+          </div>
         </div>
 
         <div className="text-slate-500 text-xs text-center mt-4">
