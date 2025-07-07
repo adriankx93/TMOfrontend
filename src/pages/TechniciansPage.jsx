@@ -1,76 +1,75 @@
-import Topbar from "../components/Topbar";
-import TechniciansFromSheets from "../components/TechniciansFromSheets.tsx";
+import { useEffect, useState } from "react";
 
-export default function TechniciansPage() {
+// Przykładowa struktura jednego technika – zmień według swoich danych
+type Technician = {
+  id: string | number;
+  name: string;
+  skills?: string[];     // Jeśli masz tablicę
+  position?: string;     // Jeśli masz tekst
+  [key: string]: any;    // Dla bezpieczeństwa
+};
+
+export default function TechniciansFromSheets() {
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState<string>("");
+
+  useEffect(() => {
+    setLoading(true);
+    fetch("/api/technicians") // Zmień na swój endpoint!
+      .then((res) => {
+        if (!res.ok) throw new Error("Błąd pobierania danych");
+        return res.json();
+      })
+      .then((data) => {
+        setTechnicians(Array.isArray(data) ? data : []);
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Bezpieczne filtrowanie (możesz dopasować do swoich potrzeb!)
+  const filtered = technicians.filter((t) => {
+    // Przykład: filtruje po imieniu i/lub po skills, bezpiecznie!
+    const nameMatch = (t.name || "").toLowerCase().includes(search.toLowerCase());
+    const skillsMatch = Array.isArray(t.skills)
+      ? t.skills.some(skill =>
+          (skill || "").toLowerCase().includes(search.toLowerCase())
+        )
+      : false;
+    return nameMatch || skillsMatch;
+  });
+
+  if (loading) return <div>Ładowanie...</div>;
+  if (error) return <div className="text-red-500">Błąd: {error}</div>;
+  if (!technicians.length) return <div>Brak techników.</div>;
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      <Topbar 
-        title="Zespół techniczny" 
-        subtitle="Zarządzanie zasobami ludzkimi i kompetencjami"
-        action={
-          <button className="btn-primary flex items-center gap-2">
-            <span>👥</span>
-            <span>Dodaj technika</span>
-          </button>
-        }
-      />
-      
-      {/* Team Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">👥</span>
-            </div>
-            <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">
-              17
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Zespół</h3>
-          <p className="text-slate-400 text-sm">Aktywni technicy</p>
-        </div>
-
-        <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">⚡</span>
-            </div>
-            <div className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-bold">
-              12
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Na zmianie</h3>
-          <p className="text-slate-400 text-sm">Obecnie pracuje</p>
-        </div>
-
-        <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">📊</span>
-            </div>
-            <div className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-bold">
-              87%
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Wydajność</h3>
-          <p className="text-slate-400 text-sm">Średnia zespołu</p>
-        </div>
-
-        <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">🎯</span>
-            </div>
-            <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-bold">
-              24
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Zadania</h3>
-          <p className="text-slate-400 text-sm">Wykonane dziś</p>
-        </div>
+    <div>
+      <div className="mb-4">
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Szukaj technika lub umiejętności..."
+          className="input input-bordered w-full max-w-xs"
+        />
       </div>
-
-      <TechniciansFromSheets />
+      <div className="grid gap-4">
+        {filtered.map((tech) => (
+          <div key={tech.id} className="p-4 rounded-xl bg-white/10">
+            <div className="font-bold">{tech.name}</div>
+            {Array.isArray(tech.skills) && tech.skills.length > 0 && (
+              <div className="text-sm text-slate-400">
+                {tech.skills.join(", ")}
+              </div>
+            )}
+            {tech.position && (
+              <div className="text-sm text-slate-400">{tech.position}</div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
