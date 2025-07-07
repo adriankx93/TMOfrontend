@@ -22,7 +22,9 @@ export default function Sidebar() {
     { to: "/notatnik", label: "Notatnik", icon: "📝", description: "Notatki i komunikacja" },
     { to: "/raporty", label: "Analityka", icon: "📊", description: "Raporty i KPI" },
     { to: "/analiza-trendow", label: "Trendy", icon: "📈", description: "Analiza awaryjności" },
-    { to: "/ustawienia", label: "Ustawienia", icon: "⚙️", description: "Konfiguracja systemu" }
+    { to: "/ustawienia", label: "Ustawienia", icon: "⚙️", description: "Konfiguracja systemu" },
+    // NOWY LINK:
+    { to: "/protokol", label: "Protokół", icon: "📝", description: "Generator protokołów" }
   ];
 
   const currentShift =
