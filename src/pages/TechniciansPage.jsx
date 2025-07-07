@@ -1,12 +1,10 @@
-@@ -3,11 +3,73 @@ import TechniciansFromSheets from "../components/TechniciansFromSheets.tsx";
+import Topbar from "../components/Topbar.jsx";
+import TechniciansFromSheets from "../components/TechniciansFromSheets.tsx";
 
 export default function TechniciansPage() {
   return (
-    <div className="space-y-8">
     <div className="space-y-8 animate-fade-in">
       <Topbar 
-        title="Zespół techników" 
-        subtitle="Dane techników z arkusza Google Sheets"
         title="Zespół techniczny" 
         subtitle="Zarządzanie zasobami ludzkimi i kompetencjami"
         action={
@@ -75,3 +73,4 @@ export default function TechniciansPage() {
       <TechniciansFromSheets />
     </div>
   );
+}
