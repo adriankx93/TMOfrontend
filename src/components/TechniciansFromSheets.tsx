@@ -35,8 +35,8 @@ export default function TechniciansFromSheets() {
         let isOnShift = false;
 
         if (todayShift) {
-          isOnShift = todayShift.dayTechnicians.includes(tech.fullName) ||
-                     todayShift.nightTechnicians.includes(tech.fullName);
+          isOnShift = (todayShift.dayTechnicians ?? []).includes(tech.fullName) ||
+                     (todayShift.nightTechnicians ?? []).includes(tech.fullName);
         }
 
         // Symuluj liczbę przypisanych zadań (2-8 zadań)
