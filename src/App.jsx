@@ -23,6 +23,7 @@ import EquipmentPage from "./pages/EquipmentPage";
 import ToolsPage from "./pages/ToolsPage";
 import NotebookPage from "./pages/NotebookPage";
 import TrendAnalysisPage from "./pages/TrendAnalysisPage";
+import ProtokolGenerator from "./components/ProtokolGenerator"; // <-- NOWY IMPORT
 
 export default function App() {
   return (
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="/profil" element={<ProfilePage />} />
           <Route path="/uzytkownicy" element={<UsersPage />} />
           <Route path="/uzytkownicy/:id" element={<EditUserPage />} />
+          <Route path="/protokol" element={<ProtokolGenerator />} /> {/* <-- NOWA STRONA */}
         </Routes>
       </main>
     </div>
