@@ -12,6 +12,7 @@ export interface Shift {
   dayNumber: number;
   dayTechnicians: string[];
   nightTechnicians: string[];
+  firstShiftTechnicians: string[];
   vacationTechnicians: string[];
   l4Technicians: string[];
   totalWorking: number;
