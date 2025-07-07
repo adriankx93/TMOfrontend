@@ -54,8 +54,10 @@ const tools = [
   { numer: "OPC00007161", nazwa: "Zgrzewarka PP", kategoria: "elektronarzędzia" },
 ];
 
+// Dynamiczne kategorie na podstawie narzędzi
 const categories = Array.from(new Set(tools.map(t => t.kategoria)));
 
+// Mapowanie ikon na kategorie
 const iconMap = {
   "elektronarzędzia": "⚡",
   "narzędzia": "🔧",
@@ -67,10 +69,12 @@ const iconMap = {
 
 export default function ToolsPage() {
   const [activeCategory, setActiveCategory] = useState(null);
+  const [search, setSearch] = useState("");
 
   const [activeTab, setActiveTab] = useState("inventory");
   const [showRequestModal, setShowRequestModal] = useState(false);
 
+  // Statystyki
   const tabs = [
     { id: "inventory", label: "Inwentaryzacja", icon: "📋", count: tools.length },
     { id: "requests", label: "Zapotrzebowania", icon: "📝", count: 8 },
@@ -78,7 +82,13 @@ export default function ToolsPage() {
     { id: "condition", label: "Stan techniczny", icon: "🔧", count: 23 }
   ];
 
-  const filteredTools = tools.filter(t => t.kategoria === activeCategory);
+  // Filtrowanie po kategorii i wyszukiwaniu
+  const filteredTools = tools
+    .filter(t => t.kategoria === activeCategory)
+    .filter(t =>
+      t.numer.toLowerCase().includes(search.toLowerCase()) ||
+      t.nazwa.toLowerCase().includes(search.toLowerCase())
+    );
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -115,44 +125,72 @@ export default function ToolsPage() {
       </div>
 
       {/* Kategorie narzędzi */}
-      <div className="glass-card p-8">
-        <h3 className="text-xl font-bold text-white mb-6">Kategorie narzędzi</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {categories.map((cat) => (
-            <div
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`glass-card-light p-6 text-center transition-all duration-200 cursor-pointer
-                ${activeCategory === cat ? "bg-orange-500/40 ring-2 ring-orange-400" : "hover:bg-slate-600/30"}`}
-            >
-              <div className="text-3xl mb-3">
-                {iconMap[cat] || "🛠️"}
+      {!activeCategory && (
+        <div className="glass-card p-8">
+          <h3 className="text-xl font-bold text-white mb-6">Kategorie narzędzi</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {categories.map((cat) => (
+              <div
+                key={cat}
+                onClick={() => {
+                  setActiveCategory(cat);
+                  setSearch(""); // resetuj wyszukiwarkę przy zmianie kategorii
+                }}
+                className={`glass-card-light p-6 text-center transition-all duration-200 cursor-pointer
+                  hover:bg-slate-600/30 ${activeCategory === cat ? "bg-orange-500/40 ring-2 ring-orange-400" : ""}`}
+              >
+                <div className="text-3xl mb-3">
+                  {iconMap[cat] || "🛠️"}
+                </div>
+                <h4 className="font-semibold text-white mb-2">{cat}</h4>
+                <p className="text-sm text-slate-400">
+                  {tools.filter(t => t.kategoria === cat).length} narzędzi
+                </p>
               </div>
-              <h4 className="font-semibold text-white mb-2">{cat}</h4>
-              <p className="text-sm text-slate-400">
-                {tools.filter(t => t.kategoria === cat).length} narzędzi
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Lista narzędzi w wybranej kategorii */}
       {activeCategory && (
         <div className="glass-card p-8 mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-white">
-              Narzędzia w kategorii: <span className="text-orange-300">{activeCategory}</span>
-            </h3>
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">
+                Narzędzia w kategorii: <span className="text-orange-300">{activeCategory}</span>
+              </h3>
+              <p className="text-slate-400">
+                Łącznie: <span className="text-orange-300">{tools.filter(t => t.kategoria === activeCategory).length}</span>
+              </p>
+            </div>
             <button
               className="text-slate-400 hover:text-orange-400 text-sm underline"
               onClick={() => setActiveCategory(null)}
             >
-              Wróć do wyboru kategorii
+              ← Wróć do wyboru kategorii
             </button>
           </div>
+
+          {/* Wyszukiwarka */}
+          <div className="mb-4 flex items-center gap-2">
+            <input
+              className="rounded-xl px-4 py-2 bg-slate-700/50 text-slate-200 w-full max-w-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Szukaj po nazwie lub numerze narzędzia..."
+            />
+            <button
+              className="ml-2 text-slate-400 hover:text-orange-400"
+              onClick={() => setSearch("")}
+              title="Wyczyść wyszukiwanie"
+            >✕</button>
+          </div>
+
+          {/* Tabela narzędzi */}
           {filteredTools.length === 0 ? (
-            <div className="text-slate-400 py-12 text-center">Brak narzędzi w tej kategorii.</div>
+            <div className="text-slate-400 py-12 text-center">Brak narzędzi spełniających kryteria.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-slate-200">
