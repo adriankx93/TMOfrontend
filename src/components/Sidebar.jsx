@@ -151,6 +151,7 @@ export default function Sidebar() {
                       : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                   }`
                 }
+               >
               >
                 <span className="text-slate-300 group-hover:text-white transition-colors duration-200">
                   {item.icon}
