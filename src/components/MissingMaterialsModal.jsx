@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTasks } from "../hooks/useTasks";
 
 export default function MissingMaterialsModal({ task, onClose, onMoved }) {
-  const { updateTask } = useTasks();
+  const { moveToPool } = useTasks();
   const [materials, setMaterials] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,28 +35,12 @@ export default function MissingMaterialsModal({ task, onClose, onMoved }) {
       const fullReason = `Brak materiałów: ${materials}${additionalNotes ? `. Dodatkowe uwagi: ${additionalNotes}` : ''}`;
       
       const updateData = {
-        status: 'pool',
-        poolReason: fullReason,
         missingMaterials: materials,
         additionalNotes: additionalNotes,
-        movedToPoolAt: new Date().toISOString(),
-        movedToPoolBy: "Administrator Systemu",
-        assignedTo: null,
-        needsMaterials: true,
-        lastModified: new Date().toISOString(),
-        lastModifiedBy: "Administrator Systemu",
-        history: [
-          ...(task.history || []),
-          {
-            action: "moved_to_pool_materials",
-            user: "Administrator Systemu",
-            timestamp: new Date().toISOString(),
-            details: `Przeniesiono do puli - brak materiałów: ${materials}`
-          }
-        ]
+        needsMaterials: true
       };
 
-      await updateTask(task._id, updateData);
+      await moveToPool(task._id, fullReason, updateData);
       onMoved();
     } catch (err) {
       setError(err.response?.data?.message || "Błąd podczas przenoszenia zadania");

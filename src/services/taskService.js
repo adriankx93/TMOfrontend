@@ -103,10 +103,10 @@ export const taskService = {
   },
 
   // Move task to pool
-  moveToPool: async (taskId, reason) => {
+  moveToPool: async (taskId, reason, additionalData = {}) => {
     try {
       try {
-        const response = await API.post(`/tasks/${taskId}/move-to-pool`, { reason });
+        const response = await API.post(`/tasks/${taskId}/move-to-pool`, { reason, ...additionalData });
         return response.data;
       } catch (apiError) {
         console.log('API not available, using mock data');
@@ -117,6 +117,7 @@ export const taskService = {
           const currentTask = mockDataService.tasks[taskIndex];
           mockDataService.tasks[taskIndex] = {
             ...currentTask,
+            ...additionalData,
             status: 'pool',
             poolReason: reason,
             movedToPoolAt: new Date().toISOString(),

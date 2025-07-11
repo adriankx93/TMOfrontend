@@ -55,7 +55,7 @@ export const useTasks = () => {
 
   const moveToPool = async (taskId, reason) => {
     try {
-      const updatedTask = await taskService.moveToPool(taskId, reason);
+      const updatedTask = await taskService.moveToPool(taskId, reason, {});
       setTasks(prev => prev.map(task => 
         task._id === taskId ? updatedTask : task
       ));
@@ -63,6 +63,22 @@ export const useTasks = () => {
     } catch (err) {
       setError(err.message);
       throw err;
+    }
+  };
+
+  const moveToPoolWithData = async (taskId, reason, additionalData = {}) => {
+    try {
+      setLoading(true);
+      const updatedTask = await taskService.moveToPool(taskId, reason, additionalData);
+      setTasks(prev => prev.map(task => 
+        task._id === taskId ? updatedTask : task
+      ));
+      return updatedTask;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,6 +121,7 @@ export const useTasks = () => {
     updateTask,
     deleteTask,
     moveToPool,
+    moveToPoolWithData,
     assignFromPool,
     completeTask
   };
