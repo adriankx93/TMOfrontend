@@ -110,7 +110,11 @@ export default function TaskList({ type }) {
   };
 
   const handleProgressChange = async (taskId, newProgress) => {
-    setLoading(true);
+    // Debounce the API call for smoother interaction
+    clearTimeout(window.progressTimeout);
+    
+    window.progressTimeout = setTimeout(async () => {
+      setLoading(true);
     try {
       const updateData = {
         progress: newProgress,
@@ -133,6 +137,7 @@ export default function TaskList({ type }) {
     } finally {
       setLoading(false);
     }
+    }, 300); // Wait 300ms after user stops dragging
   };
 
   const handleMoveToPool = async (taskId) => {
@@ -210,23 +215,34 @@ export default function TaskList({ type }) {
                           <span>Postęp</span>
                           <span className="font-semibold text-white">{task.progress || 0}%</span>
                         </div>
-                        <div className="space-y-1 md:space-y-2">
-                          <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={task.progress || 0}
-                            onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
-                            className="w-full h-1 md:h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
-                            disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
-                          />
-                          <div 
-                            className="gradient-primary h-1 md:h-2 rounded-full transition-all duration-300 pointer-events-none"
-                            style={{ width: `${task.progress || 0}%` }}
-                          ></div>
-                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={task.progress || 0}
+                          onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
+                          className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer progress-slider"
+                          disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
+                        />
                       </div>
                     )}
+
+                    {/* Progress bar for all tasks */}
+                    <div className="mb-1 md:mb-3">
+                      <div className="flex justify-between mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
+                        <span>Postęp</span>
+                        <span className="font-semibold text-white">{task.progress || 0}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={task.progress || 0}
+                        onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
+                        className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer progress-slider"
+                        disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
+                      />
+                    </div>
 
                     {task.createdBy && (
                       <div className="mobile-micro-text md:text-xs text-slate-500 hidden lg:block">
