@@ -22,10 +22,10 @@ export default function MissingMaterialsModal({ task, onClose, onMoved }) {
   ];
 
   const handleSubmit = async (e) => {
+    e.preventDefault();
 
     setLoading(true);
     setError("");
-            action: "moved_to_pool_materials",
     try {
       const fullReason = `Brak materiałów: ${materials}${additionalNotes ? `. Dodatkowe uwagi: ${additionalNotes}` : ''}`;
       
