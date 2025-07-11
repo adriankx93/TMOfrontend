@@ -141,8 +141,11 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
-      <div className="glass-card max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4">
+      <div className={`glass-card w-full max-w-2xl ${
+        window.innerWidth < 768 ? 'modal-mobile' : 'max-h-[90vh]'
+      } overflow-y-auto mobile-scroll`}>
+        <div className={window.innerWidth < 768 ? 'modal-content-mobile' : ''}>
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
@@ -151,7 +154,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
               </div>
               <div>
                 <h2 className="text-xl md:text-2xl font-bold text-white">Nowe zadanie</h2>
-                <p className="text-slate-400 text-sm md:text-base hidden md:block">Utwórz zadanie dla zespołu technicznego</p>
+                <p className="text-slate-400 text-sm">Utwórz zadanie dla zespołu technicznego</p>
               </div>
             </div>
             <button 
@@ -405,6 +408,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
             </div>
           </form>
         </div>
+      </div>
       </div>
     </div>
   );

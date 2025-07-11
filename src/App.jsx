@@ -23,37 +23,56 @@ import EquipmentPage from "./pages/EquipmentPage";
 import ToolsPage from "./pages/ToolsPage";
 import NotebookPage from "./pages/NotebookPage";
 import TrendAnalysisPage from "./pages/TrendAnalysisPage";
-import ProtokolGenerator from "./components/ProtokolGenerator"; // <-- NOWY IMPORT
+import ProtokolGenerator from "./components/ProtokolGenerator";
 
 export default function App() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
-    <div className="bg-slate-900 min-h-screen flex flex-col md:flex-row">
-      <Sidebar />
-      <main className="flex-1 px-4 md:px-8 py-6 pt-20 md:pt-6 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/zadania" element={<TasksPage />} />
-          <Route path="/budynki" element={<BuildingsPage />} />
-          <Route path="/shifts" element={<ShiftsPage />} />
-          <Route path="/magazyn" element={<InventoryPage />} />
-          <Route path="/materialy" element={<MaterialsPage />} />
-          <Route path="/current-month" element={<CurrentMonthPage />} />
-          <Route path="/technicians" element={<TechniciansPage />} />
-          <Route path="/technicy" element={<TechniciansPage />} />
-          <Route path="/raporty" element={<ReportsPage />} />
-          <Route path="/przeglady" element={<InspectionsPage />} />
-          <Route path="/usterki" element={<DefectsPage />} />
-          <Route path="/urzadzenia" element={<EquipmentPage />} />
-          <Route path="/narzedzia" element={<ToolsPage />} />
-          <Route path="/notatnik" element={<NotebookPage />} />
-          <Route path="/analiza-trendow" element={<TrendAnalysisPage />} />
-          <Route path="/ustawienia" element={<SettingsPage />} />
-          <Route path="/profil" element={<ProfilePage />} />
-          <Route path="/uzytkownicy" element={<UsersPage />} />
-          <Route path="/uzytkownicy/:id" element={<EditUserPage />} />
-          <Route path="/protokol" element={<ProtokolGenerator />} /> {/* <-- NOWA STRONA */}
-        </Routes>
-      </main>
+    <div className="bg-slate-900 min-h-screen w-full overflow-x-hidden">
+      <div className="flex flex-col md:flex-row min-h-screen w-full">
+        <Sidebar />
+        <main className={`flex-1 w-full overflow-x-hidden ${
+          isMobile ? 'pt-16 px-3 py-4' : 'px-4 md:px-8 py-6'
+        } bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900`}>
+          <div className="w-full max-w-full">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/zadania" element={<TasksPage />} />
+              <Route path="/budynki" element={<BuildingsPage />} />
+              <Route path="/shifts" element={<ShiftsPage />} />
+              <Route path="/magazyn" element={<InventoryPage />} />
+              <Route path="/materialy" element={<MaterialsPage />} />
+              <Route path="/current-month" element={<CurrentMonthPage />} />
+              <Route path="/technicians" element={<TechniciansPage />} />
+              <Route path="/technicy" element={<TechniciansPage />} />
+              <Route path="/raporty" element={<ReportsPage />} />
+              <Route path="/przeglady" element={<InspectionsPage />} />
+              <Route path="/usterki" element={<DefectsPage />} />
+              <Route path="/urzadzenia" element={<EquipmentPage />} />
+              <Route path="/narzedzia" element={<ToolsPage />} />
+              <Route path="/notatnik" element={<NotebookPage />} />
+              <Route path="/analiza-trendow" element={<TrendAnalysisPage />} />
+              <Route path="/ustawienia" element={<SettingsPage />} />
+              <Route path="/profil" element={<ProfilePage />} />
+              <Route path="/uzytkownicy" element={<UsersPage />} />
+              <Route path="/uzytkownicy/:id" element={<EditUserPage />} />
+              <Route path="/protokol" element={<ProtokolGenerator />} />
+            </Routes>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
