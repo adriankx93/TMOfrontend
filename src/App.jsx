@@ -27,9 +27,9 @@ import ProtokolGenerator from "./components/ProtokolGenerator"; // <-- NOWY IMPO
 
 export default function App() {
   return (
-    <div className="bg-slate-900 min-h-screen flex">
+    <div className="bg-slate-900 min-h-screen flex flex-col md:flex-row">
       <Sidebar />
-      <main className="flex-1 px-4 md:px-8 py-6 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <main className="flex-1 px-4 md:px-8 py-6 pt-20 md:pt-6 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/zadania" element={<TasksPage />} />

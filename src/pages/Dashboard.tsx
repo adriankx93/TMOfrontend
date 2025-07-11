@@ -142,27 +142,27 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header with System Status */}
-      <div className="glass-card p-8">
+      <div className="glass-card p-4 md:p-8">
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue">
-                <span className="text-white text-2xl">🏢</span>
+            <div className="flex items-center gap-3 md:gap-4 mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue">
+                <span className="text-white text-xl md:text-2xl">🏢</span>
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">TechSPIE Dashboard</h1>
-                <p className="text-slate-300 text-lg">
+                <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">TechSPIE Dashboard</h1>
+                <p className="text-slate-300 text-sm md:text-lg">
                   Technical Facility Management System - Miasteczko Orange
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-6 text-slate-300">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-slate-300">
               <div className="flex items-center gap-2">
                 <div className="status-indicator bg-green-400"></div>
                 <span className="text-sm font-medium">System Online</span>
               </div>
-              <div className="text-sm font-medium">
+              <div className="text-xs md:text-sm font-medium">
                 {new Date().toLocaleDateString('pl-PL', { 
                   weekday: 'long', 
                   year: 'numeric', 
@@ -170,7 +170,7 @@ export default function Dashboard() {
                   day: 'numeric' 
                 })}
               </div>
-              <div className="text-lg font-bold text-white">
+              <div className="text-base md:text-lg font-bold text-white">
                 {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
@@ -178,7 +178,7 @@ export default function Dashboard() {
           
           {/* Weather Widget */}
           {weather && (
-            <div className="glass-card-light p-6 min-w-[280px]">
+            <div className="glass-card-light p-4 md:p-6 min-w-[200px] md:min-w-[280px] hidden lg:block">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">{weather.icon}</span>
@@ -212,30 +212,30 @@ export default function Dashboard() {
       </div>
 
       {/* Current Shift Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         {/* Current Shift */}
         <div className="lg:col-span-2 glass-card overflow-hidden">
-          <div className={`${isDay ? 'gradient-warning' : 'gradient-primary'} px-8 py-6`}>
+          <div className={`${isDay ? 'gradient-warning' : 'gradient-primary'} px-4 md:px-8 py-4 md:py-6`}>
             <div className="flex items-center justify-between text-white">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl md:text-3xl">
                   {isDay ? '☀️' : '🌙'}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">{getCurrentShiftName()}</h2>
-                  <p className="text-white/80 text-lg">{getCurrentShiftTime()}</p>
+                  <h2 className="text-lg md:text-2xl font-bold">{getCurrentShiftName()}</h2>
+                  <p className="text-white/80 text-sm md:text-lg">{getCurrentShiftTime()}</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-bold">
+                <div className="text-2xl md:text-4xl font-bold">
                   {loading ? '...' : currentShiftTechnicians.length}
                 </div>
-                <div className="text-white/80">Na zmianie</div>
+                <div className="text-white/80 text-sm md:text-base">Na zmianie</div>
               </div>
             </div>
           </div>
 
-          <div className="p-8">
+          <div className="p-4 md:p-8">
             {loading ? (
               <div className="animate-pulse space-y-4">
                 <div className="h-4 bg-slate-700 rounded w-1/4"></div>
@@ -247,17 +247,17 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-white mb-4">Technicy na aktualnej zmianie</h3>
+                  <h3 className="text-base md:text-lg font-bold text-white mb-4">Technicy na aktualnej zmianie</h3>
                   {currentShiftTechnicians.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-3 md:gap-4">
                       {currentShiftTechnicians.map((techName, index) => (
-                        <div key={index} className="flex items-center gap-3 p-4 glass-card-light rounded-xl hover:bg-slate-600/30 transition-all duration-200">
-                          <div className="w-10 h-10 gradient-accent rounded-full flex items-center justify-center text-white font-bold">
+                        <div key={index} className="flex items-center gap-3 p-3 md:p-4 glass-card-light rounded-xl hover:bg-slate-600/30 transition-all duration-200">
+                          <div className="w-8 h-8 md:w-10 md:h-10 gradient-accent rounded-full flex items-center justify-center text-white font-bold text-sm">
                             {techName.split(' ').map(n => n[0]).join('')}
                           </div>
                           <div>
-                            <div className="font-semibold text-white">{techName}</div>
-                            <div className="text-sm text-emerald-400 flex items-center gap-1">
+                            <div className="font-semibold text-white text-sm md:text-base">{techName}</div>
+                            <div className="text-xs md:text-sm text-emerald-400 flex items-center gap-1">
                               <div className="status-indicator bg-emerald-400"></div>
                               Aktywny
                             </div>
@@ -274,19 +274,19 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-bold text-white mb-4">Zadania na aktualnej zmianie</h3>
+                  <h3 className="text-base md:text-lg font-bold text-white mb-4">Zadania na aktualnej zmianie</h3>
                   {currentShiftTasks.length > 0 ? (
                     <div className="space-y-3">
                       {currentShiftTasks.slice(0, 3).map((task) => (
-                        <div key={task._id} className="flex items-center gap-3 p-4 glass-card-light rounded-xl">
-                          <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400">
+                        <div key={task._id} className="flex items-center gap-3 p-3 md:p-4 glass-card-light rounded-xl">
+                          <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 text-sm">
                             📋
                           </div>
                           <div className="flex-1">
-                            <div className="font-semibold text-white">{task.title}</div>
-                            <div className="text-sm text-slate-400">{task.location} • {task.category}</div>
+                            <div className="font-semibold text-white text-sm md:text-base">{task.title}</div>
+                            <div className="text-xs md:text-sm text-slate-400">{task.location} • {task.category}</div>
                           </div>
-                          <div className={`px-3 py-1 rounded-xl text-sm font-semibold ${
+                          <div className={`px-2 md:px-3 py-1 rounded-xl text-xs md:text-sm font-semibold ${
                             task.status === 'in_progress' 
                               ? 'bg-amber-500/20 text-amber-400' 
                               : 'bg-blue-500/20 text-blue-400'
@@ -296,7 +296,7 @@ export default function Dashboard() {
                         </div>
                       ))}
                       {currentShiftTasks.length > 3 && (
-                        <div className="text-center text-sm text-slate-400">
+                        <div className="text-center text-xs md:text-sm text-slate-400">
                           ... i {currentShiftTasks.length - 3} więcej zadań
                         </div>
                       )}
@@ -315,41 +315,41 @@ export default function Dashboard() {
 
         {/* Next Shift Preview */}
         <div className="glass-card overflow-hidden">
-          <div className={`${!isDay ? 'gradient-warning' : 'gradient-primary'} px-6 py-4`}>
+          <div className={`${!isDay ? 'gradient-warning' : 'gradient-primary'} px-4 md:px-6 py-3 md:py-4`}>
             <div className="text-white text-center">
-              <div className="text-2xl mb-2">{!isDay ? '☀️' : '🌙'}</div>
-              <h3 className="text-lg font-bold">{getNextShiftName()}</h3>
-              <p className="text-white/80">{getNextShiftTime()}</p>
+              <div className="text-xl md:text-2xl mb-2">{!isDay ? '☀️' : '🌙'}</div>
+              <h3 className="text-base md:text-lg font-bold">{getNextShiftName()}</h3>
+              <p className="text-white/80 text-sm md:text-base">{getNextShiftTime()}</p>
             </div>
           </div>
 
-          <div className="p-6">
-            <h4 className="font-bold text-white mb-4">Następna zmiana</h4>
+          <div className="p-4 md:p-6">
+            <h4 className="font-bold text-white mb-3 md:mb-4 text-sm md:text-base">Następna zmiana</h4>
             {nextShiftTechnicians.length > 0 ? (
               <div className="space-y-3">
                 {nextShiftTechnicians.map((techName, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 glass-card-light rounded-xl">
-                    <div className="w-8 h-8 bg-slate-500/30 rounded-full flex items-center justify-center text-slate-400 text-sm font-bold">
+                  <div key={index} className="flex items-center gap-2 md:gap-3 p-2 md:p-3 glass-card-light rounded-xl">
+                    <div className="w-6 h-6 md:w-8 md:h-8 bg-slate-500/30 rounded-full flex items-center justify-center text-slate-400 text-xs md:text-sm font-bold">
                       {techName.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                      <div className="font-medium text-white text-sm">{techName}</div>
+                      <div className="font-medium text-white text-xs md:text-sm">{techName}</div>
                       <div className="text-xs text-slate-400">Oczekuje</div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 text-slate-400">
-                <span className="text-2xl mb-2 block">⏰</span>
+              <div className="text-center py-4 md:py-6 text-slate-400">
+                <span className="text-xl md:text-2xl mb-2 block">⏰</span>
                 <div className="text-sm">Brak techników na następnej zmianie</div>
               </div>
             )}
 
-            <div className="mt-6 pt-4 border-t border-slate-600">
+            <div className="mt-4 md:mt-6 pt-3 md:pt-4 border-t border-slate-600">
               <div className="text-sm text-slate-400 text-center">
                 <div className="font-semibold text-white">Zmiana za:</div>
-                <div className="text-lg font-bold text-orange-400">
+                <div className="text-base md:text-lg font-bold text-orange-400">
                   {isDay 
                     ? `${19 - currentHour}h ${60 - new Date().getMinutes()}min`
                     : `${7 + (24 - currentHour)}h ${60 - new Date().getMinutes()}min`
@@ -362,140 +362,140 @@ export default function Dashboard() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
         <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">👷</span>
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-xl md:text-2xl">👷</span>
             </div>
-            <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">
+            <div className="px-2 md:px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs md:text-sm font-bold">
               {dashboardStats.activeTechnicians}
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Technicy aktywni</h3>
-          <p className="text-slate-400 text-sm">Na dzisiejszej zmianie</p>
+          <h3 className="text-sm md:text-lg font-semibold text-white mb-1">Technicy aktywni</h3>
+          <p className="text-slate-400 text-xs md:text-sm">Na dzisiejszej zmianie</p>
         </div>
 
         <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">📋</span>
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-xl md:text-2xl">📋</span>
             </div>
-            <div className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-bold">
+            <div className="px-2 md:px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs md:text-sm font-bold">
               {dashboardStats.currentTasks}
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Zadania w toku</h3>
-          <p className="text-slate-400 text-sm">Przypisane i w realizacji</p>
+          <h3 className="text-sm md:text-lg font-semibold text-white mb-1">Zadania w toku</h3>
+          <p className="text-slate-400 text-xs md:text-sm">Przypisane i w realizacji</p>
         </div>
 
         <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">🔄</span>
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-xl md:text-2xl">🔄</span>
             </div>
-            <div className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-bold">
+            <div className="px-2 md:px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs md:text-sm font-bold">
               {dashboardStats.poolTasks}
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Pula zadań</h3>
-          <p className="text-slate-400 text-sm">Oczekujące na przypisanie</p>
+          <h3 className="text-sm md:text-lg font-semibold text-white mb-1">Pula zadań</h3>
+          <p className="text-slate-400 text-xs md:text-sm">Oczekujące na przypisanie</p>
         </div>
 
         <div className="metric-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">✅</span>
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-xl md:text-2xl">✅</span>
             </div>
-            <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-bold">
+            <div className="px-2 md:px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs md:text-sm font-bold">
               {dashboardStats.completedToday}
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-white mb-1">Wykonane dziś</h3>
-          <p className="text-slate-400 text-sm">Zakończone zadania</p>
+          <h3 className="text-sm md:text-lg font-semibold text-white mb-1">Wykonane dziś</h3>
+          <p className="text-slate-400 text-xs md:text-sm">Zakończone zadania</p>
         </div>
       </div>
 
       {/* System Health & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
         {/* System Health */}
-        <div className="glass-card p-8">
-          <h3 className="text-xl font-bold text-white mb-6">Status systemu</h3>
+        <div className="glass-card p-4 md:p-8">
+          <h3 className="text-lg md:text-xl font-bold text-white mb-4 md:mb-6">Status systemu</h3>
           
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 glass-card-light rounded-xl">
+            <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="status-indicator bg-green-400"></div>
-                <span className="font-semibold text-white">Baza danych</span>
+                <span className="font-semibold text-white text-sm md:text-base">Baza danych</span>
               </div>
-              <span className="text-green-400 text-sm font-medium">Operacyjna</span>
+              <span className="text-green-400 text-xs md:text-sm font-medium">Operacyjna</span>
             </div>
 
-            <div className="flex items-center justify-between p-4 glass-card-light rounded-xl">
+            <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="status-indicator bg-green-400"></div>
-                <span className="font-semibold text-white">Google Sheets API</span>
+                <span className="font-semibold text-white text-sm md:text-base">Google Sheets API</span>
               </div>
-              <span className="text-green-400 text-sm font-medium">Synchronizacja aktywna</span>
+              <span className="text-green-400 text-xs md:text-sm font-medium">Synchronizacja aktywna</span>
             </div>
 
-            <div className="flex items-center justify-between p-4 glass-card-light rounded-xl">
+            <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="status-indicator bg-amber-400"></div>
-                <span className="font-semibold text-white">Powiadomienia</span>
+                <span className="font-semibold text-white text-sm md:text-base">Powiadomienia</span>
               </div>
-              <span className="text-amber-400 text-sm font-medium">Częściowo aktywne</span>
+              <span className="text-amber-400 text-xs md:text-sm font-medium">Częściowo aktywne</span>
             </div>
 
-            <div className="flex items-center justify-between p-4 glass-card-light rounded-xl">
+            <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="status-indicator bg-green-400"></div>
-                <span className="font-semibold text-white">Monitoring</span>
+                <span className="font-semibold text-white text-sm md:text-base">Monitoring</span>
               </div>
-              <span className="text-green-400 text-sm font-medium">Online</span>
+              <span className="text-green-400 text-xs md:text-sm font-medium">Online</span>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="glass-card p-8">
-          <h3 className="text-xl font-bold text-white mb-6">Szybkie akcje</h3>
+        <div className="glass-card p-4 md:p-8">
+          <h3 className="text-lg md:text-xl font-bold text-white mb-4 md:mb-6">Szybkie akcje</h3>
           
           <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => window.location.href = '/zadania'}
-              className="p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
+              className="p-4 md:p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
             >
-              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">📋</div>
-              <div className="font-semibold text-blue-300">Nowe zadanie</div>
-              <div className="text-sm text-slate-400">Utwórz zadanie</div>
+              <div className="text-2xl md:text-3xl mb-2 md:mb-3 group-hover:scale-110 transition-transform duration-200">📋</div>
+              <div className="font-semibold text-blue-300 text-sm md:text-base">Nowe zadanie</div>
+              <div className="text-xs md:text-sm text-slate-400">Utwórz zadanie</div>
             </button>
             
             <button 
               onClick={() => window.location.href = '/technicy'}
-              className="p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
+              className="p-4 md:p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
             >
-              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">👷</div>
-              <div className="font-semibold text-emerald-300">Zespół</div>
-              <div className="text-sm text-slate-400">Zarządzaj technikami</div>
+              <div className="text-2xl md:text-3xl mb-2 md:mb-3 group-hover:scale-110 transition-transform duration-200">👷</div>
+              <div className="font-semibold text-emerald-300 text-sm md:text-base">Zespół</div>
+              <div className="text-xs md:text-sm text-slate-400">Zarządzaj technikami</div>
             </button>
             
             <button 
               onClick={() => window.location.href = '/budynki'}
-              className="p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
+              className="p-4 md:p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
             >
-              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">🏢</div>
-              <div className="font-semibold text-purple-300">Budynki</div>
-              <div className="text-sm text-slate-400">Infrastruktura</div>
+              <div className="text-2xl md:text-3xl mb-2 md:mb-3 group-hover:scale-110 transition-transform duration-200">🏢</div>
+              <div className="font-semibold text-purple-300 text-sm md:text-base">Budynki</div>
+              <div className="text-xs md:text-sm text-slate-400">Infrastruktura</div>
             </button>
             
             <button 
               onClick={() => window.location.href = '/raporty'}
-              className="p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
+              className="p-4 md:p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
             >
-              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200">📊</div>
-              <div className="font-semibold text-orange-300">Raporty</div>
-              <div className="text-sm text-slate-400">Analiza wydajności</div>
+              <div className="text-2xl md:text-3xl mb-2 md:mb-3 group-hover:scale-110 transition-transform duration-200">📊</div>
+              <div className="font-semibold text-orange-300 text-sm md:text-base">Raporty</div>
+              <div className="text-xs md:text-sm text-slate-400">Analiza wydajności</div>
             </button>
           </div>
         </div>

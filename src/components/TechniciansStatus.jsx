@@ -52,21 +52,21 @@ export default function TechniciansStatus() {
   const displayTechnicians = technicians.slice(0, 4);
 
   return (
-    <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl p-8">
+    <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl md:rounded-3xl shadow-xl p-4 md:p-8">
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-          <span className="text-white text-xl">👷</span>
+        <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+          <span className="text-white text-lg md:text-xl">👷</span>
         </div>
         <div>
-          <h3 className="text-xl font-bold text-slate-800">Status techników</h3>
-          <p className="text-slate-600">Aktualny status zespołu</p>
+          <h3 className="text-lg md:text-xl font-bold text-slate-800">Status techników</h3>
+          <p className="text-slate-600 text-sm md:text-base">Aktualny status zespołu</p>
         </div>
       </div>
 
       <div className="space-y-4">
         {displayTechnicians.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-2">👷</div>
+          <div className="text-center py-6 md:py-8">
+            <div className="text-3xl md:text-4xl mb-2">👷</div>
             <div className="text-slate-500">Brak techników w systemie</div>
           </div>
         ) : (
@@ -76,35 +76,35 @@ export default function TechniciansStatus() {
             const currentTask = getCurrentTask(tech._id);
             
             return (
-              <div key={tech._id} className="p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all duration-200">
+              <div key={tech._id} className="p-3 md:p-4 bg-slate-50 rounded-xl md:rounded-2xl hover:bg-slate-100 transition-all duration-200">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                       {tech.firstName[0]}{tech.lastName[0]}
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-800">{tech.firstName} {tech.lastName}</div>
-                      <div className="text-sm text-slate-600">{tech.specialization} • Zmiana {tech.shift}</div>
+                      <div className="font-semibold text-slate-800 text-sm md:text-base">{tech.firstName} {tech.lastName}</div>
+                      <div className="text-xs md:text-sm text-slate-600">{tech.specialization} • Zmiana {tech.shift}</div>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getStatusColor(tech.status)}`}>
+                  <span className={`px-2 md:px-3 py-1 rounded-xl text-xs md:text-sm font-semibold border ${getStatusColor(tech.status)}`}>
                     {getStatusLabel(tech.status)}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 text-xs md:text-sm mb-3">
                   <div>
                     <div className="text-slate-500">Lokalizacja:</div>
                     <div className="font-medium text-slate-800">{tech.currentLocation || 'Nieznana'}</div>
                   </div>
                   <div>
                     <div className="text-slate-500">Bieżące zadanie:</div>
-                    <div className="font-medium text-slate-800 truncate">{currentTask}</div>
+                    <div className="font-medium text-slate-800 line-clamp-2">{currentTask}</div>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-4 text-sm">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                  <div className="flex gap-3 md:gap-4 text-xs md:text-sm">
                     <div>
                       <span className="text-slate-500">Zadania: </span>
                       <span className="font-semibold text-orange-600">{currentTasks.length}</span>
@@ -116,7 +116,7 @@ export default function TechniciansStatus() {
                   </div>
                   
                   {currentTasks.length > 0 && (
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-slate-500 md:text-right">
                       {tech.lastActivity 
                         ? `Aktywny ${new Date(tech.lastActivity).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}`
                         : 'Brak aktywności'
@@ -131,7 +131,7 @@ export default function TechniciansStatus() {
       </div>
 
       {technicians.length > 4 && (
-        <div className="mt-4 text-center">
+        <div className="mt-3 md:mt-4 text-center">
           <div className="text-sm text-slate-500">
             Wyświetlono 4 z {technicians.length} techników
           </div>

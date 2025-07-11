@@ -48,18 +48,18 @@ export default function TasksOverview() {
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl shadow-xl overflow-hidden">
-      <div className="bg-gradient-to-r from-slate-50 to-orange-50 px-8 py-6 border-b border-slate-200/50">
+    <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl md:rounded-3xl shadow-xl overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-50 to-orange-50 px-4 md:px-8 py-4 md:py-6 border-b border-slate-200/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-xl">📋</span>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-lg md:text-xl">📋</span>
             </div>
             <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 Przegląd zadań
               </h2>
-              <p className="text-slate-500 font-medium">
+              <p className="text-slate-500 font-medium text-sm md:text-base">
                 Ostatnie zadania w systemie
               </p>
             </div>
@@ -67,35 +67,36 @@ export default function TasksOverview() {
           
           <button 
             onClick={() => navigate('/zadania')}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+            className="px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl md:rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-sm md:text-base"
           >
-            Zobacz wszystkie
+            <span className="hidden md:inline">Zobacz wszystkie</span>
+            <span className="md:hidden">Wszystkie</span>
           </button>
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         {recentTasks.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📋</div>
-            <h3 className="text-xl font-semibold text-slate-600 mb-2">Brak zadań</h3>
-            <p className="text-slate-500">Nie ma jeszcze żadnych zadań w systemie.</p>
+          <div className="text-center py-8 md:py-12">
+            <div className="text-4xl md:text-6xl mb-4">📋</div>
+            <h3 className="text-lg md:text-xl font-semibold text-slate-600 mb-2">Brak zadań</h3>
+            <p className="text-slate-500 text-sm md:text-base">Nie ma jeszcze żadnych zadań w systemie.</p>
           </div>
         ) : (
           <div className="grid gap-4">
             {recentTasks.map((task) => (
-              <div key={task._id} className="p-6 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all duration-200 border border-slate-200/50">
+              <div key={task._id} className="p-4 md:p-6 bg-slate-50 rounded-xl md:rounded-2xl hover:bg-slate-100 transition-all duration-200 border border-slate-200/50">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-slate-800 mb-2">{task.title}</h4>
-                    <div className="flex items-center gap-4 text-sm text-slate-600">
+                    <h4 className="font-semibold text-slate-800 mb-2 text-sm md:text-base line-clamp-2">{task.title}</h4>
+                    <div className="grid grid-cols-1 md:flex md:items-center gap-2 md:gap-4 text-xs md:text-sm text-slate-600">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
-                        <span>{getTechnicianName(task.assignedTo)}</span>
+                        <span className="truncate">{getTechnicianName(task.assignedTo)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span>📍</span>
-                        <span>{task.location}</span>
+                        <span className="truncate">{task.location}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span>🕐</span>
@@ -108,16 +109,16 @@ export default function TasksOverview() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span>🏷️</span>
-                        <span>{task.category}</span>
+                        <span className="truncate">{task.category}</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
-                    <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getStatusColor(task.status)}`}>
+                  <div className="flex flex-col md:flex-row gap-2 ml-2">
+                    <span className={`px-2 md:px-3 py-1 rounded-xl text-xs md:text-sm font-semibold border ${getStatusColor(task.status)}`}>
                       {getStatusLabel(task.status)}
                     </span>
-                    <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getPriorityColor(task.priority)}`}>
+                    <span className={`px-2 md:px-3 py-1 rounded-xl text-xs md:text-sm font-semibold border ${getPriorityColor(task.priority)}`}>
                       {task.priority}
                     </span>
                   </div>
@@ -125,13 +126,13 @@ export default function TasksOverview() {
                 
                 {task.progress !== undefined && task.status !== 'completed' && (
                   <div className="mt-3">
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-xs md:text-sm mb-1">
                       <span className="text-slate-600">Postęp</span>
                       <span className="font-semibold text-slate-800">{task.progress || 0}%</span>
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
+                    <div className="w-full bg-slate-200 rounded-full h-1.5 md:h-2">
                       <div 
-                        className="bg-gradient-to-r from-orange-500 to-red-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-orange-500 to-red-600 h-1.5 md:h-2 rounded-full transition-all duration-300"
                         style={{ width: `${task.progress || 0}%` }}
                       ></div>
                     </div>

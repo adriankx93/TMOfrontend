@@ -1,6 +1,10 @@
 import { NavLink } from "react-router-dom";
 
+import { useState } from "react";
+
 export default function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+
   // Mock user data since authentication is disabled
   const user = {
     firstName: "Administrator",
@@ -35,7 +39,29 @@ export default function Sidebar() {
     currentShift === "Dzienna" ? "07:00 - 19:00" : "19:00 - 07:00";
 
   return (
-    <aside className="w-80 bg-slate-900 border-r border-slate-700/50 min-h-screen flex flex-col shadow-2xl">
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-3 bg-slate-800 rounded-xl shadow-lg"
+      >
+        <span className="text-white text-xl">{isOpen ? '✕' : '☰'}</span>
+      </button>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed md:static inset-y-0 left-0 z-40 w-80 bg-slate-900 border-r border-slate-700/50 
+        min-h-screen flex flex-col shadow-2xl transform transition-transform duration-300
+        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
       {/* Header */}
       <div className="p-8 border-b border-slate-700/50">
         <div className="flex items-center gap-4 mb-6">
@@ -87,6 +113,7 @@ export default function Sidebar() {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={() => setIsOpen(false)}
               className={({ isActive }) =>
                 `group flex items-center gap-3 py-2 px-3 rounded-lg font-medium transition-all duration-200 ${
                   isActive
@@ -134,6 +161,7 @@ export default function Sidebar() {
           © {new Date().getFullYear()} TechSPIE v1.0
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
