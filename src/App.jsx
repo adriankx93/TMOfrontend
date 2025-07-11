@@ -43,9 +43,7 @@ export default function App() {
     <div className="bg-slate-900 min-h-screen w-full overflow-x-hidden">
       <div className="flex flex-col md:flex-row min-h-screen w-full">
         <Sidebar />
-        <main className={`flex-1 w-full overflow-x-hidden ${
-          isMobile ? 'pt-8 px-1 py-1' : 'px-4 md:px-8 py-6'
-        } bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900`}>
+        <main className="flex-1 w-full overflow-x-hidden px-2 py-2 md:px-8 md:py-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
           <div className="w-full max-w-full">
             <Routes>
               <Route path="/" element={<Dashboard />} />

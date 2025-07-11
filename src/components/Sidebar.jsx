@@ -142,8 +142,7 @@ export default function Sidebar() {
                   </span>
                   <div>
                     <div className="font-semibold text-sm">{item.label}</div>
-                    <div className="font-semibold mobile-micro-text md:text-sm">{item.label}</div>
-                    <div className="mobile-micro-text md:text-xs opacity-70 hidden lg:block">{item.description}</div>
+                    <div className="text-mobile-xs md:text-xs opacity-70 hidden lg:block">{item.description}</div>
                   </div>
                 </div>
               </NavLink>
