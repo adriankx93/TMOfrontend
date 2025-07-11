@@ -3,6 +3,8 @@ import { useTasks } from "../hooks/useTasks";
 import { sheetsService } from "../services/sheetsService";
 import TaskDetailsModal from "./TaskDetailsModal";
 import TaskEditModal from "./TaskEditModal";
+import MoveToPoolModal from "./MoveToPoolModal";
+import MissingMaterialsModal from "./MissingMaterialsModal";
 
 export default function TaskList({ type }) {
   const { tasks, updateTask, deleteTask, moveToPool, completeTask } = useTasks();
