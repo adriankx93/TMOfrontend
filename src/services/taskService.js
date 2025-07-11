@@ -34,7 +34,13 @@ export const taskService = {
         const newTask = {
           _id: mockDataService.generateId(),
           ...taskData,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          history: taskData.history || [{
+            action: "created",
+            user: "Administrator Systemu",
+            timestamp: new Date().toISOString(),
+            details: "Zadanie utworzone"
+          }]
         };
         
         mockDataService.tasks.push(newTask);
@@ -58,7 +64,11 @@ export const taskService = {
         
         const taskIndex = mockDataService.tasks.findIndex(t => t._id === taskId);
         if (taskIndex !== -1) {
-          mockDataService.tasks[taskIndex] = { ...mockDataService.tasks[taskIndex], ...taskData };
+          mockDataService.tasks[taskIndex] = { 
+            ...mockDataService.tasks[taskIndex], 
+            ...taskData,
+            lastModified: new Date().toISOString()
+          };
           return mockDataService.tasks[taskIndex];
         }
         throw new Error('Task not found');
@@ -104,12 +114,23 @@ export const taskService = {
         
         const taskIndex = mockDataService.tasks.findIndex(t => t._id === taskId);
         if (taskIndex !== -1) {
+          const currentTask = mockDataService.tasks[taskIndex];
           mockDataService.tasks[taskIndex] = {
-            ...mockDataService.tasks[taskIndex],
+            ...currentTask,
             status: 'pool',
             poolReason: reason,
             movedToPoolAt: new Date().toISOString(),
-            assignedTo: null
+            movedToPoolBy: "Administrator Systemu",
+            assignedTo: null,
+            history: [
+              ...(currentTask.history || []),
+              {
+                action: "status_changed_to_pool",
+                user: "Administrator Systemu",
+                timestamp: new Date().toISOString(),
+                details: `Przeniesiono do puli. Powód: ${reason}`
+              }
+            ]
           };
           return mockDataService.tasks[taskIndex];
         }
@@ -133,11 +154,22 @@ export const taskService = {
         
         const taskIndex = mockDataService.tasks.findIndex(t => t._id === taskId);
         if (taskIndex !== -1) {
+          const currentTask = mockDataService.tasks[taskIndex];
           mockDataService.tasks[taskIndex] = {
-            ...mockDataService.tasks[taskIndex],
+            ...currentTask,
             status: 'assigned',
             assignedTo: technicianId,
-            assignedAt: new Date().toISOString()
+            assignedAt: new Date().toISOString(),
+            assignedBy: "Administrator Systemu",
+            history: [
+              ...(currentTask.history || []),
+              {
+                action: "status_changed_to_assigned",
+                user: "Administrator Systemu",
+                timestamp: new Date().toISOString(),
+                details: "Zadanie przypisane do technika"
+              }
+            ]
           };
           return mockDataService.tasks[taskIndex];
         }
@@ -161,10 +193,21 @@ export const taskService = {
         
         const taskIndex = mockDataService.tasks.findIndex(t => t._id === taskId);
         if (taskIndex !== -1) {
+          const currentTask = mockDataService.tasks[taskIndex];
           mockDataService.tasks[taskIndex] = {
-            ...mockDataService.tasks[taskIndex],
+            ...currentTask,
             status: 'completed',
-            ...completionData
+            progress: 100,
+            ...completionData,
+            history: [
+              ...(currentTask.history || []),
+              {
+                action: "status_changed_to_completed",
+                user: completionData.completedBy || "Administrator Systemu",
+                timestamp: new Date().toISOString(),
+                details: "Zadanie zakończone"
+              }
+            ]
           };
           return mockDataService.tasks[taskIndex];
         }

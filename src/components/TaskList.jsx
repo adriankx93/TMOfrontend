@@ -1,16 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTasks } from "../hooks/useTasks";
-import { useTechnicians } from "../hooks/useTechnicians";
+import { sheetsService } from "../services/sheetsService";
 import TaskDetailsModal from "./TaskDetailsModal";
-import AssignTaskModal from "./AssignTaskModal";
+import TaskEditModal from "./TaskEditModal";
 
 export default function TaskList({ type }) {
   const { tasks, updateTask, deleteTask, moveToPool, completeTask } = useTasks();
-  const { technicians } = useTechnicians();
+  const [technicians, setTechnicians] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchTechnicians();
+  }, []);
+
+  const fetchTechnicians = async () => {
+    try {
+      const data = await sheetsService.getCurrentMonthData();
+      setTechnicians(data.technicians);
+    } catch (error) {
+      console.error('Error fetching technicians:', error);
+      setTechnicians([]);
+    }
+  };
 
   // Filter tasks based on type
   const filteredTasks = tasks.filter(task => {
@@ -21,8 +35,6 @@ export default function TaskList({ type }) {
         return task.status === 'completed';
       case 'overdue':
         return task.status === 'overdue' || (task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed');
-      case 'pool':
-        return task.status === 'pool';
       default:
         return true;
     }
@@ -52,17 +64,32 @@ export default function TaskList({ type }) {
 
   const getPriorityColor = (priority) => {
     switch(priority) {
-      case 'Wysoki': return 'bg-red-100 text-red-800 border-red-200';
+      case 'Krytyczny': return 'bg-red-100 text-red-800 border-red-200';
+      case 'Wysoki': return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'Średni': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'Niski': return 'bg-gray-100 text-gray-800 border-gray-200';
       default: return 'bg-slate-100 text-slate-800 border-slate-200';
     }
   };
 
-  const handleStatusChange = async (taskId, newStatus) => {
+  const handleStatusChange = async (taskId, newStatus, additionalData = {}) => {
     setLoading(true);
     try {
-      await updateTask(taskId, { status: newStatus });
+      const updateData = {
+        status: newStatus,
+        ...additionalData,
+        history: [
+          ...(tasks.find(t => t._id === taskId)?.history || []),
+          {
+            action: `status_changed_to_${newStatus}`,
+            user: "Administrator Systemu",
+            timestamp: new Date().toISOString(),
+            details: `Status zmieniony na: ${getStatusLabel(newStatus)}`
+          }
+        ]
+      };
+
+      await updateTask(taskId, updateData);
     } catch (error) {
       console.error('Error updating task status:', error);
     } finally {
@@ -70,51 +97,44 @@ export default function TaskList({ type }) {
     }
   };
 
+  const handleCompleteTask = async (taskId) => {
+    const notes = prompt("Dodaj notatki o wykonaniu zadania (opcjonalne):");
+    await handleStatusChange(taskId, 'completed', {
+      completedAt: new Date().toISOString(),
+      notes: notes || "",
+      completedBy: "Administrator Systemu"
+    });
+  };
+
   const handleMoveToPool = async (taskId) => {
     const reason = prompt("Podaj powód przeniesienia do puli:");
     if (reason) {
-      setLoading(true);
-      try {
-        await moveToPool(taskId, reason);
-      } catch (error) {
-        console.error('Error moving task to pool:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleCompleteTask = async (taskId) => {
-    const notes = prompt("Dodaj notatki o wykonaniu zadania (opcjonalne):");
-    setLoading(true);
-    try {
-      await completeTask(taskId, {
-        completedAt: new Date().toISOString(),
-        notes: notes || ""
+      await handleStatusChange(taskId, 'pool', {
+        poolReason: reason,
+        movedToPoolAt: new Date().toISOString(),
+        movedToPoolBy: "Administrator Systemu",
+        assignedTo: null
       });
-    } catch (error) {
-      console.error('Error completing task:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleDeleteTask = async (taskId) => {
-    if (window.confirm("Czy na pewno chcesz usunąć to zadanie?")) {
-      setLoading(true);
-      try {
-        await deleteTask(taskId);
-      } catch (error) {
-        console.error('Error deleting task:', error);
-      } finally {
-        setLoading(false);
-      }
+  const handleMissingMaterials = async (taskId) => {
+    const materials = prompt("Jakich materiałów brakuje?");
+    if (materials) {
+      await handleStatusChange(taskId, 'pool', {
+        poolReason: `Brak materiałów: ${materials}`,
+        missingMaterials: materials,
+        movedToPoolAt: new Date().toISOString(),
+        movedToPoolBy: "Administrator Systemu",
+        assignedTo: null,
+        needsMaterials: true
+      });
     }
   };
 
   const getTechnicianName = (technicianId) => {
-    const technician = technicians.find(t => t._id === technicianId);
-    return technician ? `${technician.firstName} ${technician.lastName}` : 'Nieprzypisane';
+    const technician = technicians.find(t => t.id === technicianId);
+    return technician ? technician.fullName : 'Nieprzypisane';
   };
 
   const openDetailsModal = (task) => {
@@ -122,9 +142,9 @@ export default function TaskList({ type }) {
     setShowDetailsModal(true);
   };
 
-  const openAssignModal = (task) => {
+  const openEditModal = (task) => {
     setSelectedTask(task);
-    setShowAssignModal(true);
+    setShowEditModal(true);
   };
 
   return (
@@ -142,7 +162,13 @@ export default function TaskList({ type }) {
               <div key={task._id} className="p-6 glass-card-light rounded-2xl hover:bg-slate-600/30 transition-all duration-200">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-white mb-2">{task.title}</h4>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h4 className="font-semibold text-white">{task.title}</h4>
+                      <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getPriorityColor(task.priority)}`}>
+                        {task.priority}
+                      </span>
+                    </div>
+                    
                     <div className="flex items-center gap-4 text-sm text-slate-300 mb-3">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
@@ -156,9 +182,9 @@ export default function TaskList({ type }) {
                         <span>🕐</span>
                         <span>
                           {task.dueDate 
-                            ? new Date(task.dueDate).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })
+                            ? new Date(task.dueDate).toLocaleDateString('pl-PL')
                             : 'Bez terminu'
-                          } ({task.shift})
+                          } ({task.shift || task.assignedShift || 'Brak zmiany'})
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -185,35 +211,35 @@ export default function TaskList({ type }) {
                         </div>
                       </div>
                     )}
+
+                    {task.createdBy && (
+                      <div className="text-xs text-slate-500">
+                        Utworzone przez: {task.createdBy} • {new Date(task.createdAt).toLocaleString('pl-PL')}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex flex-col gap-2 ml-4">
                     <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getStatusColor(task.status)}`}>
                       {getStatusLabel(task.status)}
                     </span>
-                    <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getPriorityColor(task.priority)}`}>
-                      {task.priority}
-                    </span>
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-4 border-t border-slate-600">
+                <div className="flex gap-2 pt-4 border-t border-slate-600 flex-wrap">
                   <button 
                     onClick={() => openDetailsModal(task)}
                     className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
                   >
-                    Szczegóły
+                    📋 Szczegóły
                   </button>
                   
-                  {task.status === 'pool' && (
-                    <button 
-                      onClick={() => openAssignModal(task)}
-                      className="px-4 py-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all duration-200 font-medium"
-                      disabled={loading}
-                    >
-                      Przypisz
-                    </button>
-                  )}
+                  <button 
+                    onClick={() => openEditModal(task)}
+                    className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
+                  >
+                    ✏️ Edytuj
+                  </button>
                   
                   {['assigned', 'in_progress'].includes(task.status) && (
                     <>
@@ -222,7 +248,7 @@ export default function TaskList({ type }) {
                         className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        {task.status === 'assigned' ? 'Rozpocznij' : 'Wstrzymaj'}
+                        {task.status === 'assigned' ? '▶️ Rozpocznij' : '⏸️ Wstrzymaj'}
                       </button>
                       
                       <button 
@@ -230,7 +256,15 @@ export default function TaskList({ type }) {
                         className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        Zakończ
+                        ✅ Zakończ
+                      </button>
+                      
+                      <button 
+                        onClick={() => handleMissingMaterials(task._id)}
+                        className="px-4 py-2 bg-orange-500/20 text-orange-400 rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium"
+                        disabled={loading}
+                      >
+                        📦 Brak materiałów
                       </button>
                       
                       <button 
@@ -238,28 +272,10 @@ export default function TaskList({ type }) {
                         className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        Do puli
+                        🔄 Do puli
                       </button>
                     </>
                   )}
-                  
-                  {task.status === 'overdue' && (
-                    <button 
-                      onClick={() => handleMoveToPool(task._id)}
-                      className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
-                      disabled={loading}
-                    >
-                      Przenieś do puli
-                    </button>
-                  )}
-                  
-                  <button 
-                    onClick={() => handleDeleteTask(task._id)}
-                    className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all duration-200 font-medium"
-                    disabled={loading}
-                  >
-                    Usuń
-                  </button>
                 </div>
               </div>
             ))
@@ -270,16 +286,18 @@ export default function TaskList({ type }) {
       {showDetailsModal && selectedTask && (
         <TaskDetailsModal 
           task={selectedTask} 
+          technicians={technicians}
           onClose={() => setShowDetailsModal(false)} 
         />
       )}
 
-      {showAssignModal && selectedTask && (
-        <AssignTaskModal 
+      {showEditModal && selectedTask && (
+        <TaskEditModal 
           task={selectedTask} 
-          onClose={() => setShowAssignModal(false)}
-          onAssigned={() => {
-            setShowAssignModal(false);
+          technicians={technicians}
+          onClose={() => setShowEditModal(false)}
+          onTaskUpdated={() => {
+            setShowEditModal(false);
             setSelectedTask(null);
           }}
         />
