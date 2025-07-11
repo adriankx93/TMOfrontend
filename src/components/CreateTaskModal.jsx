@@ -99,11 +99,12 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
         estimatedDuration: 60,
         createdAt: new Date().toISOString(),
         createdBy: "Administrator Systemu", // W przyszłości z kontekstu użytkownika
+        progress: 0,
         history: [{
           action: "created",
           user: "Administrator Systemu",
           timestamp: new Date().toISOString(),
-          details: "Zadanie utworzone"
+          details: `Zadanie utworzone: "${formData.title}"`
         }],
         ...assignmentData
       };

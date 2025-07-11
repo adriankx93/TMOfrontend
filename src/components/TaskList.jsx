@@ -10,6 +10,8 @@ export default function TaskList({ type }) {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showMoveToPoolModal, setShowMoveToPoolModal] = useState(false);
+  const [showMissingMaterialsModal, setShowMissingMaterialsModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -102,34 +104,45 @@ export default function TaskList({ type }) {
     await handleStatusChange(taskId, 'completed', {
       completedAt: new Date().toISOString(),
       notes: notes || "",
-      completedBy: "Administrator Systemu"
+      completedBy: "Administrator Systemu",
+      progress: 100
     });
   };
 
-  const handleMoveToPool = async (taskId) => {
-    const reason = prompt("Podaj powód przeniesienia do puli:");
-    if (reason) {
-      await handleStatusChange(taskId, 'pool', {
-        poolReason: reason,
-        movedToPoolAt: new Date().toISOString(),
-        movedToPoolBy: "Administrator Systemu",
-        assignedTo: null
-      });
+  const handleProgressChange = async (taskId, newProgress) => {
+    setLoading(true);
+    try {
+      const updateData = {
+        progress: newProgress,
+        lastModified: new Date().toISOString(),
+        lastModifiedBy: "Administrator Systemu",
+        history: [
+          ...(tasks.find(t => t._id === taskId)?.history || []),
+          {
+            action: "progress_updated",
+            user: "Administrator Systemu",
+            timestamp: new Date().toISOString(),
+            details: `Postęp zaktualizowany do ${newProgress}%`
+          }
+        ]
+      };
+
+      await updateTask(taskId, updateData);
+    } catch (error) {
+      console.error('Error updating task progress:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleMoveToPool = async (taskId) => {
+    setSelectedTask(tasks.find(t => t._id === taskId));
+    setShowMoveToPoolModal(true);
+  };
+
   const handleMissingMaterials = async (taskId) => {
-    const materials = prompt("Jakich materiałów brakuje?");
-    if (materials) {
-      await handleStatusChange(taskId, 'pool', {
-        poolReason: `Brak materiałów: ${materials}`,
-        missingMaterials: materials,
-        movedToPoolAt: new Date().toISOString(),
-        movedToPoolBy: "Administrator Systemu",
-        assignedTo: null,
-        needsMaterials: true
-      });
-    }
+    setSelectedTask(tasks.find(t => t._id === taskId));
+    setShowMissingMaterialsModal(true);
   };
 
   const getTechnicianName = (technicianId) => {
@@ -193,13 +206,22 @@ export default function TaskList({ type }) {
 
                     {task.progress !== undefined && (
                       <div className="mb-1 md:mb-3">
-                        <div className="flex justify-between mobile-micro-text md:text-sm text-slate-300 mb-0.5 md:mb-1">
+                        <div className="flex justify-between mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
                           <span>Postęp</span>
                           <span className="font-semibold text-white">{task.progress || 0}%</span>
                         </div>
-                        <div className="w-full bg-slate-700 rounded-full h-1 md:h-2">
+                        <div className="space-y-1 md:space-y-2">
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={task.progress || 0}
+                            onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
+                            className="w-full h-1 md:h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+                            disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
+                          />
                           <div 
-                            className="gradient-primary h-1 md:h-2 rounded-full transition-all duration-300"
+                            className="gradient-primary h-1 md:h-2 rounded-full transition-all duration-300 pointer-events-none"
                             style={{ width: `${task.progress || 0}%` }}
                           ></div>
                         </div>
@@ -307,6 +329,28 @@ export default function TaskList({ type }) {
           onClose={() => setShowEditModal(false)}
           onTaskUpdated={() => {
             setShowEditModal(false);
+            setSelectedTask(null);
+          }}
+        />
+      )}
+
+      {showMoveToPoolModal && selectedTask && (
+        <MoveToPoolModal 
+          task={selectedTask}
+          onClose={() => setShowMoveToPoolModal(false)}
+          onMoved={() => {
+            setShowMoveToPoolModal(false);
+            setSelectedTask(null);
+          }}
+        />
+      )}
+
+      {showMissingMaterialsModal && selectedTask && (
+        <MissingMaterialsModal 
+          task={selectedTask}
+          onClose={() => setShowMissingMaterialsModal(false)}
+          onMoved={() => {
+            setShowMissingMaterialsModal(false);
             setSelectedTask(null);
           }}
         />

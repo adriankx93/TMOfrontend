@@ -70,10 +70,22 @@ export default function TaskEditModal({ task, technicians, onClose, onTaskUpdate
             action: "edited",
             user: "Administrator Systemu",
             timestamp: new Date().toISOString(),
-            details: "Zadanie zostało edytowane"
+            details: `Zadanie edytowane - zmieniono: ${getChangedFields(task, updateData).join(', ')}`
           }
         ]
       };
+
+      // Dodaj specjalną historię dla zmiany technika
+      if (task.assignedTo !== formData.assignedTo) {
+        const oldTechName = getTechnicianName(task.assignedTo);
+        const newTechName = getTechnicianName(formData.assignedTo);
+        updateData.history.push({
+          action: "technician_changed",
+          user: "Administrator Systemu",
+          timestamp: new Date().toISOString(),
+          details: `Technik zmieniony z "${oldTechName}" na "${newTechName}"`
+        });
+      }
 
       await updateTask(task._id, updateData);
       
@@ -93,6 +105,24 @@ export default function TaskEditModal({ task, technicians, onClose, onTaskUpdate
       ...prev,
       [name]: value
     }));
+  };
+
+  const getChangedFields = (oldTask, newData) => {
+    const changes = [];
+    if (oldTask.title !== newData.title) changes.push('tytuł');
+    if (oldTask.description !== newData.description) changes.push('opis');
+    if (oldTask.priority !== newData.priority) changes.push('priorytet');
+    if (oldTask.location !== newData.location) changes.push('lokalizacja');
+    if (oldTask.shift !== newData.shift) changes.push('zmiana');
+    if (oldTask.estimatedDuration !== newData.estimatedDuration) changes.push('czas wykonania');
+    if (oldTask.progress !== newData.progress) changes.push('postęp');
+    return changes.length > 0 ? changes : ['dane zadania'];
+  };
+
+  const getTechnicianName = (technicianId) => {
+    if (!technicianId) return 'Nieprzypisane';
+    const technician = technicians.find(t => t.id === technicianId);
+    return technician ? technician.fullName : 'Nieznany technik';
   };
 
   return (

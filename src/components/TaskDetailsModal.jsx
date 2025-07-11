@@ -40,6 +40,10 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
     switch(action) {
       case 'created': return '📝 Utworzono';
       case 'edited': return '✏️ Edytowano';
+      case 'technician_changed': return '👤 Zmieniono technika';
+      case 'progress_updated': return '📊 Zaktualizowano postęp';
+      case 'moved_to_pool': return '🔄 Przeniesiono do puli';
+      case 'moved_to_pool_materials': return '📦 Przeniesiono - brak materiałów';
       case 'status_changed_to_assigned': return '👤 Przypisano';
       case 'status_changed_to_in_progress': return '▶️ Rozpoczęto';
       case 'status_changed_to_completed': return '✅ Zakończono';
@@ -213,11 +217,13 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs md:text-sm">{getActionLabel(entry.action)}</span>
                         </div>
-                        <div className="text-xs text-slate-600 mb-1">
+                        <div className="text-xs text-slate-600 mb-2 font-medium">
                           {entry.user} • {new Date(entry.timestamp).toLocaleString('pl-PL')}
                         </div>
                         {entry.details && (
-                          <div className="text-xs text-slate-500 break-words">{entry.details}</div>
+                          <div className="text-xs text-slate-700 break-words bg-slate-50 p-2 rounded border-l-2 border-blue-200">
+                            {entry.details}
+                          </div>
                         )}
                       </div>
                     ))}
