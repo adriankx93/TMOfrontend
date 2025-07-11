@@ -16,9 +16,6 @@ export default function Topbar({ title, subtitle, action }) {
       <div className="flex justify-between items-center gap-1">
         {/* Title Section */}
         <div className="flex items-center gap-1 md:gap-6 flex-1">
-          <div className="mobile-mini-icon md:w-16 md:h-16 gradient-primary rounded-sm md:rounded-2xl flex items-center justify-center shadow-lg glow-blue">
-            <span className="text-white text-xs md:text-2xl">⚡</span>
-          </div>
           <div>
             <h1 className="text-xs md:text-3xl font-bold text-white mb-0 md:mb-1">
               {title}
@@ -53,7 +50,7 @@ export default function Topbar({ title, subtitle, action }) {
 
           {/* Notifications */}
           <button className="relative p-0.5 md:p-3 glass-card-light hover:bg-slate-600/30 transition-all duration-200 group">
-            <span className="text-xs md:text-xl group-hover:scale-110 transition-transform duration-200">🔔</span>
+            <span className="text-sm md:text-xl group-hover:scale-110 transition-transform duration-200">N</span>
             <div className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 w-2 h-2 md:w-5 md:h-5 bg-red-500 rounded-full flex items-center justify-center glow-red">
               <span className="text-white mobile-micro-text md:text-xs font-bold">3</span>
             </div>
@@ -61,7 +58,7 @@ export default function Topbar({ title, subtitle, action }) {
 
           {/* Quick Actions */}
           <button className="p-0.5 md:p-3 glass-card-light hover:bg-slate-600/30 transition-all duration-200 group hidden lg:block">
-            <span className="text-xl group-hover:scale-110 transition-transform duration-200">⚙️</span>
+            <span className="text-xl group-hover:scale-110 transition-transform duration-200">U</span>
           </button>
         </div>
       </div>

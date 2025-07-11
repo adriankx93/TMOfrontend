@@ -82,7 +82,7 @@ export default function Sidebar() {
         <div className="p-2 md:p-6 border-b border-slate-700/50 safe-area-top">
           <div className="flex items-center gap-1 md:gap-3 mb-2 md:mb-4">
             <div className="w-6 h-6 md:w-10 md:h-10 gradient-primary rounded-md md:rounded-2xl flex items-center justify-center font-bold text-white shadow-lg">
-              <span className="text-xs md:text-lg">🏢</span>
+              <span className="text-sm md:text-lg">T</span>
             </div>
             <div>
               <div className="font-bold text-xs md:text-lg text-white">TechSPIE</div>
@@ -137,9 +137,6 @@ export default function Sidebar() {
                 style={{ minHeight: isMobile ? '32px' : '48px' }}
               >
                 <div className="flex items-center gap-1 md:gap-3 flex-1">
-                  <span className="text-xs md:text-lg group-hover:scale-110 transition-transform duration-200">
-                    {item.icon}
-                  </span>
                   <div>
                     <div className="font-semibold text-sm">{item.label}</div>
                     <div className="text-mobile-xs md:text-xs opacity-70 hidden lg:block">{item.description}</div>

@@ -164,32 +164,26 @@ export default function TaskList({ type }) {
                   <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-3 mb-1 md:mb-3">
                       <h4 className="font-semibold text-white text-xs md:text-base line-clamp-1 md:line-clamp-2">{task.title}</h4>
-                      <span className={`px-1 py-0.5 md:px-3 md:py-1 rounded-sm md:rounded-xl mobile-micro-text md:text-sm font-semibold border ${getPriorityColor(task.priority)}`}>
+                      <span className={`px-1.5 py-0.5 md:px-3 md:py-1 rounded-md md:rounded-xl text-xs md:text-sm font-semibold ${getPriorityColor(task.priority)}`}>
                         {task.priority}
                       </span>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-2 lg:flex lg:items-center gap-0.5 md:gap-4 mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-3">
-                      <div className="flex items-center gap-0.5 md:gap-2">
-                        <span>👤</span>
-                        <span>{getTechnicianName(task.assignedTo)}</span>
+                      <div className="truncate">
+                        {getTechnicianName(task.assignedTo)}
                       </div>
-                      <div className="flex items-center gap-0.5 md:gap-2">
-                        <span>📍</span>
-                        <span className="truncate">{task.location}</span>
+                      <div className="truncate">
+                        {task.location}
                       </div>
-                      <div className="flex items-center gap-0.5 md:gap-2">
-                        <span>🕐</span>
-                        <span className="mobile-micro-text md:text-sm">
-                          {task.dueDate 
-                            ? new Date(task.dueDate).toLocaleDateString('pl-PL')
-                            : 'Bez terminu'
-                          } ({task.shift || task.assignedShift || 'Brak zmiany'})
-                        </span>
+                      <div className="text-mobile-xs md:text-sm">
+                        {task.dueDate 
+                          ? new Date(task.dueDate).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' })
+                          : 'Bez terminu'
+                        }
                       </div>
-                      <div className="flex items-center gap-0.5 md:gap-2 hidden md:flex">
-                        <span>🏷️</span>
-                        <span>{task.category}</span>
+                      <div className="hidden md:block">
+                        {task.category}
                       </div>
                     </div>
                     
@@ -220,7 +214,7 @@ export default function TaskList({ type }) {
                   </div>
                   
                   <div className="flex flex-col gap-0.5 md:gap-2 ml-0.5 md:ml-4">
-                    <span className={`px-1 py-0.5 md:px-3 md:py-1 rounded-sm md:rounded-xl mobile-micro-text md:text-sm font-semibold border ${getStatusColor(task.status)}`}>
+                    <span className={`px-1.5 py-0.5 md:px-3 md:py-1 rounded-md md:rounded-xl text-xs md:text-sm font-semibold ${getStatusColor(task.status)}`}>
                       {getStatusLabel(task.status)}
                     </span>
                   </div>
@@ -229,65 +223,65 @@ export default function TaskList({ type }) {
                 <div className="mobile-grid-4 md:flex gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-600">
                   <button 
                     onClick={() => openDetailsModal(task)}
-                    className="mobile-mini-button md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-sm md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
+                    className="btn-compact md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-md md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
                   >
-                    <span className="md:hidden mobile-micro-text">📋</span>
-                    <span className="hidden md:inline">📋 Szczegóły</span>
+                    <span className="md:hidden text-xs">S</span>
+                    <span className="hidden md:inline text-sm">Szczegóły</span>
                   </button>
                   
                   <button 
                     onClick={() => openEditModal(task)}
-                    className="mobile-mini-button md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-sm md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
+                    className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
                   >
-                    <span className="md:hidden mobile-micro-text">✏️</span>
-                    <span className="hidden md:inline">✏️ Edytuj</span>
+                    <span className="md:hidden text-xs">E</span>
+                    <span className="hidden md:inline text-sm">Edytuj</span>
                   </button>
                   
                   {['assigned', 'in_progress'].includes(task.status) && (
                     <>
                       <button 
                         onClick={() => handleStatusChange(task._id, task.status === 'assigned' ? 'in_progress' : 'assigned')}
-                        className="mobile-mini-button md:px-4 md:py-2 bg-amber-500/20 text-amber-400 rounded-sm md:rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium col-span-4 md:col-span-1"
+                        className="btn-compact md:px-4 md:py-2 bg-amber-500/20 text-amber-400 rounded-md md:rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium col-span-3 md:col-span-1"
                         disabled={loading}
                       >
                         {task.status === 'assigned' ? (
                           <>
-                            <span className="md:hidden mobile-micro-text">▶️</span>
-                            <span className="hidden md:inline">▶️ Rozpocznij</span>
+                            <span className="md:hidden text-xs">R</span>
+                            <span className="hidden md:inline text-sm">Rozpocznij</span>
                           </>
                         ) : (
                           <>
-                            <span className="md:hidden mobile-micro-text">⏸️</span>
-                            <span className="hidden md:inline">⏸️ Wstrzymaj</span>
+                            <span className="md:hidden text-xs">W</span>
+                            <span className="hidden md:inline text-sm">Wstrzymaj</span>
                           </>
                         )}
                       </button>
                       
                       <button 
                         onClick={() => handleCompleteTask(task._id)}
-                        className="mobile-mini-button md:px-4 md:py-2 bg-emerald-500/20 text-emerald-400 rounded-sm md:rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium"
+                        className="btn-compact md:px-4 md:py-2 bg-emerald-500/20 text-emerald-400 rounded-md md:rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        <span className="md:hidden mobile-micro-text">✅</span>
-                        <span className="hidden md:inline">✅ Zakończ</span>
+                        <span className="md:hidden text-xs">Z</span>
+                        <span className="hidden md:inline text-sm">Zakończ</span>
                       </button>
                       
                       <button 
                         onClick={() => handleMissingMaterials(task._id)}
-                        className="mobile-mini-button md:px-4 md:py-2 bg-orange-500/20 text-orange-400 rounded-sm md:rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium"
+                        className="btn-compact md:px-4 md:py-2 bg-orange-500/20 text-orange-400 rounded-md md:rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        <span className="md:hidden mobile-micro-text">📦</span>
-                        <span className="hidden md:inline">📦 Materiały</span>
+                        <span className="md:hidden text-xs">M</span>
+                        <span className="hidden md:inline text-sm">Materiały</span>
                       </button>
                       
                       <button 
                         onClick={() => handleMoveToPool(task._id)}
-                        className="mobile-mini-button md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-sm md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
+                        className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        <span className="md:hidden mobile-micro-text">🔄</span>
-                        <span className="hidden md:inline">🔄 Do puli</span>
+                        <span className="md:hidden text-xs">P</span>
+                        <span className="hidden md:inline text-sm">Do puli</span>
                       </button>
                     </>
                   )}

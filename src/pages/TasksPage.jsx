@@ -31,10 +31,10 @@ export default function TasksPage() {
   const stats = getTaskStats();
 
   const tabs = [
-    { id: "current", label: "Aktywne", icon: "⚡", count: stats.current, color: "blue" },
-    { id: "pool", label: "Pula zadań", icon: "🔄", count: stats.pool, color: "amber" },
-    { id: "completed", label: "Zakończone", icon: "✅", count: stats.completed, color: "green" },
-    { id: "overdue", label: "Przeterminowane", icon: "⚠️", count: stats.overdue, color: "red" }
+    { id: "current", label: "Aktywne", count: stats.current, color: "blue" },
+    { id: "pool", label: "Pula zadań", count: stats.pool, color: "amber" },
+    { id: "completed", label: "Zakończone", count: stats.completed, color: "green" },
+    { id: "overdue", label: "Przeterminowane", count: stats.overdue, color: "red" }
   ];
 
   return (
@@ -47,7 +47,7 @@ export default function TasksPage() {
             onClick={() => setShowCreateModal(true)}
             className="btn-primary flex items-center gap-1 text-xs md:text-sm"
           >
-            <span>➕</span>
+            <span>+</span>
             <span className="hidden xs:inline">Nowe</span>
           </button>
         }
@@ -58,9 +58,6 @@ export default function TasksPage() {
         {tabs.map((tab) => (
           <div key={tab.id} className="mobile-mini-card md:p-6">
             <div className="flex items-center justify-between mb-0.5 md:mb-4">
-              <div className={`mobile-mini-icon md:w-12 md:h-12 bg-${tab.color}-500/20 rounded-sm md:rounded-xl flex items-center justify-center`}>
-                <span className="text-xs md:text-2xl">{tab.icon}</span>
-              </div>
               <div className={`px-1 py-0.5 md:px-3 md:py-1 bg-${tab.color}-500/20 text-${tab.color}-400 rounded-full mobile-micro-text md:text-xs font-bold`}>
                 {tab.count}
               </div>
@@ -84,7 +81,6 @@ export default function TasksPage() {
                   : "text-slate-400 hover:text-white hover:bg-slate-700/50"
               }`}
             >
-              <span className="text-xs md:text-lg">{tab.icon}</span>
               <div className="text-left">
                 <div className="mobile-micro-text md:text-base">{tab.label}</div>
                 <div className="mobile-micro-text md:text-xs opacity-70 hidden md:block">{tab.count}</div>

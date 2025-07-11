@@ -68,9 +68,6 @@ export default function TaskPool() {
       <div className="glass-card p-2 md:p-8">
         <div className="flex items-center justify-between mb-2 md:mb-6">
           <div className="flex items-center gap-1 md:gap-4">
-            <div className="w-6 h-6 md:w-12 md:h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-md md:rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-xs md:text-xl">🔄</span>
-            </div>
             <div>
               <h3 className="text-sm md:text-xl font-bold text-white">Pula zadań</h3>
               <p className="text-slate-400 text-xs md:text-base hidden xs:block">Zadania oczekujące na przypisanie</p>
@@ -85,7 +82,6 @@ export default function TaskPool() {
         <div className="space-y-2 md:space-y-4">
           {poolTasks.length === 0 ? (
             <div className="text-center py-6 md:py-12 text-slate-400">
-              <div className="text-3xl md:text-6xl mb-2 md:mb-4">🎯</div>
               <h3 className="text-sm md:text-xl font-semibold text-slate-300 mb-1 md:mb-2">Pula jest pusta</h3>
               <p className="text-xs md:text-base text-slate-400">Wszystkie zadania są przypisane do techników.</p>
             </div>
@@ -128,8 +124,8 @@ export default function TaskPool() {
                     onClick={() => openAssignModal(task)}
                     className="mobile-mini-button md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-sm md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
                   >
-                    <span className="md:hidden mobile-micro-text">👤</span>
-                    <span className="hidden md:inline text-sm">👤 Przypisz</span>
+                    <span className="md:hidden mobile-micro-text">P</span>
+                    <span className="hidden md:inline text-sm">Przypisz</span>
                   </button>
                   
                   <select
@@ -147,8 +143,8 @@ export default function TaskPool() {
                     onClick={() => openDetailsModal(task)}
                     className="mobile-mini-button md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-sm md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
                   >
-                    <span className="md:hidden mobile-micro-text">📋</span>
-                    <span className="hidden md:inline text-sm">📋 Szczegóły</span>
+                    <span className="md:hidden mobile-micro-text">S</span>
+                    <span className="hidden md:inline text-sm">Szczegóły</span>
                   </button>
                   
                   <button 
@@ -156,8 +152,8 @@ export default function TaskPool() {
                     className="mobile-mini-button md:px-4 md:py-2 bg-red-500/20 text-red-400 rounded-sm md:rounded-xl hover:bg-red-500/30 transition-all duration-200 font-medium"
                     disabled={loading}
                   >
-                    <span className="md:hidden mobile-micro-text">🗑️</span>
-                    <span className="hidden md:inline text-sm">🗑️ Usuń</span>
+                    <span className="md:hidden mobile-micro-text">U</span>
+                    <span className="hidden md:inline text-sm">Usuń</span>
                   </button>
                 </div>
               </div>
@@ -168,7 +164,6 @@ export default function TaskPool() {
         {poolTasks.length > 0 && (
           <div className="mt-6 p-4 bg-blue-500/20 rounded-2xl border border-blue-500/30">
             <div className="flex items-center gap-3">
-              <span className="text-blue-400 text-xl">💡</span>
               <div className="text-sm text-blue-300">
                 <div className="font-semibold mb-1">Wskazówka:</div>
                 <div>Zadania w puli można przypisać do dostępnych techników lub zmienić ich priorytet. Zadania o wyższym priorytecie powinny być wykonane w pierwszej kolejności.</div>
