@@ -96,17 +96,17 @@ export default function TaskEditModal({ task, technicians, onClose, onTaskUpdate
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+      <div className="glass-card max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white text-xl">✏️</span>
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-lg md:text-xl">✏️</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Edytuj zadanie</h2>
-                <p className="text-slate-400">ID: #{task._id?.slice(-6) || 'N/A'}</p>
+                <h2 className="text-xl md:text-2xl font-bold text-white">Edytuj zadanie</h2>
+                <p className="text-slate-400 text-sm">ID: #{task._id?.slice(-6) || 'N/A'}</p>
               </div>
             </div>
             <button 
@@ -114,7 +114,7 @@ export default function TaskEditModal({ task, technicians, onClose, onTaskUpdate
               className="p-2 hover:bg-slate-700/50 rounded-xl transition-all duration-200"
               disabled={loading}
             >
-              <span className="text-2xl text-slate-400 hover:text-white">×</span>
+              <span className="text-xl md:text-2xl text-slate-400 hover:text-white">×</span>
             </button>
           </div>
 
@@ -125,7 +125,7 @@ export default function TaskEditModal({ task, technicians, onClose, onTaskUpdate
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-200 mb-2">
@@ -263,17 +263,19 @@ export default function TaskEditModal({ task, technicians, onClose, onTaskUpdate
                   <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Postęp (%)
                   </label>
-                  <input
-                    type="range"
-                    name="progress"
-                    value={formData.progress}
-                    onChange={handleChange}
-                    className="w-full"
-                    min="0"
-                    max="100"
-                    disabled={loading}
-                  />
-                  <div className="text-center text-slate-300 mt-1">{formData.progress}%</div>
+                  <div className="space-y-2">
+                    <input
+                      type="range"
+                      name="progress"
+                      value={formData.progress}
+                      onChange={handleChange}
+                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                      min="0"
+                      max="100"
+                      disabled={loading}
+                    />
+                    <div className="text-center text-slate-300 text-lg font-bold">{formData.progress}%</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -297,7 +299,7 @@ export default function TaskEditModal({ task, technicians, onClose, onTaskUpdate
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary flex-1"
+                className="btn-primary flex-1 py-3 md:py-4"
               >
                 {loading ? "Zapisywanie..." : "Zapisz zmiany"}
               </button>
@@ -305,7 +307,7 @@ export default function TaskEditModal({ task, technicians, onClose, onTaskUpdate
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="btn-secondary px-8"
+                className="btn-secondary px-4 md:px-8 py-3 md:py-4"
               >
                 Anuluj
               </button>

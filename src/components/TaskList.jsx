@@ -159,24 +159,24 @@ export default function TaskList({ type }) {
             </div>
           ) : (
             filteredTasks.map((task) => (
-              <div key={task._id} className="p-6 glass-card-light rounded-2xl hover:bg-slate-600/30 transition-all duration-200">
+              <div key={task._id} className="p-4 md:p-6 glass-card-light rounded-2xl hover:bg-slate-600/30 transition-all duration-200">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-3">
                       <h4 className="font-semibold text-white">{task.title}</h4>
                       <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getPriorityColor(task.priority)}`}>
                         {task.priority}
                       </span>
                     </div>
                     
-                    <div className="flex items-center gap-4 text-sm text-slate-300 mb-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:flex lg:items-center gap-2 md:gap-4 text-sm text-slate-300 mb-3">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
                         <span>{getTechnicianName(task.assignedTo)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span>📍</span>
-                        <span>{task.location}</span>
+                        <span className="truncate">{task.location}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span>🕐</span>
@@ -194,12 +194,12 @@ export default function TaskList({ type }) {
                     </div>
                     
                     {task.description && (
-                      <p className="text-sm text-slate-400 mb-3">{task.description}</p>
+                      <p className="text-sm text-slate-400 mb-3 line-clamp-2">{task.description}</p>
                     )}
 
                     {task.progress !== undefined && (
                       <div className="mb-3">
-                        <div className="flex justify-between text-sm text-slate-300 mb-1">
+                        <div className="flex justify-between text-xs md:text-sm text-slate-300 mb-1">
                           <span>Postęp</span>
                           <span className="font-semibold text-white">{task.progress || 0}%</span>
                         </div>
@@ -213,66 +213,81 @@ export default function TaskList({ type }) {
                     )}
 
                     {task.createdBy && (
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-slate-500 hidden md:block">
                         Utworzone przez: {task.createdBy} • {new Date(task.createdAt).toLocaleString('pl-PL')}
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex flex-col gap-2 ml-4">
+                  <div className="flex flex-col gap-2 ml-2 md:ml-4">
                     <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getStatusColor(task.status)}`}>
                       {getStatusLabel(task.status)}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-4 border-t border-slate-600 flex-wrap">
+                <div className="grid grid-cols-2 md:flex gap-2 pt-4 border-t border-slate-600">
                   <button 
                     onClick={() => openDetailsModal(task)}
-                    className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
+                    className="px-3 md:px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium text-sm"
                   >
-                    📋 Szczegóły
+                    <span className="md:hidden">📋</span>
+                    <span className="hidden md:inline">📋 Szczegóły</span>
                   </button>
                   
                   <button 
                     onClick={() => openEditModal(task)}
-                    className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
+                    className="px-3 md:px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium text-sm"
                   >
-                    ✏️ Edytuj
+                    <span className="md:hidden">✏️</span>
+                    <span className="hidden md:inline">✏️ Edytuj</span>
                   </button>
                   
                   {['assigned', 'in_progress'].includes(task.status) && (
                     <>
                       <button 
                         onClick={() => handleStatusChange(task._id, task.status === 'assigned' ? 'in_progress' : 'assigned')}
-                        className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium"
+                        className="px-3 md:px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium text-sm col-span-2 md:col-span-1"
                         disabled={loading}
                       >
-                        {task.status === 'assigned' ? '▶️ Rozpocznij' : '⏸️ Wstrzymaj'}
+                        {task.status === 'assigned' ? (
+                          <>
+                            <span className="md:hidden">▶️</span>
+                            <span className="hidden md:inline">▶️ Rozpocznij</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="md:hidden">⏸️</span>
+                            <span className="hidden md:inline">⏸️ Wstrzymaj</span>
+                          </>
+                        )}
                       </button>
                       
                       <button 
                         onClick={() => handleCompleteTask(task._id)}
-                        className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium"
+                        className="px-3 md:px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium text-sm"
                         disabled={loading}
                       >
-                        ✅ Zakończ
+                        <span className="md:hidden">✅</span>
+                        <span className="hidden md:inline">✅ Zakończ</span>
                       </button>
                       
                       <button 
                         onClick={() => handleMissingMaterials(task._id)}
-                        className="px-4 py-2 bg-orange-500/20 text-orange-400 rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium"
+                        className="px-3 md:px-4 py-2 bg-orange-500/20 text-orange-400 rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium text-sm"
                         disabled={loading}
                       >
-                        📦 Brak materiałów
+                        <span className="md:hidden">📦</span>
+                        <span className="hidden md:inline">📦 Materiały</span>
                       </button>
                       
                       <button 
                         onClick={() => handleMoveToPool(task._id)}
-                        className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
+                        className="px-3 md:px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium text-sm"
                         disabled={loading}
                       >
-                        🔄 Do puli
+                        <span className="md:hidden">🔄</span>
+                        <span className="hidden md:inline">🔄 Do puli</span>
                       </button>
                     </>
                   )}

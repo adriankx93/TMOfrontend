@@ -141,17 +141,17 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+      <div className="glass-card max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue">
-                <span className="text-white text-xl">📋</span>
+              <div className="w-10 h-10 md:w-12 md:h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue">
+                <span className="text-white text-lg md:text-xl">📋</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Nowe zadanie</h2>
-                <p className="text-slate-400">Utwórz zadanie dla zespołu technicznego</p>
+                <h2 className="text-xl md:text-2xl font-bold text-white">Nowe zadanie</h2>
+                <p className="text-slate-400 text-sm md:text-base hidden md:block">Utwórz zadanie dla zespołu technicznego</p>
               </div>
             </div>
             <button 
@@ -159,7 +159,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
               className="p-2 hover:bg-slate-700/50 rounded-xl transition-all duration-200"
               disabled={loading}
             >
-              <span className="text-2xl text-slate-400 hover:text-white">×</span>
+              <span className="text-xl md:text-2xl text-slate-400 hover:text-white">×</span>
             </button>
           </div>
 
@@ -255,13 +255,13 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
             </div>
 
             {/* Szybkie przypisanie */}
-            <div className="p-4 bg-blue-500/20 rounded-2xl border border-blue-500/30">
+            <div className="p-3 md:p-4 bg-blue-500/20 rounded-2xl border border-blue-500/30">
               <h3 className="font-semibold text-blue-300 mb-3">⚡ Szybkie przypisanie</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => handleQuickShift("today-day")}
-                  className={`p-3 rounded-xl font-medium transition-all duration-200 ${
+                  className={`p-3 md:p-4 rounded-xl font-medium transition-all duration-200 text-center ${
                     formData.quickShift === "today-day"
                       ? "bg-yellow-500/30 text-yellow-300 border border-yellow-500/50"
                       : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
@@ -269,13 +269,13 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                   disabled={loading}
                 >
                   ☀️ Dzisiejsza dzienna
-                  <div className="text-xs opacity-70">07:00 - 19:00</div>
+                  <div className="text-xs opacity-70 mt-1">07:00 - 19:00</div>
                 </button>
                 
                 <button
                   type="button"
                   onClick={() => handleQuickShift("today-night")}
-                  className={`p-3 rounded-xl font-medium transition-all duration-200 ${
+                  className={`p-3 md:p-4 rounded-xl font-medium transition-all duration-200 text-center ${
                     formData.quickShift === "today-night"
                       ? "bg-indigo-500/30 text-indigo-300 border border-indigo-500/50"
                       : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
@@ -283,7 +283,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                   disabled={loading}
                 >
                   🌙 Dzisiejsza nocna
-                  <div className="text-xs opacity-70">19:00 - 07:00</div>
+                  <div className="text-xs opacity-70 mt-1">19:00 - 07:00</div>
                 </button>
               </div>
             </div>
@@ -330,11 +330,11 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                   <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Typ przypisania
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, assignmentType: "shift" }))}
-                      className={`p-3 rounded-xl font-medium transition-all duration-200 ${
+                      className={`p-3 md:p-4 rounded-xl font-medium transition-all duration-200 text-center ${
                         formData.assignmentType === "shift"
                           ? "bg-purple-500/30 text-purple-300 border border-purple-500/50"
                           : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
@@ -342,13 +342,13 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                       disabled={loading}
                     >
                       🔄 Do puli zmiany
-                      <div className="text-xs opacity-70">Technik zostanie przypisany później</div>
+                      <div className="text-xs opacity-70 mt-1">Technik zostanie przypisany później</div>
                     </button>
                     
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, assignmentType: "technician" }))}
-                      className={`p-3 rounded-xl font-medium transition-all duration-200 ${
+                      className={`p-3 md:p-4 rounded-xl font-medium transition-all duration-200 text-center ${
                         formData.assignmentType === "technician"
                           ? "bg-green-500/30 text-green-300 border border-green-500/50"
                           : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
@@ -356,7 +356,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                       disabled={loading}
                     >
                       👤 Bezpośrednio do technika
-                      <div className="text-xs opacity-70">Wybierz konkretnego technika</div>
+                      <div className="text-xs opacity-70 mt-1">Wybierz konkretnego technika</div>
                     </button>
                   </div>
                 </div>
@@ -390,7 +390,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary flex-1"
+                className="btn-primary flex-1 py-3 md:py-4"
               >
                 {loading ? "Tworzenie..." : "Utwórz zadanie"}
               </button>
@@ -398,7 +398,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="btn-secondary px-8"
+                className="btn-secondary px-4 md:px-8 py-3 md:py-4"
               >
                 Anuluj
               </button>
