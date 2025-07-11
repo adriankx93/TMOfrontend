@@ -56,10 +56,10 @@ export default function Sidebar() {
       {isMobile && (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-3 left-3 z-50 p-3 bg-slate-800 rounded-xl shadow-lg mobile-touch"
-          style={{ minHeight: '48px', minWidth: '48px' }}
+          className="fixed top-1 left-1 z-50 p-1.5 bg-slate-800 rounded-md shadow-lg mobile-touch"
+          style={{ minHeight: '32px', minWidth: '32px' }}
         >
-          <span className="text-white text-lg">{isOpen ? '✕' : '☰'}</span>
+          <span className="text-white text-xs">{isOpen ? '✕' : '☰'}</span>
         </button>
       )}
 
@@ -73,35 +73,35 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside className={`
-        ${isMobile ? 'fixed' : 'static'} inset-y-0 left-0 z-40 w-80 bg-slate-900 border-r border-slate-700/50 
+        ${isMobile ? 'fixed' : 'static'} inset-y-0 left-0 z-40 w-56 md:w-80 bg-slate-900 border-r border-slate-700/50 
         min-h-screen flex flex-col shadow-2xl transform transition-transform duration-300 ease-in-out
         ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
         ${isMobile ? 'animate-slide-in-left' : ''}
       `}>
         {/* Header */}
-        <div className="p-6 border-b border-slate-700/50 safe-area-top">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 gradient-primary rounded-2xl flex items-center justify-center font-bold text-white shadow-lg">
-              <span className="text-lg">🏢</span>
+        <div className="p-2 md:p-6 border-b border-slate-700/50 safe-area-top">
+          <div className="flex items-center gap-1 md:gap-3 mb-2 md:mb-4">
+            <div className="w-6 h-6 md:w-10 md:h-10 gradient-primary rounded-md md:rounded-2xl flex items-center justify-center font-bold text-white shadow-lg">
+              <span className="text-xs md:text-lg">🏢</span>
             </div>
             <div>
-              <div className="font-bold text-lg text-white">TechSPIE</div>
-              <div className="text-xs text-slate-400 font-medium">
+              <div className="font-bold text-xs md:text-lg text-white">TechSPIE</div>
+              <div className="mobile-micro-text md:text-xs text-slate-400 font-medium">
                 CMMS/CAFM System
               </div>
             </div>
           </div>
 
           {/* System Status */}
-          <div className="glass-card-light p-3">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
+          <div className="glass-card-light p-1 md:p-3">
+            <div className="flex items-center justify-between mb-0.5 md:mb-2">
+              <div className="flex items-center gap-0.5 md:gap-2">
                 <div className="status-indicator bg-green-400"></div>
-                <span className="text-sm font-semibold text-slate-200">
+                <span className="mobile-micro-text md:text-sm font-semibold text-slate-200">
                   System Online
                 </span>
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="mobile-micro-text md:text-xs text-slate-400">
                 {new Date().toLocaleTimeString("pl-PL", {
                   hour: "2-digit",
                   minute: "2-digit"
@@ -109,42 +109,41 @@ export default function Sidebar() {
               </div>
             </div>
 
-            <div className="text-xs text-slate-400 mb-1">Aktualna zmiana</div>
+            <div className="mobile-micro-text md:text-xs text-slate-400 mb-0.5 md:mb-1">Aktualna zmiana</div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-white">
+              <span className="mobile-micro-text md:text-sm font-semibold text-white">
                 {currentShift}
               </span>
-              <span className="text-xs text-slate-400">{shiftTime}</span>
+              <span className="mobile-micro-text md:text-xs text-slate-400">{shiftTime}</span>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-3 overflow-y-auto mobile-scroll">
-          <div className="space-y-1">
+        <nav className="flex-1 px-1 md:px-3 py-1 md:py-3 overflow-y-auto mobile-scroll">
+          <div className="space-y-0.5 md:space-y-1">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 onClick={() => isMobile && setIsOpen(false)}
                 className={({ isActive }) =>
-                  `group flex items-center gap-3 py-3 px-3 rounded-lg font-medium transition-all duration-200 mobile-touch no-select ${
+                  `group flex items-center gap-1 md:gap-3 py-1 md:py-3 px-1.5 md:px-3 rounded-md md:rounded-lg font-medium transition-all duration-200 mobile-touch no-select ${
                     isActive
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                   }`
                 }
-                style={{ minHeight: '48px' }}
+                style={{ minHeight: isMobile ? '32px' : '48px' }}
               >
-                <div className="flex items-center gap-3 flex-1">
-                  <span className="text-lg group-hover:scale-110 transition-transform duration-200">
+                <div className="flex items-center gap-1 md:gap-3 flex-1">
+                  <span className="text-xs md:text-lg group-hover:scale-110 transition-transform duration-200">
                     {item.icon}
                   </span>
                   <div>
                     <div className="font-semibold text-sm">{item.label}</div>
-                    {!isMobile && (
-                      <div className="text-xs opacity-70">{item.description}</div>
-                    )}
+                    <div className="font-semibold mobile-micro-text md:text-sm">{item.label}</div>
+                    <div className="mobile-micro-text md:text-xs opacity-70 hidden lg:block">{item.description}</div>
                   </div>
                 </div>
               </NavLink>

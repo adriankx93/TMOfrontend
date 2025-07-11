@@ -40,54 +40,54 @@ export default function TasksPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       <Topbar 
-        title="Zarządzanie zadaniami" 
+        title="Zadania" 
         subtitle="System CMMS - Maintenance Management"
         action={
           <button 
             onClick={() => setShowCreateModal(true)}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center gap-1 text-xs md:text-sm"
           >
             <span>➕</span>
-            <span>Nowe zadanie</span>
+            <span className="hidden xs:inline">Nowe</span>
           </button>
         }
       />
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+      <div className="mobile-grid-4 gap-1 md:gap-6">
         {tabs.map((tab) => (
-          <div key={tab.id} className="metric-card p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className={`w-8 h-8 md:w-12 md:h-12 bg-${tab.color}-500/20 rounded-xl flex items-center justify-center`}>
-                <span className="text-lg md:text-2xl">{tab.icon}</span>
+          <div key={tab.id} className="mobile-mini-card md:p-6">
+            <div className="flex items-center justify-between mb-0.5 md:mb-4">
+              <div className={`mobile-mini-icon md:w-12 md:h-12 bg-${tab.color}-500/20 rounded-sm md:rounded-xl flex items-center justify-center`}>
+                <span className="text-xs md:text-2xl">{tab.icon}</span>
               </div>
-              <div className={`px-2 py-1 md:px-3 bg-${tab.color}-500/20 text-${tab.color}-400 rounded-full text-xs md:text-sm font-bold`}>
+              <div className={`px-1 py-0.5 md:px-3 md:py-1 bg-${tab.color}-500/20 text-${tab.color}-400 rounded-full mobile-micro-text md:text-xs font-bold`}>
                 {tab.count}
               </div>
             </div>
-            <h3 className="text-sm md:text-lg font-semibold text-white mb-1">{tab.label}</h3>
-            <p className="text-slate-400 text-xs md:text-sm">Zadania w kategorii</p>
+            <h3 className="mobile-micro-text md:text-lg font-semibold text-white mb-0 md:mb-1">{tab.label}</h3>
+            <p className="mobile-micro-text md:text-sm text-slate-400 hidden xs:block">Zadania</p>
           </div>
         ))}
       </div>
 
       {/* Advanced Tabs */}
-      <div className="glass-card p-2">
-        <div className="grid grid-cols-2 lg:flex gap-2">
+      <div className="mobile-scroll-x md:block glass-card p-0.5 md:p-2">
+        <div className="inline-flex md:grid md:grid-cols-4 gap-0.5 md:gap-2 w-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 md:gap-3 px-3 md:px-6 py-3 md:py-4 rounded-xl font-semibold transition-all duration-200 flex-1 ${
+              className={`flex items-center gap-0.5 md:gap-3 px-1.5 md:px-6 py-1 md:py-4 rounded-sm md:rounded-xl font-semibold transition-all duration-200 whitespace-nowrap md:flex-1 text-xs md:text-base ${
                 activeTab === tab.id
                   ? `gradient-primary text-white shadow-lg glow-${tab.color}`
                   : "text-slate-400 hover:text-white hover:bg-slate-700/50"
               }`}
             >
-              <span className="text-base md:text-lg">{tab.icon}</span>
+              <span className="text-xs md:text-lg">{tab.icon}</span>
               <div className="text-left">
-                <div className="text-sm md:text-base">{tab.label}</div>
-                <div className="text-xs opacity-70 hidden md:block">{tab.count} zadań</div>
+                <div className="mobile-micro-text md:text-base">{tab.label}</div>
+                <div className="mobile-micro-text md:text-xs opacity-70 hidden md:block">{tab.count}</div>
               </div>
             </button>
           ))}

@@ -149,63 +149,63 @@ export default function TaskList({ type }) {
 
   return (
     <>
-      <div className="glass-card p-8">
+      <div className="glass-card p-2 md:p-8">
         <div className="space-y-4">
           {filteredTasks.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              <div className="text-6xl mb-4">📋</div>
-              <h3 className="text-xl font-semibold text-slate-300 mb-2">Brak zadań</h3>
-              <p className="text-slate-400">W tej kategorii nie ma jeszcze żadnych zadań.</p>
+            <div className="text-center py-6 md:py-12 text-slate-400">
+              <div className="text-3xl md:text-6xl mb-2 md:mb-4">📋</div>
+              <h3 className="text-sm md:text-xl font-semibold text-slate-300 mb-1 md:mb-2">Brak zadań</h3>
+              <p className="text-xs md:text-base text-slate-400">W tej kategorii nie ma jeszcze żadnych zadań.</p>
             </div>
           ) : (
             filteredTasks.map((task) => (
-              <div key={task._id} className="p-4 md:p-6 glass-card-light rounded-2xl hover:bg-slate-600/30 transition-all duration-200">
-                <div className="flex items-start justify-between mb-4">
+              <div key={task._id} className="p-1.5 md:p-6 glass-card-light rounded-md md:rounded-2xl hover:bg-slate-600/30 transition-all duration-200">
+                <div className="flex items-start justify-between mb-1 md:mb-4">
                   <div className="flex-1">
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-3">
-                      <h4 className="font-semibold text-white">{task.title}</h4>
-                      <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getPriorityColor(task.priority)}`}>
+                    <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-3 mb-1 md:mb-3">
+                      <h4 className="font-semibold text-white text-xs md:text-base line-clamp-1 md:line-clamp-2">{task.title}</h4>
+                      <span className={`px-1 py-0.5 md:px-3 md:py-1 rounded-sm md:rounded-xl mobile-micro-text md:text-sm font-semibold border ${getPriorityColor(task.priority)}`}>
                         {task.priority}
                       </span>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:flex lg:items-center gap-2 md:gap-4 text-sm text-slate-300 mb-3">
-                      <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:flex lg:items-center gap-0.5 md:gap-4 mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-3">
+                      <div className="flex items-center gap-0.5 md:gap-2">
                         <span>👤</span>
                         <span>{getTechnicianName(task.assignedTo)}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-0.5 md:gap-2">
                         <span>📍</span>
                         <span className="truncate">{task.location}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-0.5 md:gap-2">
                         <span>🕐</span>
-                        <span>
+                        <span className="mobile-micro-text md:text-sm">
                           {task.dueDate 
                             ? new Date(task.dueDate).toLocaleDateString('pl-PL')
                             : 'Bez terminu'
                           } ({task.shift || task.assignedShift || 'Brak zmiany'})
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-0.5 md:gap-2 hidden md:flex">
                         <span>🏷️</span>
                         <span>{task.category}</span>
                       </div>
                     </div>
                     
                     {task.description && (
-                      <p className="text-sm text-slate-400 mb-3 line-clamp-2">{task.description}</p>
+                      <p className="mobile-micro-text md:text-sm text-slate-400 mb-1 md:mb-3 line-clamp-1 md:line-clamp-2">{task.description}</p>
                     )}
 
                     {task.progress !== undefined && (
-                      <div className="mb-3">
-                        <div className="flex justify-between text-xs md:text-sm text-slate-300 mb-1">
+                      <div className="mb-1 md:mb-3">
+                        <div className="flex justify-between mobile-micro-text md:text-sm text-slate-300 mb-0.5 md:mb-1">
                           <span>Postęp</span>
                           <span className="font-semibold text-white">{task.progress || 0}%</span>
                         </div>
-                        <div className="w-full bg-slate-700 rounded-full h-2">
+                        <div className="w-full bg-slate-700 rounded-full h-1 md:h-2">
                           <div 
-                            className="gradient-primary h-2 rounded-full transition-all duration-300"
+                            className="gradient-primary h-1 md:h-2 rounded-full transition-all duration-300"
                             style={{ width: `${task.progress || 0}%` }}
                           ></div>
                         </div>
@@ -213,33 +213,33 @@ export default function TaskList({ type }) {
                     )}
 
                     {task.createdBy && (
-                      <div className="text-xs text-slate-500 hidden md:block">
+                      <div className="mobile-micro-text md:text-xs text-slate-500 hidden lg:block">
                         Utworzone przez: {task.createdBy} • {new Date(task.createdAt).toLocaleString('pl-PL')}
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex flex-col gap-2 ml-2 md:ml-4">
-                    <span className={`px-3 py-1 rounded-xl text-sm font-semibold border ${getStatusColor(task.status)}`}>
+                  <div className="flex flex-col gap-0.5 md:gap-2 ml-0.5 md:ml-4">
+                    <span className={`px-1 py-0.5 md:px-3 md:py-1 rounded-sm md:rounded-xl mobile-micro-text md:text-sm font-semibold border ${getStatusColor(task.status)}`}>
                       {getStatusLabel(task.status)}
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:flex gap-2 pt-4 border-t border-slate-600">
+                <div className="mobile-grid-4 md:flex gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-600">
                   <button 
                     onClick={() => openDetailsModal(task)}
-                    className="px-3 md:px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium text-sm"
+                    className="mobile-mini-button md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-sm md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
                   >
-                    <span className="md:hidden">📋</span>
+                    <span className="md:hidden mobile-micro-text">📋</span>
                     <span className="hidden md:inline">📋 Szczegóły</span>
                   </button>
                   
                   <button 
                     onClick={() => openEditModal(task)}
-                    className="px-3 md:px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium text-sm"
+                    className="mobile-mini-button md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-sm md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
                   >
-                    <span className="md:hidden">✏️</span>
+                    <span className="md:hidden mobile-micro-text">✏️</span>
                     <span className="hidden md:inline">✏️ Edytuj</span>
                   </button>
                   
@@ -247,17 +247,17 @@ export default function TaskList({ type }) {
                     <>
                       <button 
                         onClick={() => handleStatusChange(task._id, task.status === 'assigned' ? 'in_progress' : 'assigned')}
-                        className="px-3 md:px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium text-sm col-span-2 md:col-span-1"
+                        className="mobile-mini-button md:px-4 md:py-2 bg-amber-500/20 text-amber-400 rounded-sm md:rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium col-span-4 md:col-span-1"
                         disabled={loading}
                       >
                         {task.status === 'assigned' ? (
                           <>
-                            <span className="md:hidden">▶️</span>
+                            <span className="md:hidden mobile-micro-text">▶️</span>
                             <span className="hidden md:inline">▶️ Rozpocznij</span>
                           </>
                         ) : (
                           <>
-                            <span className="md:hidden">⏸️</span>
+                            <span className="md:hidden mobile-micro-text">⏸️</span>
                             <span className="hidden md:inline">⏸️ Wstrzymaj</span>
                           </>
                         )}
@@ -265,28 +265,28 @@ export default function TaskList({ type }) {
                       
                       <button 
                         onClick={() => handleCompleteTask(task._id)}
-                        className="px-3 md:px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium text-sm"
+                        className="mobile-mini-button md:px-4 md:py-2 bg-emerald-500/20 text-emerald-400 rounded-sm md:rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        <span className="md:hidden">✅</span>
+                        <span className="md:hidden mobile-micro-text">✅</span>
                         <span className="hidden md:inline">✅ Zakończ</span>
                       </button>
                       
                       <button 
                         onClick={() => handleMissingMaterials(task._id)}
-                        className="px-3 md:px-4 py-2 bg-orange-500/20 text-orange-400 rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium text-sm"
+                        className="mobile-mini-button md:px-4 md:py-2 bg-orange-500/20 text-orange-400 rounded-sm md:rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        <span className="md:hidden">📦</span>
+                        <span className="md:hidden mobile-micro-text">📦</span>
                         <span className="hidden md:inline">📦 Materiały</span>
                       </button>
                       
                       <button 
                         onClick={() => handleMoveToPool(task._id)}
-                        className="px-3 md:px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium text-sm"
+                        className="mobile-mini-button md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-sm md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
                         disabled={loading}
                       >
-                        <span className="md:hidden">🔄</span>
+                        <span className="md:hidden mobile-micro-text">🔄</span>
                         <span className="hidden md:inline">🔄 Do puli</span>
                       </button>
                     </>
