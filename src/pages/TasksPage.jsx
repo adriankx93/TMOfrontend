@@ -37,6 +37,14 @@ export default function TasksPage() {
     { id: "overdue", label: "Przeterminowane", count: stats.overdue, color: "red", icon: "⚠️" }
   ];
 
+  // Sprawdź URL hash i ustaw odpowiedni tab
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && tabs.find(tab => tab.id === hash)) {
+      setActiveTab(hash);
+    }
+  }, []);
+
   return (
     <div className="space-y-8 animate-fade-in">
       <Topbar 
@@ -77,6 +85,7 @@ export default function TasksPage() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              data-tab={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1 md:gap-3 px-2 md:px-6 py-2 md:py-4 rounded-lg md:rounded-xl font-semibold transition-all duration-200 flex-1 text-xs md:text-base ${
                 activeTab === tab.id
