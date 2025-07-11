@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTasks } from "../hooks/useTasks";
 import { useTechnicians } from "../hooks/useTechnicians";
 import { sheetsService } from "../services/sheetsService";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { tasks } = useTasks();
   const { technicians } = useTechnicians();
   const [todayShift, setTodayShift] = useState(null);
@@ -363,7 +365,10 @@ export default function Dashboard() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-        <div className="metric-card">
+        <div 
+          className="metric-card cursor-pointer hover:scale-105 transition-transform duration-200"
+          onClick={() => navigate('/technicy')}
+        >
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
               <span className="text-xl md:text-2xl">👷</span>
@@ -376,7 +381,10 @@ export default function Dashboard() {
           <p className="text-slate-400 text-xs md:text-sm">Na dzisiejszej zmianie</p>
         </div>
 
-        <div className="metric-card">
+        <div 
+          className="metric-card cursor-pointer hover:scale-105 transition-transform duration-200"
+          onClick={() => navigate('/zadania')}
+        >
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
               <span className="text-xl md:text-2xl">📋</span>
@@ -389,7 +397,17 @@ export default function Dashboard() {
           <p className="text-slate-400 text-xs md:text-sm">Przypisane i w realizacji</p>
         </div>
 
-        <div className="metric-card">
+        <div 
+          className="metric-card cursor-pointer hover:scale-105 transition-transform duration-200"
+          onClick={() => {
+            navigate('/zadania');
+            // Dodatkowa logika do przełączenia na tab "pool" będzie dodana później
+            setTimeout(() => {
+              const poolTab = document.querySelector('[data-tab="pool"]');
+              if (poolTab) poolTab.click();
+            }, 100);
+          }}
+        >
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
               <span className="text-xl md:text-2xl">🔄</span>
@@ -402,7 +420,17 @@ export default function Dashboard() {
           <p className="text-slate-400 text-xs md:text-sm">Oczekujące na przypisanie</p>
         </div>
 
-        <div className="metric-card">
+        <div 
+          className="metric-card cursor-pointer hover:scale-105 transition-transform duration-200"
+          onClick={() => {
+            navigate('/zadania');
+            // Dodatkowa logika do przełączenia na tab "completed" będzie dodana później
+            setTimeout(() => {
+              const completedTab = document.querySelector('[data-tab="completed"]');
+              if (completedTab) completedTab.click();
+            }, 100);
+          }}
+        >
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
               <span className="text-xl md:text-2xl">✅</span>
