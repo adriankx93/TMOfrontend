@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useTasks } from "../hooks/useTasks";
+import { useTasks } from "../hooks/useTasks"; 
 
 export default function MissingMaterialsModal({ task, onClose, onMoved }) {
-  const { moveToPool } = useTasks();
+  const { moveToPoolWithData } = useTasks();
   const [materials, setMaterials] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,25 +22,16 @@ export default function MissingMaterialsModal({ task, onClose, onMoved }) {
   ];
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!materials.trim()) {
-      setError("Podaj jakich materiałów brakuje");
-      return;
-    }
 
     setLoading(true);
     setError("");
-
+            action: "moved_to_pool_materials",
     try {
       const fullReason = `Brak materiałów: ${materials}${additionalNotes ? `. Dodatkowe uwagi: ${additionalNotes}` : ''}`;
       
-      const updateData = {
-        missingMaterials: materials,
-        additionalNotes: additionalNotes,
+      await moveToPoolWithData(task._id, fullReason, {
         needsMaterials: true
-      };
-
-      await moveToPool(task._id, fullReason, updateData);
+      });
       onMoved();
     } catch (err) {
       setError(err.response?.data?.message || "Błąd podczas przenoszenia zadania");
