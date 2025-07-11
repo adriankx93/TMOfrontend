@@ -7,6 +7,7 @@ import TaskEditModal from "./TaskEditModal";
 export default function TaskList({ type }) {
   const { tasks, updateTask, deleteTask, moveToPool, completeTask } = useTasks();
   const [technicians, setTechnicians] = useState([]);
+  const [localProgress, setLocalProgress] = useState({});
   const [selectedTask, setSelectedTask] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -110,34 +111,53 @@ export default function TaskList({ type }) {
   };
 
   const handleProgressChange = async (taskId, newProgress) => {
-    // Debounce the API call for smoother interaction
-    clearTimeout(window.progressTimeout);
+    // Update local state immediately for smooth UI
+    setLocalProgress(prev => ({
+      ...prev,
+      [taskId]: newProgress
+    }));
     
-    window.progressTimeout = setTimeout(async () => {
+    // Debounce the API call
+    clearTimeout(window[`progressTimeout_${taskId}`]);
+    
+    window[`progressTimeout_${taskId}`] = setTimeout(async () => {
       setLoading(true);
-    try {
-      const updateData = {
-        progress: newProgress,
-        lastModified: new Date().toISOString(),
-        lastModifiedBy: "Administrator Systemu",
-        history: [
-          ...(tasks.find(t => t._id === taskId)?.history || []),
-          {
-            action: "progress_updated",
-            user: "Administrator Systemu",
-            timestamp: new Date().toISOString(),
-            details: `Postęp zaktualizowany do ${newProgress}%`
-          }
-        ]
-      };
+      try {
+        const updateData = {
+          progress: newProgress,
+          lastModified: new Date().toISOString(),
+          lastModifiedBy: "Administrator Systemu",
+          history: [
+            ...(tasks.find(t => t._id === taskId)?.history || []),
+            {
+              action: "progress_updated",
+              user: "Administrator Systemu",
+              timestamp: new Date().toISOString(),
+              details: `Postęp zaktualizowany do ${newProgress}%`
+            }
+          ]
+        };
 
-      await updateTask(taskId, updateData);
-    } catch (error) {
-      console.error('Error updating task progress:', error);
-    } finally {
-      setLoading(false);
-    }
-    }, 300); // Wait 300ms after user stops dragging
+        await updateTask(taskId, updateData);
+        
+        // Clear local state after successful update
+        setLocalProgress(prev => {
+          const newState = { ...prev };
+          delete newState[taskId];
+          return newState;
+        });
+      } catch (error) {
+        console.error('Error updating task progress:', error);
+        // Revert local state on error
+        setLocalProgress(prev => {
+          const newState = { ...prev };
+          delete newState[taskId];
+          return newState;
+        });
+      } finally {
+        setLoading(false);
+      }
+    }, 500); // Wait 500ms after user stops dragging
   };
 
   const handleMoveToPool = async (taskId) => {
@@ -209,39 +229,26 @@ export default function TaskList({ type }) {
                       <p className="mobile-micro-text md:text-sm text-slate-400 mb-1 md:mb-3 line-clamp-1 md:line-clamp-2">{task.description}</p>
                     )}
 
-                    {task.progress !== undefined && (
-                      <div className="mb-1 md:mb-3">
-                        <div className="flex justify-between mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
-                          <span>Postęp</span>
-                          <span className="font-semibold text-white">{task.progress || 0}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={task.progress || 0}
-                          onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
-                          className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer progress-slider"
-                          disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
-                        />
-                      </div>
-                    )}
-
                     {/* Progress bar for all tasks */}
                     <div className="mb-1 md:mb-3">
                       <div className="flex justify-between mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
                         <span>Postęp</span>
                         <span className="font-semibold text-white">{task.progress || 0}%</span>
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={task.progress || 0}
-                        onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
-                        className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer progress-slider"
-                        disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
-                      />
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}
+                          onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
+                          className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer progress-slider"
+                          disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
+                          style={{
+                            background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%, #475569 ${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%, #475569 100%)`
+                          }}
+                        />
+                      </div>
                     </div>
 
                     {task.createdBy && (
