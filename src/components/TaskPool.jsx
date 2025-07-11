@@ -187,6 +187,7 @@ export default function TaskPool() {
       {showDetailsModal && selectedTask && (
         <TaskDetailsModal 
           task={selectedTask} 
+          technicians={technicians}
           onClose={() => setShowDetailsModal(false)} 
         />
       )}
