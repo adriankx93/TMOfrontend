@@ -29,7 +29,7 @@ export default function Dashboard() {
   }, [tasks, technicians]);
 
   const fetchWeatherData = async () => {
-    // Mock weather data
+    // Mock weather data - w rzeczywistej aplikacji można użyć API pogodowego
     const mockWeather = {
       temperature: Math.round(15 + Math.random() * 10),
       humidity: Math.round(45 + Math.random() * 30),
@@ -46,11 +46,15 @@ export default function Dashboard() {
     try {
       setLoading(true);
       const data = await sheetsService.getCurrentMonthData();
+      
+      // Pobierz dzisiejszą datę w strefie czasowej Polski
       const today = new Date();
-      const todayDay = today.getDate();
+      const todayDay = today.getDate(); // Dzień miesiąca (1-31)
+      
       const shift = data.shifts.find(shift => {
         return shift.dayNumber === todayDay;
       });
+
       setTodayShift(shift || null);
     } catch (error) {
       console.error('Error fetching today shift:', error);
@@ -63,6 +67,7 @@ export default function Dashboard() {
     const activeTechnicians = todayShift ? todayShift.totalWorking : 0;
     const currentTasks = tasks.filter(t => ['assigned', 'in_progress'].includes(t.status)).length;
     const poolTasks = tasks.filter(t => t.status === 'pool').length;
+    
     const today = new Date().toDateString();
     const completedToday = tasks.filter(t => 
       t.status === 'completed' && 
@@ -74,7 +79,7 @@ export default function Dashboard() {
       activeTechnicians,
       currentTasks,
       completedToday,
-      poolTasks // ta wartość dalej się liczy, jeśli gdzieś indziej z niej korzystasz
+      poolTasks
     });
   };
 
@@ -83,6 +88,7 @@ export default function Dashboard() {
 
   const getCurrentShiftTechnicians = () => {
     if (!todayShift) return [];
+    
     if (currentHour >= 7 && currentHour < 19) {
       return todayShift.dayTechnicians;
     } else {
@@ -92,6 +98,7 @@ export default function Dashboard() {
 
   const getNextShiftTechnicians = () => {
     if (!todayShift) return [];
+    
     if (currentHour >= 7 && currentHour < 19) {
       return todayShift.nightTechnicians;
     } else {
@@ -355,7 +362,7 @@ export default function Dashboard() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
         <div className="metric-card">
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
@@ -380,6 +387,19 @@ export default function Dashboard() {
           </div>
           <h3 className="text-sm md:text-lg font-semibold text-white mb-1">Zadania w toku</h3>
           <p className="text-slate-400 text-xs md:text-sm">Przypisane i w realizacji</p>
+        </div>
+
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
+              <span className="text-xl md:text-2xl">🔄</span>
+            </div>
+            <div className="px-2 md:px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs md:text-sm font-bold">
+              {dashboardStats.poolTasks}
+            </div>
+          </div>
+          <h3 className="text-sm md:text-lg font-semibold text-white mb-1">Pula zadań</h3>
+          <p className="text-slate-400 text-xs md:text-sm">Oczekujące na przypisanie</p>
         </div>
 
         <div className="metric-card">
