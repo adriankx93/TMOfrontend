@@ -151,8 +151,10 @@ export default function Sidebar() {
                       : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                   }`
                 }
-                  <span className="text-slate-300 group-hover:text-white transition-colors duration-200">
               >
+                <span className="text-slate-300 group-hover:text-white transition-colors duration-200">
+                  {item.icon}
+                </span>
                 <div className="flex items-center gap-1 md:gap-3 flex-1">
                   <div>
                     <div className="font-semibold text-sm">{item.label}</div>
