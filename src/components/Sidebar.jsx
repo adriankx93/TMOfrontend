@@ -1,5 +1,22 @@
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { 
+  Home, 
+  ClipboardList, 
+  Search, 
+  AlertTriangle, 
+  Settings as SettingsIcon, 
+  Building2, 
+  Users, 
+  Wrench, 
+  Package, 
+  ShoppingCart, 
+  FileText, 
+  BarChart4, 
+  TrendingUp, 
+  Settings, 
+  FileSignature 
+} from "lucide-react";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,21 +43,21 @@ export default function Sidebar() {
   };
 
   const navItems = [
-    { to: "/", label: "Dashboard", icon: "🏠", description: "Przegląd systemu" },
-    { to: "/zadania", label: "Zadania", icon: "📋", description: "Zarządzanie zadaniami" },
-    { to: "/przeglady", label: "Przeglądy", icon: "🔍", description: "Przeglądy i inspekcje" },
-    { to: "/usterki", label: "Usterki", icon: "⚠️", description: "Zgłoszenia i awarie" },
-    { to: "/urzadzenia", label: "Urządzenia", icon: "⚙️", description: "Sprzęt i maszyny" },
-    { to: "/budynki", label: "Budynki", icon: "🏢", description: "Infrastruktura" },
-    { to: "/technicy", label: "Zespół", icon: "👥", description: "Technicy i specjaliści" },
-    { to: "/narzedzia", label: "Narzędzia", icon: "🔧", description: "Inwentaryzacja narzędzi" },
-    { to: "/magazyn", label: "Magazyn", icon: "📦", description: "Inwentarz i zasoby" },
-    { to: "/materialy", label: "Materiały", icon: "🛒", description: "Zamówienia i dostawy" },
-    { to: "/notatnik", label: "Notatnik", icon: "📝", description: "Notatki i komunikacja" },
-    { to: "/raporty", label: "Analityka", icon: "📊", description: "Raporty i KPI" },
-    { to: "/analiza-trendow", label: "Trendy", icon: "📈", description: "Analiza awaryjności" },
-    { to: "/ustawienia", label: "Ustawienia", icon: "⚙️", description: "Konfiguracja systemu" },
-    { to: "/protokol", label: "Protokół", icon: "📝", description: "Generator protokołów" }
+    { to: "/", label: "Dashboard", icon: <Home size={18} />, description: "Przegląd systemu" },
+    { to: "/zadania", label: "Zadania", icon: <ClipboardList size={18} />, description: "Zarządzanie zadaniami" },
+    { to: "/przeglady", label: "Przeglądy", icon: <Search size={18} />, description: "Przeglądy i inspekcje" },
+    { to: "/usterki", label: "Usterki", icon: <AlertTriangle size={18} />, description: "Zgłoszenia i awarie" },
+    { to: "/urzadzenia", label: "Urządzenia", icon: <SettingsIcon size={18} />, description: "Sprzęt i maszyny" },
+    { to: "/budynki", label: "Budynki", icon: <Building2 size={18} />, description: "Infrastruktura" },
+    { to: "/technicy", label: "Zespół", icon: <Users size={18} />, description: "Technicy i specjaliści" },
+    { to: "/narzedzia", label: "Narzędzia", icon: <Wrench size={18} />, description: "Inwentaryzacja narzędzi" },
+    { to: "/magazyn", label: "Magazyn", icon: <Package size={18} />, description: "Inwentarz i zasoby" },
+    { to: "/materialy", label: "Materiały", icon: <ShoppingCart size={18} />, description: "Zamówienia i dostawy" },
+    { to: "/notatnik", label: "Notatnik", icon: <FileText size={18} />, description: "Notatki i komunikacja" },
+    { to: "/raporty", label: "Analityka", icon: <BarChart4 size={18} />, description: "Raporty i KPI" },
+    { to: "/analiza-trendow", label: "Trendy", icon: <TrendingUp size={18} />, description: "Analiza awaryjności" },
+    { to: "/ustawienia", label: "Ustawienia", icon: <Settings size={18} />, description: "Konfiguracja systemu" },
+    { to: "/protokol", label: "Protokół", icon: <FileSignature size={18} />, description: "Generator protokołów" }
   ];
 
   const currentShift =
@@ -134,7 +151,7 @@ export default function Sidebar() {
                       : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                   }`
                 }
-                style={{ minHeight: isMobile ? '32px' : '48px' }}
+                  <span className="text-slate-300 group-hover:text-white transition-colors duration-200">
               >
                 <div className="flex items-center gap-1 md:gap-3 flex-1">
                   <div>
