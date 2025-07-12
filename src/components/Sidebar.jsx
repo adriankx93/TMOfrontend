@@ -133,14 +133,16 @@ export default function Sidebar() {
 
             <div className="mobile-micro-text md:text-xs text-slate-400 mb-0.5 md:mb-1">Aktualna zmiana</div>
             <div className="flex items-center justify-between">
-            <button 
-              onClick={handleLogout}
-              className="mt-2 w-full py-2 px-3 bg-slate-700/50 rounded-lg text-sm text-slate-300 text-center hover:bg-slate-600/50 transition-all duration-200"
-            >
-              <span>🔒</span>
-              <span className="ml-2">Wyloguj się</span>
-            </button>
-              <span className="mobile-micro-text md:text-sm font-semibold text-white">
+              <button 
+                onClick={handleLogout}
+                className="mt-2 w-full py-2 px-3 bg-slate-700/50 rounded-lg text-sm text-slate-300 text-center hover:bg-slate-600/50 transition-all duration-200"
+              >
+                <span>🔒</span>
+                <span className="ml-2">Wyloguj się</span>
+              </button>
+              <span className="mobile-micro-text md:text-sm font-semibold text-white"></span>
+            </div>
+          </div>
         </div>
 
         {/* Navigation */}
@@ -158,7 +160,6 @@ export default function Sidebar() {
                       : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                   }`
                 }
-               >
               >
                 <span className="text-slate-300 group-hover:text-white transition-colors duration-200">
                   {item.icon}
