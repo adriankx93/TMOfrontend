@@ -19,6 +19,7 @@ const CONFIG: SheetConfig = {
     night: 'n',
     vacation: 'u',
     sickLeave: 'l4',
+    fullDay: '24' // Dodane: obsługa pełnej zmiany
   }
 };
 
@@ -161,9 +162,7 @@ export const sheetsService = {
 
     return dates
       .map((cell, idx) => {
-        // Używamy indeksu + 1 jako numer dnia, ignorując zawartość komórki z datami
         const dayNumber = idx + 1;
-
         const date = new Date(year, monthIndex, dayNumber);
 
         const shift: Shift = {
@@ -182,6 +181,12 @@ export const sheetsService = {
           const tokens = rawValue.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
 
           tokens.forEach(token => {
+            if (token === CONFIG.shiftCodes.fullDay) {
+              shift.dayTechnicians.push(tech.fullName);
+              shift.nightTechnicians.push(tech.fullName);
+              return;
+            }
+
             switch (token) {
               case CONFIG.shiftCodes.firstShift:
                 shift.firstShiftTechnicians.push(tech.fullName);
@@ -214,7 +219,6 @@ export const sheetsService = {
   },
 };
 
-// >>> TO DODAJ NA SAMYM KOŃCU (po obiekcie sheetsService):
 export async function getEmployees() {
   const data = await sheetsService.getCurrentMonthData();
   return data.technicians;
