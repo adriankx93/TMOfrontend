@@ -61,24 +61,6 @@ export default function TasksPage() {
         }
       />
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
-        {tabs.map((tab) => (
-          <div key={tab.id} className="metric-card card-mobile md:p-6">
-            <div className="flex items-center justify-between mb-1 md:mb-4">
-              <div className={`w-6 h-6 md:w-12 md:h-12 bg-${tab.color}-500/20 rounded-lg md:rounded-xl flex items-center justify-center`}>
-                <span className="text-sm md:text-2xl">{tab.icon}</span>
-              </div>
-              <div className={`px-1.5 py-0.5 md:px-3 md:py-1 bg-${tab.color}-500/20 text-${tab.color}-400 rounded-full text-xs font-bold`}>
-                {tab.count}
-              </div>
-            </div>
-            <h3 className="text-xs md:text-lg font-semibold text-white mb-0 md:mb-1">{tab.label}</h3>
-            <p className="text-mobile-xs md:text-sm text-slate-400 hidden xs:block">Zadania</p>
-          </div>
-        ))}
-      </div>
-
       {/* Advanced Tabs */}
       <div className="mobile-scroll-x md:block glass-card p-0.5 md:p-2">
         <div className="inline-flex md:grid md:grid-cols-4 gap-0.5 md:gap-2 w-auto">
