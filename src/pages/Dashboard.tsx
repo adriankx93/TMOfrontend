@@ -107,9 +107,12 @@ export default function Dashboard() {
   const noTechniciansToday =
     todayShift && todayShift.dayTechnicians.length === 0 && todayShift.nightTechnicians.length === 0;
 
+  const currentShiftTechnicians = getCurrentShiftTechnicians();
+  const nextShiftTechnicians = getNextShiftTechnicians();
+  const currentShiftTasks = getCurrentShiftTasks();
+
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Główna sekcja + pogoda mobilna */}
       <div className="glass-card p-4 md:p-8">
         <div className="flex flex-col md:flex-row justify-between items-start gap-4">
           <div className="flex-1">
@@ -122,7 +125,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Pogoda mobilna */}
           {weather && (
             <div className="block lg:hidden text-right text-slate-300">
               <div className="text-xl">{weather.icon} {weather.temperature}°C</div>
@@ -132,29 +134,32 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Alert brak techników */}
       {noTechniciansToday && (
         <div className="p-4 bg-red-500/20 border border-red-400 text-red-300 rounded-xl">
           ⚠️ Brak przypisanych techników do dzisiejszej zmiany
         </div>
       )}
 
-      {/* Widżet zmiany + kalendarz */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          {/* Tu możesz wrzucić aktualną zmianę, jak masz */}
-          {/* ... */}
+        <div className="glass-card p-4 md:p-6">
+          <h3 className="text-white text-lg font-semibold mb-4">Aktualna zmiana</h3>
+          {loading ? (
+            <p className="text-slate-400">Ładowanie danych...</p>
+          ) : (
+            <div>
+              <p className="text-slate-300 mb-2">{isDay ? 'Zmiana dzienna (07:00 - 19:00)' : 'Zmiana nocna (19:00 - 07:00)'}</p>
+              <ul className="list-disc pl-4 text-white space-y-1">
+                {currentShiftTechnicians.map((tech, i) => (
+                  <li key={i}>{tech}</li>
+                ))}
+              </ul>
+              {currentShiftTechnicians.length === 0 && <p className="text-slate-400">Brak techników</p>}
+            </div>
+          )}
         </div>
 
-        <div>
-          <ShiftCalendar shifts={allShifts} />
-        </div>
-      </div>
-
-      {/* Kafle statystyk i system health (skrócone) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* ... statystyki jak wcześniej ... */}
+        <ShiftCalendar shifts={allShifts} />
       </div>
     </div>
   );
-} 
+}
