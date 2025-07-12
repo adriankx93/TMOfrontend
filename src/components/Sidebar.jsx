@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { authService } from "../services/authService";
 import { 
   Home, 
   ClipboardList, 
@@ -21,6 +22,7 @@ import {
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -35,11 +37,14 @@ export default function Sidebar() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Mock user data since authentication is disabled
-  const user = {
-    firstName: "Administrator",
-    lastName: "Systemu",
-    role: "Admin"
+  useEffect(() => {
+    const currentUser = authService.getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    window.location.href = '/login';
   };
 
   const navItems = [
@@ -128,12 +133,14 @@ export default function Sidebar() {
 
             <div className="mobile-micro-text md:text-xs text-slate-400 mb-0.5 md:mb-1">Aktualna zmiana</div>
             <div className="flex items-center justify-between">
+            <button 
+              onClick={handleLogout}
+              className="mt-2 w-full py-2 px-3 bg-slate-700/50 rounded-lg text-sm text-slate-300 text-center hover:bg-slate-600/50 transition-all duration-200"
+            >
+              <span>🔒</span>
+              <span className="ml-2">Wyloguj się</span>
+            </button>
               <span className="mobile-micro-text md:text-sm font-semibold text-white">
-                {currentShift}
-              </span>
-              <span className="mobile-micro-text md:text-xs text-slate-400">{shiftTime}</span>
-            </div>
-          </div>
         </div>
 
         {/* Navigation */}

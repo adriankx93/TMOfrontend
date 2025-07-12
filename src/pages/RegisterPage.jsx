@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { authService } from "../services/authService";
-import { Link } from "react-router-dom";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
-    password: ""
+    password: "",
+    confirmPassword: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -21,12 +23,34 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Hasła nie są identyczne");
+      return;
+    }
+    
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError("Hasło musi mieć co najmniej 6 znaków");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      await authService.login(formData.email, formData.password);
-      navigate("/");
+      // Register user
+      await authService.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // Show success message and redirect to login
+      alert("Rejestracja zakończona pomyślnie. Możesz się teraz zalogować.");
+      navigate("/login");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -44,7 +68,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
             Miasteczko Orange
           </h1>
-          <p className="text-slate-600 mt-2">System TMO - Logowanie</p>
+          <p className="text-slate-600 mt-2">System TMO - Rejestracja</p>
         </div>
 
         {error && (
@@ -56,15 +80,47 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Login
+              Imię
             </label>
             <input
               type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="w-full p-4 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all duration-200"
+              placeholder="Wprowadź imię"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Nazwisko
+            </label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="w-full p-4 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all duration-200"
+              placeholder="Wprowadź nazwisko"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               className="w-full p-4 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all duration-200"
-              placeholder="Wprowadź login"
+              placeholder="Wprowadź email"
               required
               disabled={loading}
             />
@@ -83,6 +139,24 @@ export default function LoginPage() {
               placeholder="Wprowadź hasło"
               required
               disabled={loading}
+              minLength={6}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Potwierdź hasło
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full p-4 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all duration-200"
+              placeholder="Potwierdź hasło"
+              required
+              disabled={loading}
+              minLength={6}
             />
           </div>
 
@@ -91,20 +165,14 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Logowanie..." : "Zaloguj się"}
+            {loading ? "Rejestracja..." : "Zarejestruj się"}
           </button>
         </form>
 
-        <div className="mt-4 text-center">
-          <p className="text-slate-600">Nie masz konta? <Link to="/register" className="text-orange-500 hover:underline">Zarejestruj się</Link></p>
-        </div>
-
-        <div className="mt-8 p-4 bg-blue-50 rounded-2xl border border-blue-200">
-          <div className="text-sm text-blue-800 font-medium mb-2">Dane testowe:</div>
-          <div className="text-sm text-blue-700">
-            <div>Login: <strong>admin</strong></div>
-            <div>Hasło: <strong>test1234</strong></div>
-          </div>
+        <div className="mt-6 text-center">
+          <p className="text-slate-600">
+            Masz już konto? <Link to="/login" className="text-orange-500 hover:underline">Zaloguj się</Link>
+          </p>
         </div>
 
         <div className="mt-6 text-center text-sm text-slate-500">

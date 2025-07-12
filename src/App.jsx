@@ -24,6 +24,8 @@ import ToolsPage from "./pages/ToolsPage";
 import NotebookPage from "./pages/NotebookPage";
 import TrendAnalysisPage from "./pages/TrendAnalysisPage";
 import ProtokolGenerator from "./components/ProtokolGenerator";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 export default function App() {
   const [isMobile, setIsMobile] = useState(false);
@@ -67,6 +69,8 @@ export default function App() {
               <Route path="/uzytkownicy" element={<UsersPage />} />
               <Route path="/uzytkownicy/:id" element={<EditUserPage />} />
               <Route path="/protokol" element={<ProtokolGenerator />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
             </Routes>
           </div>
         </main>

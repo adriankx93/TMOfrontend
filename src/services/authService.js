@@ -1,31 +1,51 @@
 export const authService = {
-  // Mock authentication service
   login: async (email, password) => {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Test user credentials
-    if (email === "admin" && password === "test1234") {
-      const user = {
-        id: "1",
-        email: "admin@orange.pl",
-        firstName: "Administrator",
-        lastName: "Systemu",
-        role: "Admin",
-        avatar: "A",
-        permissions: ["all"]
-      };
-      
-      const token = "mock-jwt-token-" + Date.now();
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Nieprawidłowe dane logowania');
+      }
+
+      const data = await response.json();
       
       // Store in localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       
-      return { user, token };
+      return data;
+    } catch (error) {
+      throw new Error(error.message || 'Nieprawidłowe dane logowania');
     }
-    
-    throw new Error("Nieprawidłowe dane logowania");
+  },
+
+  register: async (userData) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Błąd rejestracji');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw new Error(error.message || 'Błąd rejestracji');
+    }
   },
 
   logout: () => {
@@ -43,27 +63,52 @@ export const authService = {
   },
 
   updateProfile: async (userData) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const currentUser = authService.getCurrentUser();
-    const updatedUser = { ...currentUser, ...userData };
-    
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    return updatedUser;
+    try {
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Błąd aktualizacji profilu');
+      }
+
+      const updatedUser = await response.json();
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return updatedUser;
+    } catch (error) {
+      throw new Error(error.message || 'Błąd aktualizacji profilu');
+    }
   },
 
   changePassword: async (currentPassword, newPassword) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Mock password validation
-    if (currentPassword !== "test1234") {
-      throw new Error("Nieprawidłowe obecne hasło");
+    try {
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Błąd zmiany hasła');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw new Error(error.message || 'Błąd zmiany hasła');
     }
-    
-    if (newPassword.length < 6) {
-      throw new Error("Nowe hasło musi mieć co najmniej 6 znaków");
-    }
-    
-    return { success: true };
   }
 };
