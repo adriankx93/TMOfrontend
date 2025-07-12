@@ -133,13 +133,6 @@ export default function Sidebar() {
 
             <div className="mobile-micro-text md:text-xs text-slate-400 mb-0.5 md:mb-1">Aktualna zmiana</div>
             <div className="flex items-center justify-between">
-              <button 
-                onClick={handleLogout}
-                className="mt-2 w-full py-2 px-3 bg-slate-700/50 rounded-lg text-sm text-slate-300 text-center hover:bg-slate-600/50 transition-all duration-200"
-              >
-                <span>🔒</span>
-                <span className="ml-2">Wyloguj się</span>
-              </button>
               <span className="mobile-micro-text md:text-sm font-semibold text-white"></span>
             </div>
           </div>
@@ -180,7 +173,7 @@ export default function Sidebar() {
           <div className="glass-card-light p-3">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 gradient-accent rounded-full flex items-center justify-center font-bold text-white text-sm shadow-lg">
-                {user?.firstName?.[0] || "A"}
+                {user?.firstName?.[0] || "U"}
               </div>
               <div className="flex-1">
                 <div className="font-semibold text-sm text-white">
@@ -190,10 +183,13 @@ export default function Sidebar() {
               </div>
             </div>
 
-            <div className="w-full py-2 px-3 bg-slate-700/50 rounded-lg text-sm text-slate-300 text-center">
-              <span>🔓</span>
-              <span className="ml-2">Tryb demo</span>
-            </div>
+            <button 
+              onClick={handleLogout}
+              className="w-full py-2 px-3 bg-slate-700/50 rounded-lg text-sm text-slate-300 text-center hover:bg-slate-600/50 transition-all duration-200"
+            >
+              <span>🔒</span>
+              <span className="ml-2">Wyloguj się</span>
+            </button>
           </div>
 
           <div className="text-slate-500 text-xs text-center mt-3">

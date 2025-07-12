@@ -2,20 +2,20 @@ export const authService = {
   login: async (email, password) => {
     // Simulate API call delay
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Nieprawidłowe dane logowania');
-      }
-
-      const data = await response.json();
+      // Simulate successful login for demo purposes
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Mock user data
+      const data = {
+        token: "mock-jwt-token-" + Date.now(),
+        user: {
+          id: "user-1",
+          firstName: "Administrator",
+          lastName: "Systemu",
+          email: email,
+          role: "Admin"
+        }
+      };
       
       // Store in localStorage
       localStorage.setItem("token", data.token);
