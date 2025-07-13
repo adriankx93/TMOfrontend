@@ -13,7 +13,8 @@ import {
   User,
   PauseCircle,
   ClipboardList,
-  Settings as SliderIcon
+  Slider as SliderIcon,
+  Repeat
 } from "lucide-react";
 
 export default function TaskList({ type }) {
@@ -25,26 +26,11 @@ export default function TaskList({ type }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showMoveToPoolModal, setShowMoveToPoolModal] = useState(false);
   const [showMissingMaterialsModal, setShowMissingMaterialsModal] = useState(false);
+  const [showHandoverModal, setShowHandoverModal] = useState(false);
+  const [handoverDate, setHandoverDate] = useState('');
+  const [handoverNotes, setHandoverNotes] = useState('');
+  const [handoverTechnician, setHandoverTechnician] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // Function to get progress comment based on percentage
-  const getProgressComment = (progress) => {
-    if (progress === 0) {
-      return 'Oczekuje na rozpoczęcie';
-    } else if (progress > 0 && progress < 25) {
-      return 'Zadanie rozpoczęte';
-    } else if (progress >= 25 && progress < 50) {
-      return 'W trakcie realizacji';
-    } else if (progress >= 50 && progress < 75) {
-      return 'Znaczny postęp';
-    } else if (progress >= 75 && progress < 100) {
-      return 'Blisko zakończenia';
-    } else if (progress === 100) {
-      return 'Zadanie zakończone';
-    } else {
-      return 'Status nieznany';
-    }
-  };
 
   useEffect(() => {
     fetchTechnicians();
@@ -64,7 +50,7 @@ export default function TaskList({ type }) {
   const filteredTasks = tasks.filter(task => {
     switch(type) {
       case 'current':
-        return ['assigned', 'in_progress'].includes(task.status);
+        return ['assigned', 'in_progress', 'handover'].includes(task.status);
       case 'completed':
         return task.status === 'completed';
       case 'overdue':
@@ -74,7 +60,7 @@ export default function TaskList({ type }) {
     }
   });
 
-  // --- Nowoczesne badge priorytetu ---
+  // Nowoczesne badge priorytetu
   const getPriorityBadge = (priority) => {
     switch(priority) {
       case 'Krytyczny':
@@ -110,9 +96,9 @@ export default function TaskList({ type }) {
     }
   };
 
-  // --- Nowoczesne badge statusu ---
-  const getStatusBadge = (status) => {
-    switch(status) {
+  // Nowoczesne badge statusu
+  const getStatusBadge = (task) => {
+    switch(task.status) {
       case 'assigned':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200">
@@ -137,6 +123,19 @@ export default function TaskList({ type }) {
             <AlertTriangle className="w-4 h-4 text-red-500" /> Przeterminowane
           </span>
         );
+      case 'handover':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cyan-100 text-cyan-700 text-xs font-semibold border border-cyan-200">
+            <Repeat className="w-4 h-4 text-cyan-500" />
+            Do dokończenia {task.handoverDate && <>({new Date(task.handoverDate).toLocaleDateString('pl-PL')})</>}
+            {task.handoverTechnician && (
+              <span className="inline-flex items-center gap-1 ml-2 px-1 bg-cyan-200/50 text-cyan-700 rounded">
+                <User className="w-3 h-3" />
+                {getTechnicianName(task.handoverTechnician)}
+              </span>
+            )}
+          </span>
+        );
       case 'pool':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 text-xs font-semibold border border-purple-200">
@@ -146,10 +145,20 @@ export default function TaskList({ type }) {
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200">
-            {status}
+            {task.status}
           </span>
         );
     }
+  };
+
+  // Komentarz do progressu
+  const getProgressComment = (progress) => {
+    if (progress === 100) return "Zadanie ukończone!";
+    if (progress >= 80) return "Końcowa faza realizacji";
+    if (progress >= 60) return "Czeka na kolejną zmianę";
+    if (progress >= 30) return "W trakcie realizacji";
+    if (progress > 0)  return "Rozpoczęto zadanie";
+    return "Nie rozpoczęto";
   };
 
   const handleStatusChange = async (taskId, newStatus, additionalData = {}) => {
@@ -238,7 +247,27 @@ export default function TaskList({ type }) {
     setShowMissingMaterialsModal(true);
   };
 
+  const openHandoverModal = (task) => {
+    setSelectedTask(task);
+    setHandoverDate('');
+    setHandoverNotes('');
+    setHandoverTechnician('');
+    setShowHandoverModal(true);
+  };
+
+  const handleHandover = async () => {
+    if (!handoverDate && !handoverTechnician && !handoverNotes) return;
+    await handleStatusChange(selectedTask._id, 'handover', {
+      handoverDate: handoverDate || null,
+      handoverNotes: handoverNotes || "",
+      handoverTechnician: handoverTechnician || null
+    });
+    setShowHandoverModal(false);
+    setSelectedTask(null);
+  };
+
   const getTechnicianName = (technicianId) => {
+    if (!technicianId) return 'Nieprzypisane';
     const technician = technicians.find(t => t.id === technicianId);
     return technician ? technician.fullName : 'Nieprzypisane';
   };
@@ -301,37 +330,45 @@ export default function TaskList({ type }) {
 
                     {/* Nowoczesny PROGRESS BAR */}
                     <div className="mb-1 md:mb-3">
-  <div className="flex justify-between items-center mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
-    <span className="inline-flex items-center gap-1">
-      <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
-      Postęp
-    </span>
-    <span className="inline-flex items-center gap-1 font-semibold text-white">
-      <SliderIcon className="w-4 h-4 text-slate-300" />
-      {localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%
-    </span>
-  </div>
-  <div className="relative w-full h-3 rounded-lg overflow-hidden bg-slate-700 shadow-inner">
-    <div
-      className="h-full transition-all duration-700 bg-gradient-to-r from-blue-400 via-emerald-400 to-emerald-600"
-      style={{
-        width: `${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%`
-      }}
-    />
-    <input
-      type="range"
-      min="0"
-      max="100"
-      value={localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}
-      onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
-      className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
-      disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
-    />
-  </div>
-  <div className="mt-1 mobile-micro-text md:text-xs text-slate-400">
-    {getProgressComment(localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0))}
-  </div>
-</div>
+                      <div className="flex justify-between items-center mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
+                        <span className="inline-flex items-center gap-1">
+                          <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
+                          Postęp
+                        </span>
+                        <span className="inline-flex items-center gap-1 font-semibold text-white">
+                          <SliderIcon className="w-4 h-4 text-slate-300" />
+                          {localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%
+                        </span>
+                      </div>
+                      <div className="relative w-full h-3 rounded-lg overflow-hidden bg-slate-700 shadow-inner">
+                        <div
+                          className="h-full transition-all duration-700 bg-gradient-to-r from-blue-400 via-emerald-400 to-emerald-600"
+                          style={{
+                            width: `${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%`
+                          }}
+                        />
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}
+                          onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
+                          className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
+                          disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
+                        />
+                      </div>
+                      <div className="mt-1 mobile-micro-text md:text-xs text-slate-400">
+                        {getProgressComment(localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0))}
+                      </div>
+                    </div>
+
+                    {task.status === "handover" && (task.handoverNotes || task.handoverDate || task.handoverTechnician) && (
+                      <div className="bg-cyan-50 text-cyan-700 px-3 py-2 rounded-md border border-cyan-200 text-xs mb-2 mt-1">
+                        <b>Przekazane:</b> {task.handoverDate && <>do {new Date(task.handoverDate).toLocaleDateString('pl-PL')}</>}
+                        {task.handoverTechnician && <> dla: <b>{getTechnicianName(task.handoverTechnician)}</b></>}
+                        {task.handoverNotes && <div className="mt-1 text-cyan-900">{task.handoverNotes}</div>}
+                      </div>
+                    )}
 
                     {task.createdBy && (
                       <div className="mobile-micro-text md:text-xs text-slate-500 hidden lg:block">
@@ -341,7 +378,7 @@ export default function TaskList({ type }) {
                   </div>
                   
                   <div className="flex flex-col gap-0.5 md:gap-2 ml-0.5 md:ml-4">
-                    {getStatusBadge(task.status)}
+                    {getStatusBadge(task)}
                   </div>
                 </div>
 
@@ -404,6 +441,16 @@ export default function TaskList({ type }) {
                         <span className="md:hidden text-xs">P</span>
                         <span className="hidden md:inline text-sm">Do puli</span>
                       </button>
+                      {/* --- Przekazanie do zmiany/technika/modal --- */}
+                      <button
+                        onClick={() => openHandoverModal(task)}
+                        className="btn-compact md:px-4 md:py-2 bg-cyan-500/20 text-cyan-500 rounded-md md:rounded-xl hover:bg-cyan-500/30 transition-all duration-200 font-medium whitespace-nowrap"
+                        disabled={loading}
+                      >
+                        <Repeat className="w-4 h-4" />
+                        <span className="hidden md:inline">Przekaż</span>
+                        <span className="md:hidden">↪</span>
+                      </button>
                     </>
                   )}
                 </div>
@@ -453,6 +500,43 @@ export default function TaskList({ type }) {
             setSelectedTask(null);
           }}
         />
+      )}
+
+      {/* Modal przekazania zadania */}
+      {showHandoverModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl p-6 shadow-2xl w-[90vw] max-w-xs">
+            <h3 className="font-bold mb-2 text-slate-700">Przekaż zadanie</h3>
+            <label className="text-xs text-slate-600 block mb-1">Data przekazania (opcjonalnie):</label>
+            <input type="date" className="border rounded w-full mb-2"
+              value={handoverDate} onChange={e => setHandoverDate(e.target.value)} />
+
+            <label className="text-xs text-slate-600 block mb-1">Przekaż do technika (opcjonalnie):</label>
+            <select className="border rounded w-full mb-2"
+              value={handoverTechnician} onChange={e => setHandoverTechnician(e.target.value)}>
+              <option value="">-- Wybierz technika --</option>
+              {technicians.map(t => (
+                <option key={t.id} value={t.id}>{t.fullName}</option>
+              ))}
+            </select>
+
+            <label className="text-xs text-slate-600 block mb-1">Notatki (opcjonalnie):</label>
+            <textarea className="border rounded w-full mb-3" rows={2}
+              placeholder="Notatki dla kolejnej zmiany/technika..."
+              value={handoverNotes} onChange={e => setHandoverNotes(e.target.value)} />
+
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowHandoverModal(false)} className="text-xs text-slate-500">Anuluj</button>
+              <button
+                onClick={handleHandover}
+                className="bg-cyan-500 text-white px-3 py-1 rounded text-xs"
+                disabled={loading}
+              >
+                Przekaż
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
