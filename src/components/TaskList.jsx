@@ -5,6 +5,15 @@ import TaskDetailsModal from "./TaskDetailsModal";
 import TaskEditModal from "./TaskEditModal";
 import MoveToPoolModal from "./MoveToPoolModal";
 import MissingMaterialsModal from "./MissingMaterialsModal";
+import {
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle,
+  Loader2,
+  User,
+  PauseCircle,
+  ClipboardList
+} from "lucide-react";
 
 export default function TaskList({ type }) {
   const { tasks, updateTask, deleteTask, moveToPool, completeTask } = useTasks();
@@ -45,35 +54,81 @@ export default function TaskList({ type }) {
     }
   });
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'assigned': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'in_progress': return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'completed': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'overdue': return 'bg-red-100 text-red-800 border-red-200';
-      case 'pool': return 'bg-purple-100 text-purple-800 border-purple-200';
-      default: return 'bg-slate-100 text-slate-800 border-slate-200';
-    }
-  };
-
-  const getStatusLabel = (status) => {
-    switch(status) {
-      case 'assigned': return 'Przypisane';
-      case 'in_progress': return 'W trakcie';
-      case 'completed': return 'Zakończone';
-      case 'overdue': return 'Przeterminowane';
-      case 'pool': return 'W puli';
-      default: return 'Nieznany';
-    }
-  };
-
-  const getPriorityColor = (priority) => {
+  // --- Nowoczesne badge priorytetu ---
+  const getPriorityBadge = (priority) => {
     switch(priority) {
-      case 'Krytyczny': return 'bg-red-100 text-red-800 border-red-200';
-      case 'Wysoki': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Średni': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Niski': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-slate-100 text-slate-800 border-slate-200';
+      case 'Krytyczny':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-100 text-red-700 text-xs font-bold border border-red-200">
+            <AlertTriangle className="w-4 h-4 text-red-500" /> Krytyczny
+          </span>
+        );
+      case 'Wysoki':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-100 text-orange-700 text-xs font-bold border border-orange-200">
+            <AlertCircle className="w-4 h-4 text-orange-500" /> Wysoki
+          </span>
+        );
+      case 'Średni':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-yellow-100 text-yellow-700 text-xs font-bold border border-yellow-200">
+            <ClipboardList className="w-4 h-4 text-yellow-500" /> Średni
+          </span>
+        );
+      case 'Niski':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-green-100 text-green-700 text-xs font-bold border border-green-200">
+            <CheckCircle className="w-4 h-4 text-green-500" /> Niski
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+            <CheckCircle className="w-4 h-4 text-slate-400" /> {priority}
+          </span>
+        );
+    }
+  };
+
+  // --- Nowoczesne badge statusu ---
+  const getStatusBadge = (status) => {
+    switch(status) {
+      case 'assigned':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200">
+            <User className="w-4 h-4 text-blue-500" /> Przypisane
+          </span>
+        );
+      case 'in_progress':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-200">
+            <Loader2 className="w-4 h-4 text-amber-500 animate-spin" /> W trakcie
+          </span>
+        );
+      case 'completed':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-green-100 text-green-700 text-xs font-semibold border border-green-200">
+            <CheckCircle className="w-4 h-4 text-green-500" /> Zakończone
+          </span>
+        );
+      case 'overdue':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-100 text-red-700 text-xs font-semibold border border-red-200">
+            <AlertTriangle className="w-4 h-4 text-red-500" /> Przeterminowane
+          </span>
+        );
+      case 'pool':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 text-xs font-semibold border border-purple-200">
+            <ClipboardList className="w-4 h-4 text-purple-500" /> W puli
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200">
+            {status}
+          </span>
+        );
     }
   };
 
@@ -89,11 +144,10 @@ export default function TaskList({ type }) {
             action: `status_changed_to_${newStatus}`,
             user: "Administrator Systemu",
             timestamp: new Date().toISOString(),
-            details: `Status zmieniony na: ${getStatusLabel(newStatus)}`
+            details: `Status zmieniony na: ${newStatus}`
           }
         ]
       };
-
       await updateTask(taskId, updateData);
     } catch (error) {
       console.error('Error updating task status:', error);
@@ -113,15 +167,11 @@ export default function TaskList({ type }) {
   };
 
   const handleProgressChange = async (taskId, newProgress) => {
-    // Update local state immediately for smooth UI
     setLocalProgress(prev => ({
       ...prev,
       [taskId]: newProgress
     }));
-    
-    // Debounce the API call
     clearTimeout(window[`progressTimeout_${taskId}`]);
-    
     window[`progressTimeout_${taskId}`] = setTimeout(async () => {
       setLoading(true);
       try {
@@ -139,10 +189,7 @@ export default function TaskList({ type }) {
             }
           ]
         };
-
         await updateTask(taskId, updateData);
-        
-        // Clear local state after successful update
         setLocalProgress(prev => {
           const newState = { ...prev };
           delete newState[taskId];
@@ -150,7 +197,6 @@ export default function TaskList({ type }) {
         });
       } catch (error) {
         console.error('Error updating task progress:', error);
-        // Revert local state on error
         setLocalProgress(prev => {
           const newState = { ...prev };
           delete newState[taskId];
@@ -159,7 +205,7 @@ export default function TaskList({ type }) {
       } finally {
         setLoading(false);
       }
-    }, 500); // Wait 500ms after user stops dragging
+    }, 500);
   };
 
   const handleMoveToPool = async (taskId) => {
@@ -204,25 +250,27 @@ export default function TaskList({ type }) {
                   <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-3 mb-1 md:mb-3">
                       <h4 className="font-semibold text-white text-xs md:text-base line-clamp-1 md:line-clamp-2">{task.title}</h4>
-                      <span className={`px-1.5 py-0.5 md:px-3 md:py-1 rounded-md md:rounded-xl text-xs md:text-sm font-semibold ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
-                      </span>
+                      {getPriorityBadge(task.priority)}
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-2 lg:flex lg:items-center gap-0.5 md:gap-4 mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-3">
-                      <div className="truncate">
+                      <div className="truncate flex items-center gap-1">
+                        <User className="w-4 h-4 text-blue-400" />
                         {getTechnicianName(task.assignedTo)}
                       </div>
-                      <div className="truncate">
+                      <div className="truncate flex items-center gap-1">
+                        <ClipboardList className="w-4 h-4 text-purple-400" />
                         {task.location}
                       </div>
-                      <div className="text-mobile-xs md:text-sm">
+                      <div className="text-mobile-xs md:text-sm flex items-center gap-1">
+                        <PauseCircle className="w-4 h-4 text-amber-400" />
                         {task.dueDate 
                           ? new Date(task.dueDate).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' })
                           : 'Bez terminu'
                         }
                       </div>
-                      <div className="hidden md:block">
+                      <div className="hidden md:block flex items-center gap-1">
+                        <ClipboardList className="w-4 h-4 text-slate-400" />
                         {task.category}
                       </div>
                     </div>
@@ -231,24 +279,30 @@ export default function TaskList({ type }) {
                       <p className="mobile-micro-text md:text-sm text-slate-400 mb-1 md:mb-3 line-clamp-1 md:line-clamp-2">{task.description}</p>
                     )}
 
-                    {/* Progress bar for all tasks */}
+                    {/* Nowoczesny PROGRESS BAR */}
                     <div className="mb-1 md:mb-3">
                       <div className="flex justify-between mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
-                        <span>Postęp</span>
-                        <span className="font-semibold text-white">{task.progress || 0}%</span>
+                        <span className="inline-flex items-center gap-1">
+                          <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
+                          Postęp
+                        </span>
+                        <span className="font-semibold text-white">{localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%</span>
                       </div>
-                      <div className="relative">
+                      <div className="relative w-full h-3 rounded-lg overflow-hidden bg-slate-700 shadow-inner">
+                        <div
+                          className="h-full transition-all duration-700 bg-gradient-to-r from-blue-400 via-emerald-400 to-emerald-600"
+                          style={{
+                            width: `${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%`
+                          }}
+                        />
                         <input
                           type="range"
                           min="0"
                           max="100"
                           value={localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}
                           onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
-                          className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer progress-slider"
+                          className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
                           disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
-                          style={{
-                            background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%, #475569 ${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%, #475569 100%)`
-                          }}
                         />
                       </div>
                     </div>
@@ -261,12 +315,11 @@ export default function TaskList({ type }) {
                   </div>
                   
                   <div className="flex flex-col gap-0.5 md:gap-2 ml-0.5 md:ml-4">
-                    <span className={`px-1.5 py-0.5 md:px-3 md:py-1 rounded-md md:rounded-xl text-xs md:text-sm font-semibold ${getStatusColor(task.status)}`}>
-                      {getStatusLabel(task.status)}
-                    </span>
+                    {getStatusBadge(task.status)}
                   </div>
                 </div>
 
+                {/* Akcje */}
                 <div className="flex flex-nowrap overflow-x-auto w-full gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-600">
                   <button 
                     onClick={() => openDetailsModal(task)}
@@ -275,7 +328,6 @@ export default function TaskList({ type }) {
                     <span className="md:hidden text-xs">S</span>
                     <span className="hidden md:inline text-sm">Szczegóły</span>
                   </button>
-                  
                   <button 
                     onClick={() => openEditModal(task)}
                     className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium whitespace-nowrap"
@@ -283,7 +335,6 @@ export default function TaskList({ type }) {
                     <span className="md:hidden text-xs">E</span>
                     <span className="hidden md:inline text-sm">Edytuj</span>
                   </button>
-                  
                   {['assigned', 'in_progress'].includes(task.status) && (
                     <>
                       <button 
@@ -303,7 +354,6 @@ export default function TaskList({ type }) {
                           </>
                         )}
                       </button>
-                      
                       <button 
                         onClick={() => handleCompleteTask(task._id)}
                         className="btn-compact md:px-4 md:py-2 bg-emerald-500/20 text-emerald-400 rounded-md md:rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium whitespace-nowrap"
@@ -312,7 +362,6 @@ export default function TaskList({ type }) {
                         <span className="md:hidden text-xs">Z</span>
                         <span className="hidden md:inline text-sm">Zakończ</span>
                       </button>
-                      
                       <button 
                         onClick={() => handleMissingMaterials(task._id)}
                         className="btn-compact md:px-4 md:py-2 bg-orange-500/20 text-orange-400 rounded-md md:rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium whitespace-nowrap"
@@ -321,7 +370,6 @@ export default function TaskList({ type }) {
                         <span className="md:hidden text-xs">M</span>
                         <span className="hidden md:inline text-sm">Materiały</span>
                       </button>
-                      
                       <button 
                         onClick={() => handleMoveToPool(task._id)}
                         className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium whitespace-nowrap"
