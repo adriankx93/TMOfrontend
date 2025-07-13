@@ -8,13 +8,14 @@ import MissingMaterialsModal from "./MissingMaterialsModal";
 import {
   AlertTriangle,
   AlertCircle,
-  CheckCircle,
+  CheckCircle, 
   Loader2,
   User,
   PauseCircle,
   ClipboardList,
   Sliders,   
-  Repeat
+  Repeat,
+  Calendar
 } from "lucide-react";
 
 
@@ -506,7 +507,7 @@ export default function TaskList({ type }) {
       {/* Modal przekazania zadania */}
       {showHandoverModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="glass-card max-w-md w-full">
+          <div className="glass-card max-w-md w-full overflow-hidden">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -537,11 +538,11 @@ export default function TaskList({ type }) {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-200 mb-2">
-                    Data przekazania (opcjonalnie)
+                    Data przekazania
                   </label>
                   <input 
                     type="date" 
-                    className="input-field w-full"
+                    className="input-field w-full bg-slate-800 text-white"
                     value={handoverDate} 
                     onChange={e => setHandoverDate(e.target.value)} 
                   />
@@ -549,28 +550,63 @@ export default function TaskList({ type }) {
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-200 mb-2">
-                    Przekaż do technika (opcjonalnie)
+                    Przekaż do technika
                   </label>
-                  <select 
-                    className="input-field w-full"
-                    value={handoverTechnician} 
-                    onChange={e => setHandoverTechnician(e.target.value)}
-                  >
-                    <option value="">-- Wybierz technika --</option>
-                    {technicians.map(t => (
-                      <option key={t.id} value={t.id}>
-                        {t.fullName} - {t.specialization} ({t.shift === 'Dzienna' ? 'Dzień 7-19' : 'Noc 19-7'})
-                      </option>
+                  <div className="space-y-2 max-h-40 overflow-y-auto glass-card-light p-2 rounded-xl">
+                    {technicians.map(tech => (
+                      <label 
+                        key={tech.id} 
+                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                          handoverTechnician === tech.id 
+                            ? 'bg-blue-500/30 text-blue-300' 
+                            : 'hover:bg-slate-700/50 text-white'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="handoverTechnician"
+                          value={tech.id}
+                          checked={handoverTechnician === tech.id}
+                          onChange={() => setHandoverTechnician(tech.id)}
+                          className="sr-only"
+                        />
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="relative">
+                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                              {tech.firstName?.[0]}{tech.lastName?.[0]}
+                            </div>
+                            {tech.shift === 'Nocna' && <span className="absolute -top-1 -right-1 text-xs">🌙</span>}
+                            {tech.shift === 'Dzienna' && <span className="absolute -top-1 -right-1 text-xs">☀️</span>}
+                          </div>
+                          <div>
+                            <div className="font-medium">{tech.firstName} {tech.lastName}</div>
+                            <div className="text-xs opacity-75">{tech.specialization}</div>
+                          </div>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            // Tu można dodać funkcję pokazującą kalendarz technika
+                            alert(`Kalendarz zmian dla: ${tech.firstName} ${tech.lastName}`);
+                          }}
+                          className="p-1 text-slate-300 hover:text-white hover:bg-slate-600/50 rounded-full transition-all duration-200"
+                          title="Zobacz kalendarz zmian"
+                        >
+                          <Calendar className="w-4 h-4" />
+                        </button>
+                      </label>
                     ))}
-                  </select>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-slate-200 mb-2">
-                    Notatki (opcjonalnie)
+                    Notatki dla technika
                   </label>
                   <textarea 
-                    className="input-field w-full" 
+                    className="input-field w-full bg-slate-800 text-white" 
                     rows={3}
                     placeholder="Notatki dla kolejnej zmiany/technika..."
                     value={handoverNotes} 
@@ -582,14 +618,24 @@ export default function TaskList({ type }) {
               <div className="flex gap-4 pt-6 border-t border-slate-600 mt-6">
                 <button
                   onClick={handleHandover}
-                  className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+                  className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2"
                   disabled={loading}
                 >
-                  {loading ? "Przetwarzanie..." : "Przekaż zadanie"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Przetwarzanie...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Repeat className="w-5 h-5" />
+                      <span>Przekaż zadanie</span>
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => setShowHandoverModal(false)}
-                  className="px-6 py-3 bg-slate-700 text-slate-300 rounded-xl font-semibold hover:bg-slate-600 transition-all duration-200"
+                  className="px-6 py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all duration-200"
                 >
                   Anuluj
                 </button>
