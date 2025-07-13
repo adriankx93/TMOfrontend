@@ -12,7 +12,8 @@ import {
   Loader2,
   User,
   PauseCircle,
-  ClipboardList
+  ClipboardList,
+  Slider as SliderIcon
 } from "lucide-react";
 
 export default function TaskList({ type }) {
@@ -281,31 +282,37 @@ export default function TaskList({ type }) {
 
                     {/* Nowoczesny PROGRESS BAR */}
                     <div className="mb-1 md:mb-3">
-                      <div className="flex justify-between mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
-                        <span className="inline-flex items-center gap-1">
-                          <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
-                          Postęp
-                        </span>
-                        <span className="font-semibold text-white">{localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%</span>
-                      </div>
-                      <div className="relative w-full h-3 rounded-lg overflow-hidden bg-slate-700 shadow-inner">
-                        <div
-                          className="h-full transition-all duration-700 bg-gradient-to-r from-blue-400 via-emerald-400 to-emerald-600"
-                          style={{
-                            width: `${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%`
-                          }}
-                        />
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}
-                          onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
-                          className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
-                          disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
-                        />
-                      </div>
-                    </div>
+  <div className="flex justify-between items-center mobile-micro-text md:text-sm text-slate-300 mb-1 md:mb-2">
+    <span className="inline-flex items-center gap-1">
+      <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
+      Postęp
+    </span>
+    <span className="inline-flex items-center gap-1 font-semibold text-white">
+      <SliderIcon className="w-4 h-4 text-slate-300" />
+      {localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%
+    </span>
+  </div>
+  <div className="relative w-full h-3 rounded-lg overflow-hidden bg-slate-700 shadow-inner">
+    <div
+      className="h-full transition-all duration-700 bg-gradient-to-r from-blue-400 via-emerald-400 to-emerald-600"
+      style={{
+        width: `${localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%`
+      }}
+    />
+    <input
+      type="range"
+      min="0"
+      max="100"
+      value={localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}
+      onChange={(e) => handleProgressChange(task._id, parseInt(e.target.value))}
+      className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer"
+      disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
+    />
+  </div>
+  <div className="mt-1 mobile-micro-text md:text-xs text-slate-400">
+    {getProgressComment(localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0))}
+  </div>
+</div>
 
                     {task.createdBy && (
                       <div className="mobile-micro-text md:text-xs text-slate-500 hidden lg:block">
