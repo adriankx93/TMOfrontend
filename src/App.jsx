@@ -1,7 +1,8 @@
+import { Routes, Route, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
+
+import AppLayout from "./layouts/AppLayout";
+import AuthLayout from "./layouts/AuthLayout";
 
 import Dashboard from "./pages/Dashboard";
 import TasksPage from "./pages/TasksPage";
@@ -27,7 +28,6 @@ import ProtokolGenerator from "./components/ProtokolGenerator";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
-
 export default function App() {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -35,48 +35,45 @@ export default function App() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   return (
     <div className="bg-slate-900 min-h-screen w-full overflow-x-hidden">
-      <div className="flex flex-col md:flex-row min-h-screen w-full">
-        <Sidebar />
-        <main className="flex-1 w-full overflow-x-hidden px-2 py-2 md:px-8 md:py-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-          <div className="w-full max-w-full">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/zadania" element={<TasksPage />} />
-              <Route path="/budynki" element={<BuildingsPage />} />
-              <Route path="/shifts" element={<ShiftsPage />} />
-              <Route path="/magazyn" element={<InventoryPage />} />
-              <Route path="/materialy" element={<MaterialsPage />} />
-              <Route path="/current-month" element={<CurrentMonthPage />} />
-              <Route path="/technicians" element={<TechniciansPage />} />
-              <Route path="/technicy" element={<TechniciansPage />} />
-              <Route path="/raporty" element={<ReportsPage />} />
-              <Route path="/przeglady" element={<InspectionsPage />} />
-              <Route path="/usterki" element={<DefectsPage />} />
-              <Route path="/urzadzenia" element={<EquipmentPage />} />
-              <Route path="/narzedzia" element={<ToolsPage />} />
-              <Route path="/notatnik" element={<NotebookPage />} />
-              <Route path="/analiza-trendow" element={<TrendAnalysisPage />} />
-              <Route path="/ustawienia" element={<SettingsPage />} />
-              <Route path="/profil" element={<ProfilePage />} />
-              <Route path="/uzytkownicy" element={<UsersPage />} />
-              <Route path="/uzytkownicy/:id" element={<EditUserPage />} />
-              <Route path="/protokol" element={<ProtokolGenerator />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-          
-            </Routes>
-          </div>
-        </main>
-      </div>
+      <Routes>
+        {/* Layout Z SIDEBAR */}
+        <Route element={<AppLayout><Outlet /></AppLayout>}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/zadania" element={<TasksPage />} />
+          <Route path="/budynki" element={<BuildingsPage />} />
+          <Route path="/shifts" element={<ShiftsPage />} />
+          <Route path="/magazyn" element={<InventoryPage />} />
+          <Route path="/materialy" element={<MaterialsPage />} />
+          <Route path="/current-month" element={<CurrentMonthPage />} />
+          <Route path="/technicians" element={<TechniciansPage />} />
+          <Route path="/technicy" element={<TechniciansPage />} />
+          <Route path="/raporty" element={<ReportsPage />} />
+          <Route path="/przeglady" element={<InspectionsPage />} />
+          <Route path="/usterki" element={<DefectsPage />} />
+          <Route path="/urzadzenia" element={<EquipmentPage />} />
+          <Route path="/narzedzia" element={<ToolsPage />} />
+          <Route path="/notatnik" element={<NotebookPage />} />
+          <Route path="/analiza-trendow" element={<TrendAnalysisPage />} />
+          <Route path="/ustawienia" element={<SettingsPage />} />
+          <Route path="/profil" element={<ProfilePage />} />
+          <Route path="/uzytkownicy" element={<UsersPage />} />
+          <Route path="/uzytkownicy/:id" element={<EditUserPage />} />
+          <Route path="/protokol" element={<ProtokolGenerator />} />
+        </Route>
+
+        {/* Layout BEZ SIDEBAR */}
+        <Route element={<AuthLayout><Outlet /></AuthLayout>}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Route>
+      </Routes>
     </div>
   );
 }
