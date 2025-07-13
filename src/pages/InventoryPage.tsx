@@ -222,7 +222,33 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Można też dodać filtr i listę pozycji */}
+     {/* Lista pozycji magazynowych */}
+      <div className="glass-card p-6">
+        <table className="w-full table-auto text-white">
+          <thead>
+            <tr className="text-slate-400 text-left">
+              <th className="p-2">Nazwa</th>
+              <th className="p-2">Kategoria</th>
+              <th className="p-2">Ilość</th>
+              <th className="p-2">Jednostka</th>
+              <th className="p-2">Status</th>
+              <th className="p-2">Dostawca</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredInventory.map((item) => (
+              <tr key={item.id} className="border-t border-slate-700 hover:bg-slate-800 transition">
+                <td className="p-2">{item.name}</td>
+                <td className="p-2">{item.category}</td>
+                <td className="p-2">{item.quantity}</td>
+                <td className="p-2">{item.unit}</td>
+                <td className={`p-2 ${getStatusColor(item.status)}`}>{getStatusLabel(item.status)}</td>
+                <td className="p-2">{item.supplier}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
