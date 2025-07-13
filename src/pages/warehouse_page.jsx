@@ -1,62 +1,114 @@
-// AddWarehouseItemModal.tsx
-import React, { useState } from "react";
+// warehouse_page.jsx
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import AddWarehouseItemModal from "../components/AddWarehouseItemModal";
 
-export default function AddWarehouseItemModal({ onClose, onSubmit }) {
-  const [form, setForm] = useState({
-    name: "",
-    category: "",
-    quantity: 0,
-    unit: "szt.",
-    unitPrice: 0,
-    supplier: "",
-    priority: "Auto",
-    notes: "",
-    lowStockThreshold: 5,
-  });
+export default function WarehousePage() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const fetchItems = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/Warehouse/items`);
+      setItems(res.data);
+    } catch (err) {
+      console.error("Błąd podczas pobierania pozycji magazynowych:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(form);
+  const handleAdd = async (item) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/Warehouse/items`, item);
+      fetchItems();
+      setShowModal(false);
+    } catch (err) {
+      console.error("Błąd podczas dodawania pozycji:", err);
+    }
   };
+
+  const getStatus = (item) => {
+    if (item.priority && item.priority !== "Auto") return item.priority;
+    if (item.quantity <= 0) return "Brak";
+    if (item.quantity <= item.lowStockThreshold) return "Niski stan";
+    return "OK";
+  };
+
+  const total = items.length;
+  const available = items.filter(i => i.quantity > 0).length;
+  const lowStock = items.filter(i => getStatus(i) === "Niski stan").length;
+  const critical = items.filter(i => getStatus(i) === "Krytyczne").length;
+  const missing = items.filter(i => getStatus(i) === "Brak").length;
+  const totalValue = items.reduce((sum, i) => sum + (i.unitPrice || 0) * i.quantity, 0);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[9999]">
-      <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl">
-        <h2 className="text-white text-xl font-bold mb-4">Dodaj nowy materiał</h2>
-
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-          <input name="name" placeholder="Nazwa materiału" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
-          <input name="category" placeholder="Kategoria" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
-
-          <input name="quantity" type="number" placeholder="Ilość" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
-          <input name="unit" placeholder="Jednostka" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
-
-          <input name="unitPrice" type="number" placeholder="Cena jednostkowa (PLN)" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
-          <input name="supplier" placeholder="Dostawca" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} />
-
-          <select name="priority" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange}>
-            <option value="Auto">Auto (na podstawie ilości)</option>
-            <option value="OK">OK</option>
-            <option value="Niski stan">Niski stan</option>
-            <option value="Krytyczne">Krytyczne</option>
-            <option value="Brak">Brak</option>
-          </select>
-
-          <input name="lowStockThreshold" type="number" placeholder="Próg niski" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} />
-
-          <textarea name="notes" placeholder="Dodatkowe informacje" className="col-span-2 p-2 rounded bg-gray-800 text-white" onChange={handleChange}></textarea>
-
-          <div className="col-span-2 flex justify-end gap-2 mt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-600">Anuluj</button>
-            <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Dodaj materiał</button>
-          </div>
-        </form>
+    <div className="p-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-white">Zarządzanie magazynem</h1>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onClick={() => setShowModal(true)}>
+          Dodaj pozycję
+        </button>
       </div>
+
+      <div className="grid grid-cols-6 gap-4 mt-6">
+        <Card title="Pozycji" value={total} />
+        <Card title="Dostępne" value={available} />
+        <Card title="Niski stan" value={lowStock} warning />
+        <Card title="Krytyczne" value={critical} danger />
+        <Card title="Brak" value={missing} danger />
+        <Card title="Wartość" value={`${totalValue.toFixed(2)} PLN`} />
+      </div>
+
+      <div className="mt-8">
+        {loading ? (
+          <p className="text-gray-400">Ładowanie...</p>
+        ) : items.length === 0 ? (
+          <div className="text-center text-white mt-10">
+            <p className="mb-2">Magazyn jest pusty</p>
+            <button onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+              Dodaj pozycję
+            </button>
+          </div>
+        ) : (
+          <table className="w-full mt-4 text-sm text-white">
+            <thead>
+              <tr>
+                <th>Nazwa</th><th>Ilość</th><th>Status</th><th>Jednostka</th><th>Cena</th><th>Dostawca</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.id} className={getStatus(item) === "Brak" ? "bg-red-900" : getStatus(item) === "Niski stan" ? "bg-yellow-800" : "bg-gray-800"}>
+                  <td>{item.name}</td>
+                  <td>{item.quantity}</td>
+                  <td>{getStatus(item)}</td>
+                  <td>{item.unit}</td>
+                  <td>{item.unitPrice} PLN</td>
+                  <td>{item.supplier}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showModal && <AddWarehouseItemModal onClose={() => setShowModal(false)} onSubmit={handleAdd} />}
+    </div>
+  );
+}
+
+function Card({ title, value, warning = false, danger = false }) {
+  const bg = danger ? "bg-red-800" : warning ? "bg-yellow-700" : "bg-gray-700";
+  return (
+    <div className={`rounded-xl p-4 text-center text-white ${bg}`}>
+      <p className="text-sm opacity-80">{title}</p>
+      <p className="text-2xl font-bold">{value}</p>
     </div>
   );
 }
