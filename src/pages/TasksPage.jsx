@@ -62,21 +62,21 @@ export default function TasksPage() {
       />
 
       {/* Advanced Tabs */}
-      <div className="mobile-scroll-x md:block glass-card p-0.5 md:p-2">
-        <div className="inline-flex md:grid md:grid-cols-4 gap-0.5 md:gap-2 w-auto">
+      <div className="glass-card p-0.5 md:p-2 overflow-x-auto w-full">
+        <div className="flex flex-nowrap md:grid md:grid-cols-4 gap-0.5 md:gap-2 w-max md:w-full">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               data-tab={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1 md:gap-3 px-2 md:px-6 py-2 md:py-4 rounded-lg md:rounded-xl font-semibold transition-all duration-200 flex-1 text-xs md:text-base ${
+              className={`flex items-center gap-1 md:gap-3 px-2 md:px-6 py-2 md:py-4 rounded-lg md:rounded-xl font-semibold transition-all duration-200 whitespace-nowrap md:flex-1 text-xs md:text-base ${
                 activeTab === tab.id
                   ? `gradient-primary text-white shadow-lg glow-${tab.color}`
                   : "text-slate-400 hover:text-white hover:bg-slate-700/50"
               }`}
             >
               <span className="text-sm md:text-lg">{tab.icon}</span>
-              <div className="text-left">
+              <div className="text-left min-w-0">
                 <div className="text-xs md:text-base">{tab.label}</div>
                 <div className="text-mobile-xs md:text-xs opacity-70 hidden md:block">{tab.count} zadań</div>
               </div>

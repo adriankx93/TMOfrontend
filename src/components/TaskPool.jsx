@@ -119,10 +119,10 @@ export default function TaskPool() {
                   </div>
                 </div>
 
-                <div className="mobile-grid-2 md:flex gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-600">
+                <div className="flex flex-nowrap overflow-x-auto w-full gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-600">
                   <button 
                     onClick={() => openAssignModal(task)}
-                    className="mobile-mini-button md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-sm md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
+                    className="mobile-mini-button md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-sm md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                   >
                     <span className="md:hidden mobile-micro-text">P</span>
                     <span className="hidden md:inline text-sm">Przypisz</span>
@@ -131,7 +131,7 @@ export default function TaskPool() {
                   <select
                     value={task.priority}
                     onChange={(e) => handleChangePriority(task._id, e.target.value)}
-                    className="mobile-mini-button md:px-4 md:py-2 bg-slate-700/50 text-slate-300 rounded-sm md:rounded-xl transition-all duration-200 font-medium text-xs md:text-sm"
+                    className="mobile-mini-button md:px-4 md:py-2 bg-slate-700/50 text-slate-300 rounded-sm md:rounded-xl transition-all duration-200 font-medium text-xs md:text-sm min-w-[80px]"
                     disabled={loading}
                   >
                     <option value="Niski">Niski</option>
@@ -141,7 +141,7 @@ export default function TaskPool() {
                   
                   <button 
                     onClick={() => openDetailsModal(task)}
-                    className="mobile-mini-button md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-sm md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
+                    className="mobile-mini-button md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-sm md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                   >
                     <span className="md:hidden mobile-micro-text">S</span>
                     <span className="hidden md:inline text-sm">Szczegóły</span>
@@ -149,7 +149,7 @@ export default function TaskPool() {
                   
                   <button 
                     onClick={() => handleDeleteTask(task._id)}
-                    className="mobile-mini-button md:px-4 md:py-2 bg-red-500/20 text-red-400 rounded-sm md:rounded-xl hover:bg-red-500/30 transition-all duration-200 font-medium"
+                    className="mobile-mini-button md:px-4 md:py-2 bg-red-500/20 text-red-400 rounded-sm md:rounded-xl hover:bg-red-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                     disabled={loading}
                   >
                     <span className="md:hidden mobile-micro-text">U</span>

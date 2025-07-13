@@ -14,20 +14,20 @@ export default function Topbar({ title, subtitle, action }) {
   return (
     <header className="glass-card mb-1 md:mb-8 p-1.5 md:p-6 animate-slide-in-up">
       <div className="flex justify-between items-center gap-1">
-        {/* Title Section */}
-        <div className="flex items-center gap-1 md:gap-6 flex-1">
+        {/* Title Section - Added min-w-0 to prevent overflow */}
+        <div className="flex items-center gap-1 md:gap-6 flex-1 min-w-0">
           <div>
-            <h1 className="text-xs md:text-3xl font-bold text-white mb-0 md:mb-1">
+            <h1 className="text-xs md:text-3xl font-bold text-white mb-0 md:mb-1 truncate">
               {title}
             </h1>
-            <p className="text-slate-400 mobile-micro-text md:text-lg font-medium hidden md:block">
+            <p className="text-slate-400 mobile-micro-text md:text-lg font-medium hidden md:block truncate">
               {subtitle}
             </p>
           </div>
         </div>
 
-        {/* Right Section */}
-        <div className="flex gap-0.5 md:gap-6 items-center">
+        {/* Right Section - Added flex-nowrap */}
+        <div className="flex flex-nowrap gap-0.5 md:gap-6 items-center">
           {/* Time and Date */}
           <div className="hidden md:block text-right">
             <div className="text-xl md:text-2xl font-bold text-white">{currentTime}</div>

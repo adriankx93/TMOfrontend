@@ -177,7 +177,7 @@ export default function Dashboard() {
       {/* Header with System Status */}
       <div className="glass-card p-4 md:p-8">
         <div className="flex justify-between items-start">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 md:gap-4 mb-4">
               <div className="w-12 h-12 md:w-16 md:h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue">
                 <span className="text-white text-xl md:text-2xl">🏢</span>
@@ -245,7 +245,7 @@ export default function Dashboard() {
       </div>
 
       {/* Current Shift Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 w-full">
         {/* Current Shift */}
         <div className="lg:col-span-2 glass-card overflow-hidden">
           <div className={`${isDay ? 'gradient-warning' : 'gradient-primary'} px-4 md:px-8 py-4 md:py-6`}>
@@ -282,7 +282,7 @@ export default function Dashboard() {
                 <div>
                   <h3 className="text-base md:text-lg font-bold text-white mb-4">Technicy na aktualnej zmianie</h3>
                   {currentShiftTechnicians.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-3 md:gap-4">
+                    <div className="grid grid-cols-1 gap-3 md:gap-4 w-full">
                       {currentShiftTechnicians.map((techName, index) => (
                         <div key={index} className="flex items-center gap-3 p-3 md:p-4 glass-card-light rounded-xl hover:bg-slate-600/30 transition-all duration-200">
                           <div className="w-8 h-8 md:w-10 md:h-10 gradient-accent rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -309,7 +309,7 @@ export default function Dashboard() {
                 <div>
                   <h3 className="text-base md:text-lg font-bold text-white mb-4">Zadania na aktualnej zmianie</h3>
                   {currentShiftTasks.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-3 w-full">
                       {currentShiftTasks.slice(0, 3).map((task) => (
                         <div key={task._id} className="flex items-center gap-3 p-3 md:p-4 glass-card-light rounded-xl">
                           <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 text-sm">
@@ -395,7 +395,7 @@ export default function Dashboard() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 w-full">
         <div 
           className="metric-card cursor-pointer hover:scale-105 transition-transform duration-200"
           onClick={() => navigate('/technicy')}
@@ -476,18 +476,18 @@ export default function Dashboard() {
       </div>
 
       {/* System Health & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 w-full">
         {/* System Health */}
         <div className="glass-card p-4 md:p-8">
           <h3 className="text-lg md:text-xl font-bold text-white mb-4 md:mb-6">Status systemu</h3>
           
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className={`status-indicator ${dbStatus.connected ? "bg-green-400" : "bg-red-400"}`}></div>
                 <span className="font-semibold text-white text-sm md:text-base">Baza danych</span>
               </div>
-              <span className={`text-xs md:text-sm font-medium ${dbStatus.connected ? "text-green-400" : "text-red-400"}`}>
+              <span className={`text-xs md:text-sm font-medium truncate ${dbStatus.connected ? "text-green-400" : "text-red-400"}`}>
                 {dbStatus.message}
               </span>
             </div>

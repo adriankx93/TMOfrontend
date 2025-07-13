@@ -38,12 +38,12 @@
   /* Mobile viewport fix */
   @media screen and (max-width: 768px) {
     html, body {
-      width: 100%;
+      width: 100vw;
       overflow-x: hidden;
     }
     
     #root {
-      width: 100%;
+      width: 100vw;
       overflow-x: hidden;
     }
   }
@@ -215,13 +215,31 @@
     .mobile-scroll-x {
       overflow-x: auto;
       white-space: nowrap;
-      -webkit-overflow-scrolling: touch;
+      width: 100%;
+      display: flex;
+      flex-wrap: nowrap;
       scrollbar-width: none; /* Firefox */
       -ms-overflow-style: none; /* IE and Edge */
+      -webkit-overflow-scrolling: touch;
     }
     
     .mobile-scroll-x::-webkit-scrollbar {
       display: none; /* Chrome, Safari, Opera */
+    }
+    
+    /* Mobile button container */
+    .mobile-button-container {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      width: 100%;
+      gap: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+    
+    .mobile-button-container > * {
+      flex-shrink: 0;
+      white-space: nowrap;
     }
   }
   

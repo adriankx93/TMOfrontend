@@ -267,10 +267,10 @@ export default function TaskList({ type }) {
                   </div>
                 </div>
 
-                <div className="mobile-grid-4 md:flex gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-600">
+                <div className="flex flex-nowrap overflow-x-auto w-full gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-600">
                   <button 
                     onClick={() => openDetailsModal(task)}
-                    className="btn-compact md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-md md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium"
+                    className="btn-compact md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-md md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                   >
                     <span className="md:hidden text-xs">S</span>
                     <span className="hidden md:inline text-sm">Szczegóły</span>
@@ -278,7 +278,7 @@ export default function TaskList({ type }) {
                   
                   <button 
                     onClick={() => openEditModal(task)}
-                    className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
+                    className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                   >
                     <span className="md:hidden text-xs">E</span>
                     <span className="hidden md:inline text-sm">Edytuj</span>
@@ -288,7 +288,7 @@ export default function TaskList({ type }) {
                     <>
                       <button 
                         onClick={() => handleStatusChange(task._id, task.status === 'assigned' ? 'in_progress' : 'assigned')}
-                        className="btn-compact md:px-4 md:py-2 bg-amber-500/20 text-amber-400 rounded-md md:rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium col-span-3 md:col-span-1"
+                        className="btn-compact md:px-4 md:py-2 bg-amber-500/20 text-amber-400 rounded-md md:rounded-xl hover:bg-amber-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                         disabled={loading}
                       >
                         {task.status === 'assigned' ? (
@@ -306,7 +306,7 @@ export default function TaskList({ type }) {
                       
                       <button 
                         onClick={() => handleCompleteTask(task._id)}
-                        className="btn-compact md:px-4 md:py-2 bg-emerald-500/20 text-emerald-400 rounded-md md:rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium"
+                        className="btn-compact md:px-4 md:py-2 bg-emerald-500/20 text-emerald-400 rounded-md md:rounded-xl hover:bg-emerald-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                         disabled={loading}
                       >
                         <span className="md:hidden text-xs">Z</span>
@@ -315,7 +315,7 @@ export default function TaskList({ type }) {
                       
                       <button 
                         onClick={() => handleMissingMaterials(task._id)}
-                        className="btn-compact md:px-4 md:py-2 bg-orange-500/20 text-orange-400 rounded-md md:rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium"
+                        className="btn-compact md:px-4 md:py-2 bg-orange-500/20 text-orange-400 rounded-md md:rounded-xl hover:bg-orange-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                         disabled={loading}
                       >
                         <span className="md:hidden text-xs">M</span>
@@ -324,7 +324,7 @@ export default function TaskList({ type }) {
                       
                       <button 
                         onClick={() => handleMoveToPool(task._id)}
-                        className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium"
+                        className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium whitespace-nowrap"
                         disabled={loading}
                       >
                         <span className="md:hidden text-xs">P</span>
