@@ -26,6 +26,7 @@ import TrendAnalysisPage from "./pages/TrendAnalysisPage";
 import ProtokolGenerator from "./components/ProtokolGenerator";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import WarehousePage from "./pages/warehouse_page";
 
 export default function App() {
   const [isMobile, setIsMobile] = useState(false);
@@ -71,6 +72,7 @@ export default function App() {
               <Route path="/protokol" element={<ProtokolGenerator />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/magazyn" element={<WarehousePage />} />
             </Routes>
           </div>
         </main>
