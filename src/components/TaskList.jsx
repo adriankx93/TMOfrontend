@@ -5,20 +5,18 @@ import TaskDetailsModal from "./TaskDetailsModal";
 import TaskEditModal from "./TaskEditModal";
 import MoveToPoolModal from "./MoveToPoolModal";
 import MissingMaterialsModal from "./MissingMaterialsModal";
-import { Calendar, CheckCircle, Loader2, User, PauseCircle, ClipboardList, Sliders, Repeat } from "lucide-react";
 import {
   AlertTriangle,
   AlertCircle,
-  CheckCircle, 
+  CheckCircle,
   Loader2,
   User,
   PauseCircle,
   ClipboardList,
-  Sliders,   
+  Sliders,
   Repeat,
   Calendar
 } from "lucide-react";
-
 
 export default function TaskList({ type }) {
   const { tasks, updateTask, deleteTask, moveToPool, completeTask } = useTasks();
@@ -34,16 +32,6 @@ export default function TaskList({ type }) {
   const [handoverNotes, setHandoverNotes] = useState('');
   const [handoverTechnician, setHandoverTechnician] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  // Function to get progress comment based on percentage
-  const getProgressComment = (progress) => {
-    if (progress === 100) return "Zadanie zakończone";
-    if (progress >= 75) return "Blisko zakończenia";
-    if (progress >= 50) return "Znaczny postęp";
-    if (progress >= 25) return "W trakcie realizacji";
-    if (progress > 0) return "Zadanie rozpoczęte";
-    return "Oczekuje na rozpoczęcie";
-  };
 
   useEffect(() => {
     fetchTechnicians();
@@ -73,7 +61,7 @@ export default function TaskList({ type }) {
     }
   });
 
-  // Nowoczesne badge priorytetu
+  // Badge priorytetu
   const getPriorityBadge = (priority) => {
     switch(priority) {
       case 'Krytyczny':
@@ -109,7 +97,7 @@ export default function TaskList({ type }) {
     }
   };
 
-  // Nowoczesne badge statusu
+  // Badge statusu
   const getStatusBadge = (task) => {
     switch(task.status) {
       case 'assigned':
@@ -164,7 +152,7 @@ export default function TaskList({ type }) {
     }
   };
 
-  // Komentarz do progressu
+  // Komentarz do postępu
   const getProgressComment = (progress) => {
     if (progress === 100) return "Zadanie ukończone!";
     if (progress >= 80) return "Końcowa faza realizacji";
@@ -454,7 +442,7 @@ export default function TaskList({ type }) {
                         <span className="md:hidden text-xs">P</span>
                         <span className="hidden md:inline text-sm">Do puli</span>
                       </button>
-                      {/* --- Przekazanie do zmiany/technika/modal --- */}
+                      {/* Przekazanie do zmiany/technika/modal */}
                       <button
                         onClick={() => openHandoverModal(task)}
                         className="btn-compact md:px-4 md:py-2 bg-cyan-500/20 text-cyan-500 rounded-md md:rounded-xl hover:bg-cyan-500/30 transition-all duration-200 font-medium whitespace-nowrap"
@@ -599,7 +587,7 @@ export default function TaskList({ type }) {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            handleShowCalendar(tech);
+                            // handleShowCalendar(tech); // Dodaj, jeśli masz obsługę kalendarza
                           }}
                           className="p-1 text-slate-300 hover:text-white hover:bg-slate-600/50 rounded-full transition-all duration-200"
                           title="Zobacz kalendarz zmian"
