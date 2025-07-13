@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { useTechnicians } from "../hooks/useTechnicians";
-import { Calendar } from "lucide-react";
+import { Calendar, CheckCircle, Loader2, User } from "lucide-react";
 
 export default function AssignTaskModal({ task, onClose, onAssigned }) {
   const { assignFromPool } = useTasks();
@@ -33,6 +33,12 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
       const technicianToAssign = technicians.find(tech => tech._id === selectedTechnician);
       if (technicianToAssign) {
         setAssignedTechnicianName(`${technicianToAssign.firstName} ${technicianToAssign.lastName}`);
+      } else {
+        // Try to find by ID if _id doesn't match
+        const techById = technicians.find(tech => tech.id === selectedTechnician);
+        if (techById) {
+          setAssignedTechnicianName(`${techById.firstName} ${techById.lastName}`);
+        }
       }
       
       await assignFromPool(task._id, selectedTechnician);
@@ -52,6 +58,8 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
   const handleShowCalendar = (tech) => {
     setCalendarTechnician(tech);
     setShowCalendar(true);
+    // Prevent the radio button from being selected when clicking the calendar icon
+    event.stopPropagation();
   };
 
   return (
@@ -227,30 +235,30 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
       {/* Calendar Modal */}
       {showCalendar && calendarTechnician && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full">
+          <div className="glass-card max-w-2xl w-full">
             <div className="p-8">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
-                    <Calendar className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <span className="text-white text-xl">📅</span>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-800">Kalendarz zmian</h2>
-                    <p className="text-slate-600">{calendarTechnician.firstName} {calendarTechnician.lastName}</p>
+                    <h2 className="text-2xl font-bold text-white">Kalendarz zmian</h2>
+                    <p className="text-slate-400">{calendarTechnician.firstName} {calendarTechnician.lastName}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowCalendar(false)}
-                  className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-200"
+                  className="p-2 hover:bg-slate-700/50 rounded-xl transition-all duration-200"
                 >
-                  <span className="text-2xl text-slate-400">×</span>
+                  <span className="text-2xl text-slate-400 hover:text-white">×</span>
                 </button>
               </div>
               
-              <div className="bg-slate-50 rounded-2xl p-6 mb-6">
-                <div className="grid grid-cols-7 gap-2 text-center">
+              <div className="glass-card-light p-6 mb-6">
+                <div className="grid grid-cols-7 gap-2 text-center mb-4">
                   {['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'].map(day => (
-                    <div key={day} className="font-bold text-slate-700">{day}</div>
+                    <div key={day} className="font-bold text-white">{day}</div>
                   ))}
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
                     // Symulacja danych z sheetsService - w rzeczywistości pobieralibyśmy dane z API
@@ -259,51 +267,64 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                     const isVacation = !isDay && !isNight && Math.random() > 0.8;
                     const isSickLeave = !isDay && !isNight && !isVacation && Math.random() > 0.9;
                     
-                    let bgColor = 'bg-slate-100';
-                    if (isDay) bgColor = 'bg-yellow-100';
-                    if (isNight) bgColor = 'bg-blue-100';
-                    if (isVacation) bgColor = 'bg-green-100';
-                    if (isSickLeave) bgColor = 'bg-red-100';
+                    let bgColor = 'bg-slate-700/50';
+                    let textColor = 'text-slate-300';
+                    if (isDay) {
+                      bgColor = 'bg-yellow-500/20';
+                      textColor = 'text-yellow-300';
+                    }
+                    if (isNight) {
+                      bgColor = 'bg-blue-500/20';
+                      textColor = 'text-blue-300';
+                    }
+                    if (isVacation) {
+                      bgColor = 'bg-green-500/20';
+                      textColor = 'text-green-300';
+                    }
+                    if (isSickLeave) {
+                      bgColor = 'bg-red-500/20';
+                      textColor = 'text-red-300';
+                    }
                     
                     return (
                       <div key={day} className={`p-3 rounded-lg ${bgColor} text-center`}>
-                        <div className="font-bold text-slate-800">{day}</div>
+                        <div className={`font-bold ${textColor}`}>{day}</div>
                         <div className="text-xs">
-                          {isDay && <span className="text-yellow-800">☀️</span>}
-                          {isNight && <span className="text-blue-800">🌙</span>}
-                          {isVacation && <span className="text-green-800">🏖️</span>}
-                          {isSickLeave && <span className="text-red-800">🏥</span>}
+                          {isDay && <span>☀️</span>}
+                          {isNight && <span>🌙</span>}
+                          {isVacation && <span>🏖️</span>}
+                          {isSickLeave && <span>🏥</span>}
                           {!isDay && !isNight && !isVacation && !isSickLeave && <span className="text-slate-400">-</span>}
                         </div>
                       </div>
                     );
                   })}
                 </div>
+                
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-yellow-500/20 rounded"></div>
+                    <span className="text-yellow-300">Dzienna</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-blue-500/20 rounded"></div>
+                    <span className="text-blue-300">Nocna</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-green-500/20 rounded"></div>
+                    <span className="text-green-300">Urlop</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-red-500/20 rounded"></div>
+                    <span className="text-red-300">L4</span>
+                  </div>
+                </div>
               </div>
               
-              <div className="flex gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-yellow-100 rounded"></div>
-                  <span>Dzienna</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-100 rounded"></div>
-                  <span>Nocna</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-100 rounded"></div>
-                  <span>Urlop</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-red-100 rounded"></div>
-                  <span>L4</span>
-                </div>
-              </div>
-              
-              <div className="mt-6 pt-6 border-t border-slate-200">
+              <div className="mt-6 pt-6 border-t border-slate-600">
                 <button
                   onClick={() => setShowCalendar(false)}
-                  className="w-full py-3 bg-slate-100 text-slate-700 rounded-2xl font-semibold hover:bg-slate-200 transition-all duration-200"
+                  className="w-full py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all duration-200"
                 >
                   Zamknij
                 </button>

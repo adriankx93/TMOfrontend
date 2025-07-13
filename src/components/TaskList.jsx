@@ -5,6 +5,7 @@ import TaskDetailsModal from "./TaskDetailsModal";
 import TaskEditModal from "./TaskEditModal";
 import MoveToPoolModal from "./MoveToPoolModal";
 import MissingMaterialsModal from "./MissingMaterialsModal";
+import { Calendar, CheckCircle, Loader2, User, PauseCircle, ClipboardList, Sliders, Repeat } from "lucide-react";
 import {
   AlertTriangle,
   AlertCircle,
@@ -33,6 +34,16 @@ export default function TaskList({ type }) {
   const [handoverNotes, setHandoverNotes] = useState('');
   const [handoverTechnician, setHandoverTechnician] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Function to get progress comment based on percentage
+  const getProgressComment = (progress) => {
+    if (progress === 100) return "Zadanie zakończone";
+    if (progress >= 75) return "Blisko zakończenia";
+    if (progress >= 50) return "Znaczny postęp";
+    if (progress >= 25) return "W trakcie realizacji";
+    if (progress > 0) return "Zadanie rozpoczęte";
+    return "Oczekuje na rozpoczęcie";
+  };
 
   useEffect(() => {
     fetchTechnicians();
@@ -507,7 +518,7 @@ export default function TaskList({ type }) {
       {/* Modal przekazania zadania */}
       {showHandoverModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="glass-card max-w-md w-full overflow-hidden">
+          <div className="glass-card max-w-md w-full">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -552,7 +563,7 @@ export default function TaskList({ type }) {
                   <label className="block text-sm font-semibold text-slate-200 mb-2">
                     Przekaż do technika
                   </label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto glass-card-light p-2 rounded-xl">
+                  <div className="space-y-2 max-h-60 overflow-y-auto glass-card-light p-2 rounded-xl">
                     {technicians.map(tech => (
                       <label 
                         key={tech.id} 
@@ -588,8 +599,7 @@ export default function TaskList({ type }) {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            // Tu można dodać funkcję pokazującą kalendarz technika
-                            alert(`Kalendarz zmian dla: ${tech.firstName} ${tech.lastName}`);
+                            handleShowCalendar(tech);
                           }}
                           className="p-1 text-slate-300 hover:text-white hover:bg-slate-600/50 rounded-full transition-all duration-200"
                           title="Zobacz kalendarz zmian"
