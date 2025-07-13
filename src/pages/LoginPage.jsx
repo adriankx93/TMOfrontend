@@ -121,6 +121,12 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
+            {/* Link nie pamiętasz hasła */}
+            <div className="text-right mt-2">
+              <Link to="/reset-password" className="text-xs text-blue-400 hover:underline font-semibold">
+                Nie pamiętasz hasła?
+              </Link>
+            </div>
           </div>
 
           <button
