@@ -505,36 +505,95 @@ export default function TaskList({ type }) {
 
       {/* Modal przekazania zadania */}
       {showHandoverModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl p-6 shadow-2xl w-[90vw] max-w-xs">
-            <h3 className="font-bold mb-2 text-slate-700">Przekaż zadanie</h3>
-            <label className="text-xs text-slate-600 block mb-1">Data przekazania (opcjonalnie):</label>
-            <input type="date" className="border rounded w-full mb-2"
-              value={handoverDate} onChange={e => setHandoverDate(e.target.value)} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="glass-card max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Repeat className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Przekaż zadanie</h3>
+                    <p className="text-slate-400 text-sm">Do dokończenia przez innego technika</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowHandoverModal(false)}
+                  className="p-2 hover:bg-slate-700/50 rounded-xl transition-all duration-200"
+                >
+                  <span className="text-xl text-slate-400 hover:text-white">×</span>
+                </button>
+              </div>
 
-            <label className="text-xs text-slate-600 block mb-1">Przekaż do technika (opcjonalnie):</label>
-            <select className="border rounded w-full mb-2"
-              value={handoverTechnician} onChange={e => setHandoverTechnician(e.target.value)}>
-              <option value="">-- Wybierz technika --</option>
-              {technicians.map(t => (
-                <option key={t.id} value={t.id}>{t.fullName}</option>
-              ))}
-            </select>
+              <div className="mb-4 p-4 glass-card-light rounded-xl">
+                <h4 className="font-semibold text-white mb-2">{selectedTask.title}</h4>
+                <div className="text-sm text-slate-400">
+                  <div>📍 {selectedTask.location}</div>
+                  <div>⏱️ Postęp: {selectedTask.progress || 0}%</div>
+                </div>
+              </div>
 
-            <label className="text-xs text-slate-600 block mb-1">Notatki (opcjonalnie):</label>
-            <textarea className="border rounded w-full mb-3" rows={2}
-              placeholder="Notatki dla kolejnej zmiany/technika..."
-              value={handoverNotes} onChange={e => setHandoverNotes(e.target.value)} />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
+                    Data przekazania (opcjonalnie)
+                  </label>
+                  <input 
+                    type="date" 
+                    className="input-field w-full"
+                    value={handoverDate} 
+                    onChange={e => setHandoverDate(e.target.value)} 
+                  />
+                </div>
 
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowHandoverModal(false)} className="text-xs text-slate-500">Anuluj</button>
-              <button
-                onClick={handleHandover}
-                className="bg-cyan-500 text-white px-3 py-1 rounded text-xs"
-                disabled={loading}
-              >
-                Przekaż
-              </button>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
+                    Przekaż do technika (opcjonalnie)
+                  </label>
+                  <select 
+                    className="input-field w-full"
+                    value={handoverTechnician} 
+                    onChange={e => setHandoverTechnician(e.target.value)}
+                  >
+                    <option value="">-- Wybierz technika --</option>
+                    {technicians.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.fullName} - {t.specialization} ({t.shift === 'Dzienna' ? 'Dzień 7-19' : 'Noc 19-7'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
+                    Notatki (opcjonalnie)
+                  </label>
+                  <textarea 
+                    className="input-field w-full" 
+                    rows={3}
+                    placeholder="Notatki dla kolejnej zmiany/technika..."
+                    value={handoverNotes} 
+                    onChange={e => setHandoverNotes(e.target.value)} 
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-6 border-t border-slate-600 mt-6">
+                <button
+                  onClick={handleHandover}
+                  className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+                  disabled={loading}
+                >
+                  {loading ? "Przetwarzanie..." : "Przekaż zadanie"}
+                </button>
+                <button
+                  onClick={() => setShowHandoverModal(false)}
+                  className="px-6 py-3 bg-slate-700 text-slate-300 rounded-xl font-semibold hover:bg-slate-600 transition-all duration-200"
+                >
+                  Anuluj
+                </button>
+              </div>
             </div>
           </div>
         </div>

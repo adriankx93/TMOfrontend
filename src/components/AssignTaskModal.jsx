@@ -112,10 +112,11 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                         <div>
                           <div className="font-semibold text-slate-800">
                             {tech.firstName} {tech.lastName}
-                          </div>
+                         {tech.firstName} {tech.lastName} 
                           <div className="text-sm text-slate-600">
-                            {tech.specialization} • {tech.currentTasks || 0} zadań
-                          </div>
+                       <div className="text-sm text-slate-600 flex flex-col">
+                         <span>{tech.specialization} • {tech.currentTasks || 0} zadań</span>
+                         <span className="text-xs text-blue-600">Zmiana: {tech.shift === 'Dzienna' ? 'Dzień 7-19' : 'Noc 19-7'}</span>
                         </div>
                       </div>
                       

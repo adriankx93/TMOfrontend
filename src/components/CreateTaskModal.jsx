@@ -381,7 +381,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                       <option value="">Wybierz technika</option>
                       {technicians.map((tech) => (
                         <option key={tech.id} value={tech.id}>
-                          {tech.fullName} - {tech.specialization}
+                          {tech.fullName} - {tech.specialization} ({tech.shift === 'Dzienna' ? 'Dzień 7-19' : 'Noc 19-7'})
                         </option>
                       ))}
                     </select>
