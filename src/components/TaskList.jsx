@@ -13,7 +13,7 @@ import {
   User,
   PauseCircle,
   ClipboardList,
-  Slider as SliderIcon
+  Settings as SliderIcon
 } from "lucide-react";
 
 export default function TaskList({ type }) {
