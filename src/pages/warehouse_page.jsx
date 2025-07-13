@@ -1,90 +1,62 @@
-// WarehousePage.tsx
-import React, { useState, useEffect } from "react";
-import AddWarehouseItemModal from "../components/AddWarehouseItemModal";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
+// AddWarehouseItemModal.tsx
+import React, { useState } from "react";
 
-export default function WarehousePage() {
-  const [items, setItems] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+export default function AddWarehouseItemModal({ onClose, onSubmit }) {
+  const [form, setForm] = useState({
+    name: "",
+    category: "",
+    quantity: 0,
+    unit: "szt.",
+    unitPrice: 0,
+    supplier: "",
+    priority: "Auto",
+    notes: "",
+    lowStockThreshold: 5,
+  });
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
-  const fetchItems = async () => {
-    const res = await axios.get("/api/Warehouse/items");
-    setItems(res.data);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
 
-  const handleAdd = async (item) => {
-    await axios.post("/api/Warehouse/items", item);
-    fetchItems();
-    setShowModal(false);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(form);
   };
 
-  const total = items.length;
-  const available = items.filter(i => i.quantity > 0).length;
-  const lowStock = items.filter(i => i.quantity > 0 && i.quantity <= i.lowStockThreshold).length;
-  const critical = items.filter(i => i.priority === "Krytyczne").length;
-  const missing = items.filter(i => i.quantity <= 0).length;
-  const totalValue = items.reduce((sum, i) => sum + (i.unitPrice || 0) * i.quantity, 0);
-
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Zarządzanie magazynem</h1>
-        <Button onClick={() => setShowModal(true)}>Dodaj pozycję</Button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[9999]">
+      <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl">
+        <h2 className="text-white text-xl font-bold mb-4">Dodaj nowy materiał</h2>
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <input name="name" placeholder="Nazwa materiału" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
+          <input name="category" placeholder="Kategoria" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
+
+          <input name="quantity" type="number" placeholder="Ilość" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
+          <input name="unit" placeholder="Jednostka" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
+
+          <input name="unitPrice" type="number" placeholder="Cena jednostkowa (PLN)" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} required />
+          <input name="supplier" placeholder="Dostawca" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} />
+
+          <select name="priority" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange}>
+            <option value="Auto">Auto (na podstawie ilości)</option>
+            <option value="OK">OK</option>
+            <option value="Niski stan">Niski stan</option>
+            <option value="Krytyczne">Krytyczne</option>
+            <option value="Brak">Brak</option>
+          </select>
+
+          <input name="lowStockThreshold" type="number" placeholder="Próg niski" className="p-2 rounded bg-gray-800 text-white" onChange={handleChange} />
+
+          <textarea name="notes" placeholder="Dodatkowe informacje" className="col-span-2 p-2 rounded bg-gray-800 text-white" onChange={handleChange}></textarea>
+
+          <div className="col-span-2 flex justify-end gap-2 mt-4">
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded bg-gray-700 text-white hover:bg-gray-600">Anuluj</button>
+            <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Dodaj materiał</button>
+          </div>
+        </form>
       </div>
-
-      <div className="grid grid-cols-6 gap-4 mt-6">
-        <Card title="Pozycji" value={total} />
-        <Card title="Dostępne" value={available} />
-        <Card title="Niski stan" value={lowStock} warning />
-        <Card title="Krytyczne" value={critical} danger />
-        <Card title="Brak" value={missing} danger />
-        <Card title="Wartość" value={`${totalValue.toFixed(2)} PLN`} />
-      </div>
-
-      <div className="mt-8">
-        {items.length === 0 ? (
-          <p className="text-gray-400">Magazyn jest pusty.</p>
-        ) : (
-          <table className="w-full mt-4 text-sm text-white">
-            <thead>
-              <tr>
-                <th>Nazwa</th><th>Ilość</th><th>Status</th><th>Jednostka</th><th>Cena</th><th>Dostawca</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className={item.quantity <= 0 ? "bg-red-900" : item.quantity <= item.lowStockThreshold ? "bg-yellow-800" : "bg-gray-800"}>
-                  <td>{item.name}</td>
-                  <td>{item.quantity}</td>
-                  <td>{item.priority || "Auto"}</td>
-                  <td>{item.unit}</td>
-                  <td>{item.unitPrice} PLN</td>
-                  <td>{item.supplier}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {showModal && (
-        <AddWarehouseItemModal onClose={() => setShowModal(false)} onSubmit={handleAdd} />
-      )}
-    </div>
-  );
-}
-
-function Card({ title, value, warning = false, danger = false }) {
-  const bg = danger ? "bg-red-800" : warning ? "bg-yellow-700" : "bg-gray-700";
-  return (
-    <div className={`rounded-xl p-4 text-center text-white ${bg}`}>
-      <p className="text-sm opacity-80">{title}</p>
-      <p className="text-2xl font-bold">{value}</p>
     </div>
   );
 }
