@@ -31,12 +31,12 @@ export default function LoginPage() {
     <div className="bg-slate-900/70 backdrop-blur-lg border border-slate-700 rounded-3xl shadow-2xl p-8 w-full animate-fade-in">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg ring-2 ring-blue-400/40">
-          <span className="text-white text-3xl font-bold drop-shadow-[0_1px_6px_rgba(0,0,0,0.25)]">M</span>
+          <span className="text-white text-3xl font-bold drop-shadow-[0_1px_6px_rgba(0,0,0,0.25)]">T</span>
         </div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-700 bg-clip-text text-transparent drop-shadow">
-          Miasteczko Orange
+          TECH-SPIE
         </h1>
-        <p className="text-slate-300 mt-2">System TMO – Logowanie</p>
+        <p className="text-slate-300 mt-2">Miasteczko Orange - Logowanie</p>
       </div>
 
       {error && (
@@ -124,14 +124,13 @@ export default function LoginPage() {
       <div className="mt-8 p-4 bg-slate-800/80 rounded-2xl border border-blue-600/30">
         <div className="text-sm text-blue-300 font-medium mb-2">Dane testowe:</div>
         <div className="text-sm text-blue-200 space-y-1">
-          {/* UWAGA: Tu wpisz login/email i hasło z konta testowego z bazy */}
           <div>Login: <strong className="font-bold text-white">tester</strong></div>
           <div>Hasło: <strong className="font-bold text-white">test1234</strong></div>
         </div>
       </div>
 
       <div className="mt-6 text-center text-xs text-slate-500 tracking-wider">
-        © {new Date().getFullYear()} Miasteczko Orange. Wszystkie prawa zastrzeżone.
+        © {new Date().getFullYear()} TECH SPIE Polska. Wszystkie prawa zastrzeżone. Designed and developed by Adrian Kicior ©
       </div>
     </div>
   );
