@@ -27,6 +27,25 @@ export default function TaskList({ type }) {
   const [showMissingMaterialsModal, setShowMissingMaterialsModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Function to get progress comment based on percentage
+  const getProgressComment = (progress) => {
+    if (progress === 0) {
+      return 'Oczekuje na rozpoczęcie';
+    } else if (progress > 0 && progress < 25) {
+      return 'Zadanie rozpoczęte';
+    } else if (progress >= 25 && progress < 50) {
+      return 'W trakcie realizacji';
+    } else if (progress >= 50 && progress < 75) {
+      return 'Znaczny postęp';
+    } else if (progress >= 75 && progress < 100) {
+      return 'Blisko zakończenia';
+    } else if (progress === 100) {
+      return 'Zadanie zakończone';
+    } else {
+      return 'Status nieznany';
+    }
+  };
+
   useEffect(() => {
     fetchTechnicians();
   }, []);
