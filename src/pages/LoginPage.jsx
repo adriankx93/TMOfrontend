@@ -10,7 +10,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,7 +47,9 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="relative">
-          <label className="block text-sm font-semibold text-slate-300 mb-2">Login</label>
+          <label className="block text-sm font-semibold text-slate-300 mb-2">
+            Login
+          </label>
           <div className="flex items-center bg-slate-800 rounded-2xl border border-slate-600 focus-within:border-blue-500 transition-all">
             <span className="pl-4 pr-2">
               <Mail className="w-5 h-5 text-blue-400" />
@@ -66,7 +69,9 @@ export default function LoginPage() {
         </div>
 
         <div className="relative">
-          <label className="block text-sm font-semibold text-slate-300 mb-2">Hasło</label>
+          <label className="block text-sm font-semibold text-slate-300 mb-2">
+            Hasło
+          </label>
           <div className="flex items-center bg-slate-800 rounded-2xl border border-slate-600 focus-within:border-blue-500 transition-all">
             <span className="pl-4 pr-2">
               <Lock className="w-5 h-5 text-blue-400" />
@@ -119,7 +124,8 @@ export default function LoginPage() {
       <div className="mt-8 p-4 bg-slate-800/80 rounded-2xl border border-blue-600/30">
         <div className="text-sm text-blue-300 font-medium mb-2">Dane testowe:</div>
         <div className="text-sm text-blue-200 space-y-1">
-          <div>Login: <strong className="font-bold text-white">admin</strong></div>
+          {/* UWAGA: Tu wpisz login/email i hasło z konta testowego z bazy */}
+          <div>Login: <strong className="font-bold text-white">tester</strong></div>
           <div>Hasło: <strong className="font-bold text-white">test1234</strong></div>
         </div>
       </div>
