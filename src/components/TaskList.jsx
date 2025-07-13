@@ -13,9 +13,10 @@ import {
   User,
   PauseCircle,
   ClipboardList,
-  Sliders,
+  Sliders,   
   Repeat
 } from "lucide-react";
+
 
 export default function TaskList({ type }) {
   const { tasks, updateTask, deleteTask, moveToPool, completeTask } = useTasks();
