@@ -337,7 +337,7 @@ export default function TaskList({ type }) {
                           Postęp
                         </span>
                         <span className="inline-flex items-center gap-1 font-semibold text-white">
-                          <SliderIcon className="w-4 h-4 text-slate-300" />
+                          <Sliders className="w-4 h-4 text-slate-300" />
                           {localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%
                         </span>
                       </div>
