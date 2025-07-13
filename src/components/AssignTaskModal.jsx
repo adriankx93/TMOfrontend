@@ -1,7 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { useTechnicians } from "../hooks/useTechnicians";
-import { Calendar, CheckCircle, Loader2, User } from "lucide-react";
+import { sheetsService } from "../services/sheetsService";
+import { Calendar, CheckCircle, Loader2, User, X } from "lucide-react";
+
+// Komponent wyświetlający prawdziwy grafik technika
+function TechnicianCalendar({ calendar, month, year }) {
+  if (!calendar || !calendar.length) {
+    return <div className="text-slate-500">Brak grafiku.</div>;
+  }
+  const monthNames = [
+    'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec',
+    'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'
+  ];
+  return (
+    <div>
+      <div className="font-bold mb-2">
+        Grafik na {monthNames[month] || ""} {year}
+      </div>
+      <div className="grid grid-cols-7 gap-2 text-center">
+        {['Pn','Wt','Śr','Czw','Pt','Sb','Nd'].map(d => (
+          <div key={d} className="text-xs font-bold text-slate-400">{d}</div>
+        ))}
+        {calendar.map((entry, i) => (
+          <div key={entry.date} className={`p-1 rounded-md text-xs
+            ${entry.isVacation ? 'bg-green-100 text-green-700' : ''}
+            ${entry.isL4 ? 'bg-red-100 text-red-700' : ''}
+            ${entry.isDay ? 'bg-yellow-100 text-yellow-800' : ''}
+            ${entry.isNight ? 'bg-blue-100 text-blue-800' : ''}
+            ${!entry.isDay && !entry.isNight && !entry.isVacation && !entry.isL4 ? 'bg-slate-100 text-slate-500' : ''}
+          `}>
+            {i+1}
+            <div>
+              {entry.isDay && '☀️'}
+              {entry.isNight && '🌙'}
+              {entry.isFirst && '1'}
+              {entry.isVacation && '🏖️'}
+              {entry.isL4 && '🏥'}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-3 mt-4 text-xs justify-center">
+        <span><span className="inline-block w-3 h-3 rounded bg-yellow-100 align-middle mr-1" /> Dzienna</span>
+        <span><span className="inline-block w-3 h-3 rounded bg-blue-100 align-middle mr-1" /> Nocna</span>
+        <span><span className="inline-block w-3 h-3 rounded bg-green-100 align-middle mr-1" /> Urlop</span>
+        <span><span className="inline-block w-3 h-3 rounded bg-red-100 align-middle mr-1" /> L4</span>
+      </div>
+    </div>
+  );
+}
 
 export default function AssignTaskModal({ task, onClose, onAssigned }) {
   const { assignFromPool } = useTasks();
@@ -14,10 +62,34 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
   const [assignmentSuccess, setAssignmentSuccess] = useState(false);
   const [assignedTechnicianName, setAssignedTechnicianName] = useState("");
 
-  // Filter technicians by shift and availability
-  const availableTechnicians = technicians.filter(tech => 
-    tech.shift === task.shift && tech.status !== 'inactive'
+  // Dane o miesiącu i zmianach z Google Sheets
+  const [monthData, setMonthData] = useState(null);
+  const [shifts, setShifts] = useState([]);
+
+  // Pobierz grafik tylko raz na otwarcie modala (najlepiej zrób cache globalny!)
+  useEffect(() => {
+    sheetsService.getCurrentMonthData().then(data => {
+      setMonthData(data);
+      setShifts(data.shifts);
+    }).catch(() => {
+      setMonthData(null);
+      setShifts([]);
+    });
+  }, []);
+
+  // Technicy dostępni na daną zmianę
+  const availableTechnicians = technicians.filter(tech =>
+    (!task.shift || tech.shift === task.shift) && tech.status !== 'inactive'
   );
+
+  useEffect(() => {
+    if (assignmentSuccess) {
+      const timeout = setTimeout(() => {
+        onAssigned();
+      }, 1200);
+      return () => clearTimeout(timeout);
+    }
+  }, [assignmentSuccess, onAssigned]);
 
   const handleAssign = async (e) => {
     e.preventDefault();
@@ -25,51 +97,56 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
       setError("Wybierz technika");
       return;
     }
-
     setLoading(true);
     setError("");
-
     try {
       const technicianToAssign = technicians.find(tech => tech._id === selectedTechnician);
       if (technicianToAssign) {
         setAssignedTechnicianName(`${technicianToAssign.firstName} ${technicianToAssign.lastName}`);
-      } else {
-        // Try to find by ID if _id doesn't match
-        const techById = technicians.find(tech => tech.id === selectedTechnician);
-        if (techById) {
-          setAssignedTechnicianName(`${techById.firstName} ${techById.lastName}`);
-        }
       }
-      
       await assignFromPool(task._id, selectedTechnician);
       setAssignmentSuccess(true);
-      
-      // Show success message for 1.5 seconds before closing
-      setTimeout(() => {
-        onAssigned();
-      }, 1500);
     } catch (err) {
-      setError(err.response?.data?.message || "Błąd podczas przypisywania zadania");
+      setError(err?.response?.data?.message || "Błąd podczas przypisywania zadania");
     } finally {
       setLoading(false);
     }
   };
 
+  // Pokaż kalendarz pracy danego technika (pełny miesiąc, z Google Sheets!)
   const handleShowCalendar = (tech) => {
     setCalendarTechnician(tech);
     setShowCalendar(true);
-    // Prevent the radio button from being selected when clicking the calendar icon
-    event.stopPropagation();
   };
+
+  // Funkcja: wyciąga cały grafik wybranego technika na miesiąc
+  function getTechnicianCalendar(fullName) {
+    if (!shifts || !fullName) return [];
+    return shifts.map(shift => ({
+      date: shift.date,
+      isDay: shift.dayTechnicians.includes(fullName),
+      isNight: shift.nightTechnicians.includes(fullName),
+      isFirst: shift.firstShiftTechnicians.includes(fullName),
+      isVacation: shift.vacationTechnicians.includes(fullName),
+      isL4: shift.l4Technicians.includes(fullName),
+    }));
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full relative">
+        {/* Loading overlay */}
+        {loading && (
+          <div className="absolute inset-0 bg-white/70 z-20 flex items-center justify-center rounded-3xl">
+            <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+          </div>
+        )}
+
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white text-xl">👤</span>
+                <User className="w-7 h-7 text-white" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-slate-800">Przypisz zadanie</h2>
@@ -81,7 +158,7 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
               className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-200"
               disabled={loading}
             >
-              <span className="text-2xl text-slate-400">×</span>
+              <X className="w-6 h-6 text-slate-400" />
             </button>
           </div>
 
@@ -92,7 +169,9 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
               <div>📍 {task.location}</div>
               <div>🕐 Zmiana {task.shift}</div>
               <div>🏷️ {task.category}</div>
-              <div>⏱️ {task.estimatedDuration} minut</div>
+              {task.estimatedDuration && (
+                <div>⏱️ {task.estimatedDuration} minut</div>
+              )}
             </div>
           </div>
 
@@ -134,9 +213,9 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                   {availableTechnicians.map((tech) => (
                     <label 
                       key={tech._id} 
-                      className={`flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all duration-200 ${
+                      className={`flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all duration-200 relative ${
                         selectedTechnician === tech._id 
-                          ? 'border-green-500 bg-green-50' 
+                          ? 'border-green-500 bg-green-50 ring-2 ring-green-200'
                           : 'border-slate-200 hover:border-slate-300'
                       }`}
                     >
@@ -151,10 +230,13 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                       />
                       
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">
-                          {tech.firstName[0]}{tech.lastName[0]}
-                          {tech.shift === 'Nocna' && <span className="absolute -top-1 -right-1 text-xs">🌙</span>}
-                          {tech.shift === 'Dzienna' && <span className="absolute -top-1 -right-1 text-xs">☀️</span>}
+                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold relative">
+                          <span>
+                            {tech.firstName[0]}{tech.lastName[0]}
+                          </span>
+                          <span className="absolute -top-1 -right-2 text-xs">
+                            {tech.shift === 'Nocna' ? '🌙' : tech.shift === 'Dzienna' ? '☀️' : ''}
+                          </span>
                         </div>
                         <div>
                           <div className="font-semibold text-slate-800">
@@ -179,16 +261,15 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                         >
                           <Calendar className="w-5 h-5" />
                         </button>
-                        
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedTechnician === tech._id 
-                          ? 'border-green-500 bg-green-500' 
-                          : 'border-slate-300'
-                      }`}>
-                        {selectedTechnician === tech._id && (
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        )}
-                      </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          selectedTechnician === tech._id 
+                            ? 'border-green-500 bg-green-500' 
+                            : 'border-slate-300'
+                        }`}>
+                          {selectedTechnician === tech._id && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </div>
                       </div>
                     </label>
                   ))}
@@ -233,98 +314,36 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
       </div>
       
       {/* Calendar Modal */}
-      {showCalendar && calendarTechnician && (
+      {showCalendar && calendarTechnician && monthData && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-card max-w-2xl w-full">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full">
             <div className="p-8">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                    <span className="text-white text-xl">📅</span>
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Calendar className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">Kalendarz zmian</h2>
-                    <p className="text-slate-400">{calendarTechnician.firstName} {calendarTechnician.lastName}</p>
+                    <h2 className="text-2xl font-bold text-slate-800">Kalendarz zmian</h2>
+                    <p className="text-slate-600">{calendarTechnician.firstName} {calendarTechnician.lastName}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowCalendar(false)}
-                  className="p-2 hover:bg-slate-700/50 rounded-xl transition-all duration-200"
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-200"
                 >
-                  <span className="text-2xl text-slate-400 hover:text-white">×</span>
+                  <X className="w-6 h-6 text-slate-400" />
                 </button>
               </div>
-              
-              <div className="glass-card-light p-6 mb-6">
-                <div className="grid grid-cols-7 gap-2 text-center mb-4">
-                  {['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nd'].map(day => (
-                    <div key={day} className="font-bold text-white">{day}</div>
-                  ))}
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
-                    // Symulacja danych z sheetsService - w rzeczywistości pobieralibyśmy dane z API
-                    const isDay = Math.random() > 0.5;
-                    const isNight = Math.random() > 0.7;
-                    const isVacation = !isDay && !isNight && Math.random() > 0.8;
-                    const isSickLeave = !isDay && !isNight && !isVacation && Math.random() > 0.9;
-                    
-                    let bgColor = 'bg-slate-700/50';
-                    let textColor = 'text-slate-300';
-                    if (isDay) {
-                      bgColor = 'bg-yellow-500/20';
-                      textColor = 'text-yellow-300';
-                    }
-                    if (isNight) {
-                      bgColor = 'bg-blue-500/20';
-                      textColor = 'text-blue-300';
-                    }
-                    if (isVacation) {
-                      bgColor = 'bg-green-500/20';
-                      textColor = 'text-green-300';
-                    }
-                    if (isSickLeave) {
-                      bgColor = 'bg-red-500/20';
-                      textColor = 'text-red-300';
-                    }
-                    
-                    return (
-                      <div key={day} className={`p-3 rounded-lg ${bgColor} text-center`}>
-                        <div className={`font-bold ${textColor}`}>{day}</div>
-                        <div className="text-xs">
-                          {isDay && <span>☀️</span>}
-                          {isNight && <span>🌙</span>}
-                          {isVacation && <span>🏖️</span>}
-                          {isSickLeave && <span>🏥</span>}
-                          {!isDay && !isNight && !isVacation && !isSickLeave && <span className="text-slate-400">-</span>}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-yellow-500/20 rounded"></div>
-                    <span className="text-yellow-300">Dzienna</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-blue-500/20 rounded"></div>
-                    <span className="text-blue-300">Nocna</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500/20 rounded"></div>
-                    <span className="text-green-300">Urlop</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-red-500/20 rounded"></div>
-                    <span className="text-red-300">L4</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 pt-6 border-t border-slate-600">
+              <TechnicianCalendar
+                calendar={getTechnicianCalendar(calendarTechnician.fullName)}
+                month={monthData.month}
+                year={monthData.year}
+              />
+              <div className="mt-6 pt-6 border-t border-slate-200">
                 <button
                   onClick={() => setShowCalendar(false)}
-                  className="w-full py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all duration-200"
+                  className="w-full py-3 bg-slate-100 text-slate-700 rounded-2xl font-semibold hover:bg-slate-200 transition-all duration-200"
                 >
                   Zamknij
                 </button>
