@@ -13,7 +13,7 @@ import {
   User,
   PauseCircle,
   ClipboardList,
-  Slider,
+  Sliders,
   Repeat
 } from "lucide-react";
 
