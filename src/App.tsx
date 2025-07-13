@@ -13,6 +13,8 @@ import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import UsersPage from "./pages/UsersPage";
 import EditUserPage from "./pages/EditUserPage";
+import Warehouse from "./pages/Warehouse";
+
 
 export default function App() {
   return (
@@ -31,6 +33,7 @@ export default function App() {
           <Route path="/profil" element={<ProfilePage />} />
           <Route path="/uzytkownicy" element={<UsersPage />} />
           <Route path="/uzytkownicy/:id" element={<EditUserPage />} />
+          <Route path="/warehouse" element={<Warehouse />} />
         </Routes>
       </main>
     </div>
