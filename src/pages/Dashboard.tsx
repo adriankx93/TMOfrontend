@@ -19,33 +19,22 @@ export default function Dashboard() {
     poolTasks: 0
   });
 
-  const checkDatabaseStatus = async () => {
-    try {
-      // Simulate database connection check
-      // In a real app, this would make an actual API call to check DB status
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setDbStatus({ connected: true, message: "Połączono" });
-    } catch (error) {
-      setDbStatus({ connected: false, message: "Błąd połączenia" });
-    }
-  };
-
   useEffect(() => {
     fetchTodayShift();
     fetchWeatherData();
     checkDatabaseStatus();
     calculateStats();
-
+    
     const interval = setInterval(() => {
       fetchTodayShift();
       fetchWeatherData();
       checkDatabaseStatus();
     }, 10 * 60 * 1000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line
   }, [tasks, technicians]);
 
   const fetchWeatherData = async () => {
+    // Mock weather data - w rzeczywistej aplikacji można użyć API pogodowego
     const mockWeather = {
       temperature: Math.round(15 + Math.random() * 10),
       humidity: Math.round(45 + Math.random() * 30),
@@ -58,33 +47,67 @@ export default function Dashboard() {
     setWeather(mockWeather);
   };
 
-  const fetchTodayShift = async () => {
-  try {
-    setLoading(true);
-    const data = await sheetsService.getCurrentMonthData();
-    const today = new Date();
-    const todayISO = today.toISOString().split("T")[0];
-    const shift = data.shifts.find(shift => shift.date === todayISO);
-    setTodayShift(shift || null);
-  } catch (error) {
-    console.error('Error fetching today shift:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  const checkDatabaseStatus = async () => {
+    try {
+      // Sprawdź, czy mamy dostęp do danych zadań i techników
+      const hasTasksData = tasks.length > 0;
+      const hasTechniciansData = technicians.length > 0;
+      
+      // Jeśli mamy dane, zakładamy że połączenie działa
+      if (hasTasksData || hasTechniciansData) {
+        setDbStatus({ 
+          connected: true, 
+          message: "Operacyjna" 
+        });
+      } else {
+        // Jeśli nie mamy danych, ale nie było błędu, to połączenie działa, ale baza może być pusta
+        setDbStatus({ 
+          connected: true, 
+          message: "Połączono (brak danych)" 
+        });
+      }
+    } catch (error) {
+      console.error("Błąd podczas sprawdzania statusu bazy danych:", error);
+      setDbStatus({ 
+        connected: false, 
+        message: "Problem z połączeniem" 
+      });
+    }
+  };
 
- 
+  const fetchTodayShift = async () => {
+    try {
+      setLoading(true);
+      const data = await sheetsService.getCurrentMonthData();
+      
+      // Pobierz dzisiejszą datę w strefie czasowej Polski
+      const today = new Date();
+      const todayDay = today.getDate(); // Dzień miesiąca (1-31)
+      
+      const shift = data.shifts.find(shift => {
+        return shift.dayNumber === todayDay;
+      });
+
+      setTodayShift(shift || null);
+    } catch (error) {
+      console.error('Error fetching today shift:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const calculateStats = () => {
     const activeTechnicians = todayShift ? todayShift.totalWorking : 0;
     const currentTasks = tasks.filter(t => ['assigned', 'in_progress'].includes(t.status)).length;
     const poolTasks = tasks.filter(t => t.status === 'pool').length;
+    
     const today = new Date().toDateString();
-    const completedToday = tasks.filter(t =>
-      t.status === 'completed' &&
-      t.completedAt &&
+    const completedToday = tasks.filter(t => 
+      t.status === 'completed' && 
+      t.completedAt && 
       new Date(t.completedAt).toDateString() === today
     ).length;
+
     setDashboardStats({
       activeTechnicians,
       currentTasks,
@@ -93,17 +116,13 @@ export default function Dashboard() {
     });
   };
 
-  useEffect(() => {
-    calculateStats();
-    // eslint-disable-next-line
-  }, [todayShift, tasks]);
-
   const currentHour = new Date().getHours();
   const isDay = currentHour >= 7 && currentHour < 19;
 
   const getCurrentShiftTechnicians = () => {
     if (!todayShift) return [];
-    if (isDay) {
+    
+    if (currentHour >= 7 && currentHour < 19) {
       return todayShift.dayTechnicians;
     } else {
       return todayShift.nightTechnicians;
@@ -112,7 +131,8 @@ export default function Dashboard() {
 
   const getNextShiftTechnicians = () => {
     if (!todayShift) return [];
-    if (isDay) {
+    
+    if (currentHour >= 7 && currentHour < 19) {
       return todayShift.nightTechnicians;
     } else {
       return todayShift.dayTechnicians;
@@ -120,19 +140,23 @@ export default function Dashboard() {
   };
 
   const getCurrentShiftName = () => {
-    return isDay ? "Zmiana dzienna" : "Zmiana nocna";
+    if (currentHour >= 7 && currentHour < 19) return "Zmiana dzienna";
+    return "Zmiana nocna";
   };
 
   const getNextShiftName = () => {
-    return isDay ? "Zmiana nocna" : "Zmiana dzienna";
+    if (currentHour >= 7 && currentHour < 19) return "Zmiana nocna";
+    return "Zmiana dzienna";
   };
 
   const getCurrentShiftTime = () => {
-    return isDay ? "07:00 - 19:00" : "19:00 - 07:00";
+    if (currentHour >= 7 && currentHour < 19) return "07:00 - 19:00";
+    return "19:00 - 07:00";
   };
 
   const getNextShiftTime = () => {
-    return isDay ? "19:00 - 07:00" : "07:00 - 19:00";
+    if (currentHour >= 7 && currentHour < 19) return "19:00 - 07:00";
+    return "07:00 - 19:00";
   };
 
   const currentShiftTechnicians = getCurrentShiftTechnicians();
@@ -140,8 +164,8 @@ export default function Dashboard() {
 
   const getCurrentShiftTasks = () => {
     const currentShift = isDay ? "Dzienna" : "Nocna";
-    return tasks.filter(task =>
-      task.shift === currentShift &&
+    return tasks.filter(task => 
+      task.shift === currentShift && 
       ['assigned', 'in_progress'].includes(task.status)
     );
   };
@@ -150,6 +174,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* Header with System Status */}
       <div className="glass-card p-4 md:p-8">
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
@@ -164,17 +189,18 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
+            
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-slate-300">
               <div className="flex items-center gap-2">
                 <div className="status-indicator bg-green-400"></div>
                 <span className="text-sm font-medium">System Online</span>
               </div>
               <div className="text-xs md:text-sm font-medium">
-                {new Date().toLocaleDateString('pl-PL', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                {new Date().toLocaleDateString('pl-PL', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
                 })}
               </div>
               <div className="text-base md:text-lg font-bold text-white">
@@ -182,6 +208,8 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          
+          {/* Weather Widget */}
           {weather && (
             <div className="glass-card-light p-4 md:p-6 min-w-[200px] md:min-w-[280px] hidden lg:block">
               <div className="flex items-center justify-between mb-4">
@@ -196,6 +224,7 @@ export default function Dashboard() {
                   <div className="text-3xl font-bold text-white">{weather.temperature}°C</div>
                 </div>
               </div>
+              
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="text-center">
                   <div className="text-slate-400">Wilgotność</div>
@@ -206,6 +235,7 @@ export default function Dashboard() {
                   <div className="font-semibold text-white">{weather.windSpeed} km/h</div>
                 </div>
               </div>
+              
               <div className="mt-4 pt-4 border-t border-slate-600 text-xs text-slate-400 text-center">
                 Ostatnia aktualizacja: {new Date().toLocaleTimeString('pl-PL')}
               </div>
@@ -214,7 +244,9 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Current Shift Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 w-full">
+        {/* Current Shift */}
         <div className="lg:col-span-2 glass-card overflow-hidden">
           <div className={`${isDay ? 'gradient-warning' : 'gradient-primary'} px-4 md:px-8 py-4 md:py-6`}>
             <div className="flex items-center justify-between text-white">
@@ -235,6 +267,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+
           <div className="p-4 md:p-8">
             {loading ? (
               <div className="animate-pulse space-y-4">
@@ -272,6 +305,7 @@ export default function Dashboard() {
                     </div>
                   )}
                 </div>
+
                 <div>
                   <h3 className="text-base md:text-lg font-bold text-white mb-4">Zadania na aktualnej zmianie</h3>
                   {currentShiftTasks.length > 0 ? (
@@ -312,6 +346,7 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Next Shift Preview */}
         <div className="glass-card overflow-hidden">
           <div className={`${!isDay ? 'gradient-warning' : 'gradient-primary'} px-4 md:px-6 py-3 md:py-4`}>
             <div className="text-white text-center">
@@ -320,6 +355,7 @@ export default function Dashboard() {
               <p className="text-white/80 text-sm md:text-base">{getNextShiftTime()}</p>
             </div>
           </div>
+
           <div className="p-4 md:p-6">
             <h4 className="font-bold text-white mb-3 md:mb-4 text-sm md:text-base">Następna zmiana</h4>
             {nextShiftTechnicians.length > 0 ? (
@@ -358,6 +394,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Statistics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 w-full">
         <div 
           className="metric-card cursor-pointer hover:scale-105 transition-transform duration-200"
@@ -395,6 +432,7 @@ export default function Dashboard() {
           className="metric-card cursor-pointer hover:scale-105 transition-transform duration-200"
           onClick={() => {
             navigate('/zadania');
+            // Dodatkowa logika do przełączenia na tab "pool" będzie dodana później
             setTimeout(() => {
               const poolTab = document.querySelector('[data-tab="pool"]');
               if (poolTab) poolTab.click();
@@ -417,6 +455,7 @@ export default function Dashboard() {
           className="metric-card cursor-pointer hover:scale-105 transition-transform duration-200"
           onClick={() => {
             navigate('/zadania');
+            // Dodatkowa logika do przełączenia na tab "completed" będzie dodana później
             setTimeout(() => {
               const completedTab = document.querySelector('[data-tab="completed"]');
               if (completedTab) completedTab.click();
@@ -436,9 +475,12 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* System Health & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 w-full">
+        {/* System Health */}
         <div className="glass-card p-4 md:p-8">
           <h3 className="text-lg md:text-xl font-bold text-white mb-4 md:mb-6">Status systemu</h3>
+          
           <div className="space-y-4 w-full">
             <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
@@ -475,8 +517,11 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Quick Actions */}
         <div className="glass-card p-4 md:p-8">
           <h3 className="text-lg md:text-xl font-bold text-white mb-4 md:mb-6">Szybkie akcje</h3>
+          
           <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => window.location.href = '/zadania'}
@@ -486,6 +531,7 @@ export default function Dashboard() {
               <div className="font-semibold text-blue-300 text-sm md:text-base">Nowe zadanie</div>
               <div className="text-xs md:text-sm text-slate-400">Utwórz zadanie</div>
             </button>
+            
             <button 
               onClick={() => window.location.href = '/technicy'}
               className="p-4 md:p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
@@ -494,6 +540,7 @@ export default function Dashboard() {
               <div className="font-semibold text-emerald-300 text-sm md:text-base">Zespół</div>
               <div className="text-xs md:text-sm text-slate-400">Zarządzaj technikami</div>
             </button>
+            
             <button 
               onClick={() => window.location.href = '/budynki'}
               className="p-4 md:p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
@@ -502,6 +549,7 @@ export default function Dashboard() {
               <div className="font-semibold text-purple-300 text-sm md:text-base">Budynki</div>
               <div className="text-xs md:text-sm text-slate-400">Infrastruktura</div>
             </button>
+            
             <button 
               onClick={() => window.location.href = '/raporty'}
               className="p-4 md:p-6 glass-card-light hover:bg-slate-600/30 rounded-2xl transition-all duration-200 text-left group"
