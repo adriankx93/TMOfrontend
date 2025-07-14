@@ -2,13 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --card-bg: rgba(30, 41, 59, 0.5);
+  --card-border: rgba(51, 65, 85, 0.5);
+  --accent-primary: #3b82f6;
+  --accent-secondary: #4f46e5;
+}
+
+.light {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --card-border: rgba(226, 232, 240, 0.8);
+  --accent-primary: #2563eb;
+  --accent-secondary: #4338ca;
+}
+
 @layer base {
   html {
     @apply overflow-x-hidden;
   }
   
   body {
-    @apply bg-slate-900 text-slate-100 font-sans antialiased overflow-x-hidden;
+    @apply font-sans antialiased overflow-x-hidden transition-colors duration-300;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
   }
@@ -51,11 +75,15 @@
 
 @layer components {
   .glass-card {
-    @apply bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-2xl;
+    @apply backdrop-blur-xl rounded-xl shadow-2xl transition-colors duration-300;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
   }
   
   .glass-card-light {
-    @apply bg-slate-700/30 backdrop-blur-xl border border-slate-600/30 rounded-xl;
+    @apply backdrop-blur-xl rounded-xl transition-colors duration-300;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
   }
   
   .gradient-primary {
@@ -87,47 +115,54 @@
   }
   
   .btn-primary {
-    @apply gradient-primary text-white px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] text-sm;
+    @apply px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] text-sm;
+    background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+    color: white;
   }
   
   .btn-secondary {
-    @apply bg-slate-700 hover:bg-slate-600 text-slate-100 px-4 py-3 rounded-xl font-semibold transition-all duration-200 min-h-[48px] text-sm;
+    @apply px-4 py-3 rounded-xl font-semibold transition-all duration-200 min-h-[48px] text-sm;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
   }
   
   .input-field {
-    @apply bg-slate-800 border border-slate-600 text-slate-100 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200 min-h-[48px] text-base;
+    @apply px-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 min-h-[48px] text-base;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
   }
   
   /* Mobile specific styles */
   @media (max-width: 640px) {
     .metric-card {
-      @apply p-2 rounded-md;
+      @apply p-3 rounded-md;
     }
     
     .btn-primary, .btn-secondary {
-      @apply px-2 py-1.5 text-xs min-h-[32px] rounded-md;
+      @apply px-3 py-2 text-xs min-h-[36px] rounded-md;
     }
     
     .input-field {
-      @apply px-2 py-1.5 text-sm min-h-[32px] rounded-md;
+      @apply px-3 py-2 text-sm min-h-[36px] rounded-md;
     }
     
     .glass-card {
-      @apply rounded-md p-3;
+      @apply rounded-md p-4;
     }
     
     .glass-card-light {
-      @apply rounded-md p-2;
+      @apply rounded-md p-3;
     }
     
     /* Compact mobile buttons */
     .btn-compact {
-      @apply px-2 py-1 text-xs min-h-[28px] rounded-md;
+      @apply px-3 py-1.5 text-xs min-h-[32px] rounded-md;
     }
     
     /* Small mobile cards */
     .card-mobile {
-      @apply p-2 text-xs;
+      @apply p-3 text-xs;
     }
     
     /* Compact spacing */
@@ -137,11 +172,11 @@
     
     /* Mobile text sizes */
     .text-mobile-xs {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
     }
     
     .text-mobile-sm {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
     }
     
     /* Mobile grid adjustments */
@@ -164,12 +199,12 @@
     
     /* Extreme mobile optimizations */
     .mobile-micro-text {
-      font-size: 0.65rem;
-      line-height: 0.9rem;
+      font-size: 0.7rem;
+      line-height: 1rem;
     }
     
     .mobile-nano-padding {
-      padding: 0.25rem;
+      padding: 0.375rem;
     }
     
     .mobile-mini-icon {
@@ -179,15 +214,15 @@
     }
     
     .mobile-mini-button {
-      min-height: 28px;
-      padding: 0.25rem 0.5rem;
-      font-size: 0.7rem;
-      border-radius: 0.375rem;
+      min-height: 32px;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      border-radius: 0.5rem;
     }
     
     .mobile-mini-card {
-      padding: 0.5rem;
-      border-radius: 0.5rem;
+      padding: 0.75rem;
+      border-radius: 0.625rem;
     }
     
     /* Mobile layout adjustments */

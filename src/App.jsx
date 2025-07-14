@@ -1,5 +1,5 @@
 import { Routes, Route, Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import AppLayout from "./layouts/AppLayout";
 import AuthLayout from "./layouts/AuthLayout";
 
@@ -28,6 +28,18 @@ import LoginPage from "./pages/LoginPage";
 // import RegisterPage from "./pages/RegisterPage";
 
 export default function App() {
+  // Check for saved theme preference or use system preference
+  useLayoutEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      document.documentElement.classList.add(savedTheme);
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.add("light");
+    }
+  }, []);
+
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -40,7 +52,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="bg-slate-900 min-h-screen w-full overflow-x-hidden">
+    <div className="min-h-screen w-full overflow-x-hidden transition-colors duration-300">
       <Routes>
         {/* Layout Z SIDEBAR */}
         <Route element={<AppLayout><Outlet /></AppLayout>}>

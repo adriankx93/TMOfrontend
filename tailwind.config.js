@@ -1,10 +1,14 @@
 module.exports = {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}"
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '480px',
+      },
       keyframes: {
         shake: {
           '10%, 90%': { transform: 'translateX(-2px)' },
@@ -16,6 +20,9 @@ module.exports = {
       animation: {
         shake: 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both'
       },
+      colors: {
+        // Custom colors for light/dark mode
+      }
     },
   },
   plugins: [],

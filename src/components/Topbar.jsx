@@ -1,3 +1,5 @@
+import ThemeToggle from "./ThemeToggle";
+
 export default function Topbar({ title, subtitle, action }) {
   const currentTime = new Date().toLocaleTimeString('pl-PL', { 
     hour: '2-digit', 
@@ -27,7 +29,7 @@ export default function Topbar({ title, subtitle, action }) {
         </div>
 
         {/* Right Section - Added flex-nowrap */}
-        <div className="flex flex-nowrap gap-0.5 md:gap-6 items-center">
+        <div className="flex flex-nowrap gap-1 md:gap-6 items-center">
           {/* Time and Date */}
           <div className="hidden md:block text-right">
             <div className="text-xl md:text-2xl font-bold text-white">{currentTime}</div>
@@ -35,7 +37,7 @@ export default function Topbar({ title, subtitle, action }) {
           </div>
 
           {/* Action Button */}
-          {action && action}
+          {action && <div className="mx-1">{action}</div>}
 
           {/* Search */}
           <div className="relative hidden lg:block">
@@ -49,7 +51,7 @@ export default function Topbar({ title, subtitle, action }) {
           </div>
 
           {/* Notifications */}
-          <button className="relative p-0.5 md:p-3 glass-card-light hover:bg-slate-600/30 transition-all duration-200 group">
+          <button className="relative p-0.5 md:p-3 glass-card-light hover:bg-slate-600/30 dark:hover:bg-slate-600/30 light:hover:bg-slate-300/30 transition-all duration-200 group">
             <span className="text-sm md:text-xl group-hover:scale-110 transition-transform duration-200">N</span>
             <div className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 w-2 h-2 md:w-5 md:h-5 bg-red-500 rounded-full flex items-center justify-center glow-red">
               <span className="text-white mobile-micro-text md:text-xs font-bold">3</span>
@@ -57,9 +59,14 @@ export default function Topbar({ title, subtitle, action }) {
           </button>
 
           {/* Quick Actions */}
-          <button className="p-0.5 md:p-3 glass-card-light hover:bg-slate-600/30 transition-all duration-200 group hidden lg:block">
+          <button className="p-0.5 md:p-3 glass-card-light hover:bg-slate-600/30 dark:hover:bg-slate-600/30 light:hover:bg-slate-300/30 transition-all duration-200 group hidden lg:block">
             <span className="text-xl group-hover:scale-110 transition-transform duration-200">U</span>
           </button>
+          
+          {/* Theme Toggle */}
+          <div className="hidden md:block">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>

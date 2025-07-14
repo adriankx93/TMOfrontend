@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { authService } from "../services/authService";
+import ThemeToggle from "./ThemeToggle";
 import { 
   Home, ClipboardList, Search, AlertTriangle, Settings as SettingsIcon, Building2, 
   Users, Wrench, Package, ShoppingCart, FileText, BarChart4, TrendingUp, 
@@ -109,12 +110,12 @@ export default function Sidebar() {
           </div>
           <div className="p-2 md:p-3 bg-slate-800/80 rounded-lg flex items-center justify-between shadow-inner">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <div className="w-2 h-2 bg-green-400 dark:bg-green-400 light:bg-green-500 rounded-full animate-pulse" />
               <span className="text-xs md:text-sm font-semibold text-slate-200">
                 System Online
               </span>
             </div>
-            <div className="text-xs md:text-sm text-blue-400 font-bold tabular-nums tracking-widest">
+            <div className="text-xs md:text-sm text-blue-400 dark:text-blue-400 light:text-blue-600 font-bold tabular-nums tracking-widest">
               {clock}
             </div>
           </div>
@@ -147,7 +148,7 @@ export default function Sidebar() {
         </nav>
 
         {/* User Profile */}
-        <div className="p-4 border-t border-slate-700/50 mt-auto">
+        <div className="p-4 border-t border-slate-700/50 dark:border-slate-700/50 light:border-slate-300/50 mt-auto">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center font-bold text-white text-lg shadow-lg">
               {user?.firstName?.[0]?.toUpperCase() || "U"}
@@ -159,14 +160,17 @@ export default function Sidebar() {
               <div className="text-xs text-slate-400 truncate">{user?.role}</div>
             </div>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="w-full py-2 px-3 bg-slate-700/60 rounded-lg text-sm text-slate-300 text-center hover:bg-slate-600/70 transition-all duration-200"
-          >
-            <span>🔒</span>
-            <span className="ml-2">Wyloguj się</span>
-          </button>
-          <div className="text-slate-500 text-xs text-center mt-3">
+          <div className="flex gap-2 mb-3">
+            <button 
+              onClick={handleLogout}
+              className="flex-1 py-2 px-3 bg-slate-700/60 dark:bg-slate-700/60 light:bg-slate-200/60 rounded-lg text-sm text-slate-300 dark:text-slate-300 light:text-slate-700 text-center hover:bg-slate-600/70 dark:hover:bg-slate-600/70 light:hover:bg-slate-300/70 transition-all duration-200"
+            >
+              <span>🔒</span>
+              <span className="ml-2">Wyloguj się</span>
+            </button>
+            <ThemeToggle />
+          </div>
+          <div className="text-slate-500 dark:text-slate-500 light:text-slate-400 text-xs text-center">
             © {new Date().getFullYear()} TechSPIE v1.0
           </div>
         </div>
