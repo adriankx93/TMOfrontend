@@ -28,7 +28,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-slate-900/70 backdrop-blur-lg border border-slate-700 rounded-3xl shadow-2xl p-8 w-full animate-fade-in">
+    <div className="bg-slate-900/70 backdrop-blur-lg border border-slate-700 rounded-3xl shadow-2xl p-8 w-full animate-fade-in max-w-md mx-auto min-h-screen flex flex-col justify-center">
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg ring-2 ring-blue-400/40">
           <span className="text-white text-3xl font-bold drop-shadow-[0_1px_6px_rgba(0,0,0,0.25)]">T</span>
@@ -111,15 +111,6 @@ export default function LoginPage() {
           {loading ? "Logowanie..." : "Zaloguj się"}
         </button>
       </form>
-
-      <div className="mt-4 text-center">
-        <p className="text-slate-400">
-          Nie masz konta?{" "}
-          <Link to="/register" className="text-blue-400 hover:underline font-semibold">
-            Zarejestruj się
-          </Link>
-        </p>
-      </div>
 
       <div className="mt-8 p-4 bg-slate-800/80 rounded-2xl border border-blue-600/30">
         <div className="text-sm text-blue-300 font-medium mb-2">Dane testowe:</div>
