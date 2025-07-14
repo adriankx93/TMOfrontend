@@ -2,29 +2,21 @@ import { NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { authService } from "../services/authService";
 import { 
-  Home, 
-  ClipboardList, 
-  Search, 
-  AlertTriangle, 
-  Settings as SettingsIcon, 
-  Building2, 
-  Users, 
-  Wrench, 
-  Package, 
-  ShoppingCart, 
-  FileText, 
-  BarChart4, 
-  TrendingUp, 
-  Settings, 
-  FileSignature 
+  Home, ClipboardList, Search, AlertTriangle, Settings as SettingsIcon, Building2, 
+  Users, Wrench, Package, ShoppingCart, FileText, BarChart4, TrendingUp, 
+  Settings, FileSignature 
 } from "lucide-react";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [user, setUser] = useState(null);
+  const [clock, setClock] = useState(
+    new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+  );
 
   useEffect(() => {
+    // RWD
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
@@ -36,9 +28,18 @@ export default function Sidebar() {
   }, []);
 
   useEffect(() => {
-    // Uwaga! Jeśli masz inną nazwę funkcji niż getCurrentUser, zamień na getUser!
-    const currentUser = authService.getUser ? authService.getUser() : authService.getCurrentUser();
-    setUser(currentUser);
+    // Pobierz usera
+    setUser(authService.getUser ? authService.getUser() : authService.getCurrentUser?.());
+  }, []);
+
+  // Live clock (odświeżanie co sekundę)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setClock(
+        new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+      );
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = () => {
@@ -70,8 +71,8 @@ export default function Sidebar() {
       {isMobile && (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-1 left-1 z-50 p-2 bg-slate-800 rounded-md shadow-lg"
-          style={{ minHeight: '36px', minWidth: '36px' }}
+          className="fixed top-2 left-2 z-50 p-2 bg-slate-800 rounded-md shadow-lg ring-2 ring-blue-700/20 transition"
+          style={{ minHeight: '40px', minWidth: '40px' }}
         >
           <span className="text-white text-xl">{isOpen ? '✕' : '☰'}</span>
         </button>
@@ -80,17 +81,18 @@ export default function Sidebar() {
       {/* Mobile Overlay */}
       {isMobile && isOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 z-40 animate-fade-in"
+          className="fixed inset-0 bg-black/50 z-40 animate-fade-in"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        ${isMobile ? 'fixed' : 'static'} inset-y-0 left-0 z-50 w-56 md:w-72 bg-slate-900 border-r border-slate-700/50 
-        min-h-screen flex flex-col shadow-2xl transform transition-transform duration-300 ease-in-out
+        ${isMobile ? 'fixed' : 'static'} inset-y-0 left-0 z-50 w-56 md:w-72 bg-gradient-to-br from-[#1b2433] via-[#222e44] to-[#212b3b] border-r border-slate-700/30 
+        min-h-screen flex flex-col shadow-2xl transform transition-transform duration-300
         ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
         ${isMobile ? 'animate-slide-in-left' : ''}
+        backdrop-blur-xl bg-opacity-95
       `}>
         {/* Header */}
         <div className="p-3 md:p-6 border-b border-slate-700/50">
@@ -105,18 +107,15 @@ export default function Sidebar() {
               </div>
             </div>
           </div>
-          <div className="p-2 md:p-3 bg-slate-800 rounded-lg flex items-center justify-between">
+          <div className="p-2 md:p-3 bg-slate-800/80 rounded-lg flex items-center justify-between shadow-inner">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full" />
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               <span className="text-xs md:text-sm font-semibold text-slate-200">
                 System Online
               </span>
             </div>
-            <div className="text-xs md:text-sm text-slate-400">
-              {new Date().toLocaleTimeString("pl-PL", {
-                hour: "2-digit",
-                minute: "2-digit"
-              })}
+            <div className="text-xs md:text-sm text-blue-400 font-bold tabular-nums tracking-widest">
+              {clock}
             </div>
           </div>
         </div>
@@ -132,7 +131,7 @@ export default function Sidebar() {
                 className={({ isActive }) =>
                   `group flex items-center gap-2 md:gap-4 py-2 md:py-3 px-3 rounded-lg font-medium transition-all duration-200 no-select ${
                     isActive
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/70"
                   }`
                 }
@@ -162,7 +161,7 @@ export default function Sidebar() {
           </div>
           <button 
             onClick={handleLogout}
-            className="w-full py-2 px-3 bg-slate-700/50 rounded-lg text-sm text-slate-300 text-center hover:bg-slate-600/50 transition-all duration-200"
+            className="w-full py-2 px-3 bg-slate-700/60 rounded-lg text-sm text-slate-300 text-center hover:bg-slate-600/70 transition-all duration-200"
           >
             <span>🔒</span>
             <span className="ml-2">Wyloguj się</span>
@@ -172,6 +171,19 @@ export default function Sidebar() {
           </div>
         </div>
       </aside>
+      {/* Propozycja na bardzo miękki cień i animacje */}
+      <style>{`
+        .animate-slide-in-left { animation: slideInLeft .35s cubic-bezier(.65,.15,.4,1.2); }
+        @keyframes slideInLeft {
+          from { transform: translateX(-120%);}
+          to   { transform: translateX(0);}
+        }
+        .animate-fade-in { animation: fadeInSidebar .7s;}
+        @keyframes fadeInSidebar {
+          from { opacity: 0;}
+          to   { opacity: 1;}
+        }
+      `}</style>
     </>
   );
 }
