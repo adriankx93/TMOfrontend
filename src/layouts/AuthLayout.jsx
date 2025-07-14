@@ -1,4 +1,6 @@
-export default function AuthLayout({ children }) {
+import { Outlet } from "react-router-dom";
+
+export default function AuthLayout() {
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#10151f] via-[#192132] to-[#222c3a]">
       {/* ANIMOWANE TECHNO-TŁO */}
@@ -16,7 +18,7 @@ export default function AuthLayout({ children }) {
       </div>
       {/* FORMULARZ */}
       <div className="relative z-10 w-full max-w-md">
-        {children}
+        <Outlet />
       </div>
     </div>
   );
