@@ -133,11 +133,11 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full relative">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 dark:bg-black/50 light:bg-black/30">
+      <div className="dark:bg-slate-800 light:bg-white rounded-3xl shadow-2xl max-w-lg w-full relative">
         {/* Loading overlay */}
         {loading && (
-          <div className="absolute inset-0 bg-white/70 z-20 flex items-center justify-center rounded-3xl">
+          <div className="absolute inset-0 dark:bg-slate-800/70 light:bg-white/70 z-20 flex items-center justify-center rounded-3xl">
             <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
           </div>
         )}
@@ -145,27 +145,27 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg dark:text-white light:text-white">
                 <User className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">Przypisz zadanie</h2>
-                <p className="text-slate-600">Wybierz technika dla zadania</p>
+                <h2 className="text-2xl font-bold dark:text-white light:text-slate-800">Przypisz zadanie</h2>
+                <p className="dark:text-slate-400 light:text-slate-600">Wybierz technika dla zadania</p>
               </div>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-200"
+              className="p-2 dark:hover:bg-slate-700 light:hover:bg-slate-100 rounded-xl transition-all duration-200"
               disabled={loading}
             >
-              <X className="w-6 h-6 text-slate-400" />
+              <X className="w-6 h-6 dark:text-slate-400 light:text-slate-500" />
             </button>
           </div>
 
           {/* Task Info */}
-          <div className="mb-6 p-4 bg-slate-50 rounded-2xl">
-            <h3 className="font-semibold text-slate-800 mb-2">{task.title}</h3>
-            <div className="text-sm text-slate-600 space-y-1">
+          <div className="mb-6 p-4 dark:bg-slate-700 light:bg-slate-50 rounded-2xl">
+            <h3 className="font-semibold dark:text-white light:text-slate-800 mb-2">{task.title}</h3>
+            <div className="text-sm dark:text-slate-300 light:text-slate-600 space-y-1">
               <div>📍 {task.location}</div>
               <div>🕐 Zmiana {task.shift}</div>
               <div>🏷️ {task.category}</div>
@@ -193,19 +193,19 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
           )}
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl">
-              <div className="text-red-800 font-medium">{error}</div>
+            <div className="mb-6 p-4 dark:bg-red-900/30 light:bg-red-50 dark:border-red-700 light:border-red-200 rounded-2xl border">
+              <div className="dark:text-red-300 light:text-red-800 font-medium">{error}</div>
             </div>
           )}
 
           <form onSubmit={handleAssign} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
+              <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-3">
                 Dostępni technicy na zmianę {task.shift}
               </label>
               
               {availableTechnicians.length === 0 ? (
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-800">
+                <div className="p-4 dark:bg-amber-900/30 light:bg-amber-50 dark:border-amber-700 light:border-amber-200 rounded-2xl dark:text-amber-300 light:text-amber-800 border">
                   Brak dostępnych techników na zmianę {task.shift}
                 </div>
               ) : (
@@ -215,8 +215,8 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                       key={tech._id} 
                       className={`flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all duration-200 relative ${
                         selectedTechnician === tech._id 
-                          ? 'border-green-500 bg-green-50 ring-2 ring-green-200'
-                          : 'border-slate-200 hover:border-slate-300'
+                          ? 'dark:border-green-500 light:border-green-500 dark:bg-green-900/30 light:bg-green-50 dark:ring-green-700 light:ring-green-200 ring-2'
+                          : 'dark:border-slate-600 light:border-slate-200 dark:hover:border-slate-500 light:hover:border-slate-300'
                       }`}
                     >
                       <input
@@ -232,17 +232,17 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                       <div className="flex items-center gap-3 flex-1">
                         <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold relative">
                           <span>
-                            {tech.firstName[0]}{tech.lastName[0]}
+                            {tech.firstName?.[0]}{tech.lastName?.[0]}
                           </span>
                           <span className="absolute -top-1 -right-2 text-xs">
                             {tech.shift === 'Nocna' ? '🌙' : tech.shift === 'Dzienna' ? '☀️' : ''}
                           </span>
                         </div>
                         <div>
-                          <div className="font-semibold text-slate-800">
+                          <div className="font-semibold dark:text-white light:text-slate-800">
                             {tech.firstName} {tech.lastName}
                           </div>
-                          <div className="text-sm text-slate-600 flex flex-col">
+                          <div className="text-sm dark:text-slate-400 light:text-slate-600 flex flex-col">
                             <span>{tech.specialization} • {tech.shift}</span>
                             <span className="text-xs text-blue-600">{tech.currentTasks || 0} zadań</span>
                           </div>
@@ -256,15 +256,15 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                             e.preventDefault();
                             handleShowCalendar(tech);
                           }}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+                          className="p-2 text-blue-600 dark:hover:bg-blue-900/30 light:hover:bg-blue-50 rounded-full transition-all duration-200"
                           title="Zobacz kalendarz zmian"
                         >
                           <Calendar className="w-5 h-5" />
                         </button>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedTechnician === tech._id 
-                            ? 'border-green-500 bg-green-500' 
-                            : 'border-slate-300'
+                            ? 'border-green-500 bg-green-500 dark:border-green-400 dark:bg-green-400' 
+                            : 'dark:border-slate-500 light:border-slate-300'
                         }`}>
                           {selectedTechnician === tech._id && (
                             <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -280,8 +280,8 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
             <div className="flex gap-4 pt-6 border-t border-slate-200">
               <button
                 type="submit"
-                disabled={loading || !selectedTechnician || availableTechnicians.length === 0}
-                className="flex-1 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={loading || !selectedTechnician || availableTechnicians.length === 0 || assignmentSuccess}
+                className="flex-1 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 dark:text-white light:text-white"
               >
                 {loading ? (
                   <>
@@ -303,8 +303,8 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
               <button
                 type="button"
                 onClick={onClose}
-                disabled={loading}
-                className="px-8 py-4 bg-slate-100 text-slate-700 rounded-2xl font-semibold hover:bg-slate-200 transition-all duration-200 disabled:opacity-50"
+                disabled={loading || assignmentSuccess}
+                className="px-8 py-4 dark:bg-slate-700 light:bg-slate-100 dark:text-slate-300 light:text-slate-700 rounded-2xl font-semibold dark:hover:bg-slate-600 light:hover:bg-slate-200 transition-all duration-200 disabled:opacity-50"
               >
                 Anuluj
               </button>
@@ -315,24 +315,24 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
       
       {/* Calendar Modal */}
       {showCalendar && calendarTechnician && monthData && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 dark:bg-black/50 light:bg-black/30">
+          <div className="dark:bg-slate-800 light:bg-white rounded-3xl shadow-2xl max-w-2xl w-full">
             <div className="p-8">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
-                    <Calendar className="w-6 h-6 text-white" />
+                    <Calendar className="w-6 h-6 text-white dark:text-white light:text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-800">Kalendarz zmian</h2>
-                    <p className="text-slate-600">{calendarTechnician.firstName} {calendarTechnician.lastName}</p>
+                    <h2 className="text-2xl font-bold dark:text-white light:text-slate-800">Kalendarz zmian</h2>
+                    <p className="dark:text-slate-400 light:text-slate-600">{calendarTechnician.firstName} {calendarTechnician.lastName}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowCalendar(false)}
-                  className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-200"
+                  className="p-2 dark:hover:bg-slate-700 light:hover:bg-slate-100 rounded-xl transition-all duration-200"
                 >
-                  <X className="w-6 h-6 text-slate-400" />
+                  <X className="w-6 h-6 dark:text-slate-400 light:text-slate-500" />
                 </button>
               </div>
               <TechnicianCalendar
@@ -340,10 +340,10 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                 month={monthData.month}
                 year={monthData.year}
               />
-              <div className="mt-6 pt-6 border-t border-slate-200">
+              <div className="mt-6 pt-6 border-t dark:border-slate-700 light:border-slate-200">
                 <button
                   onClick={() => setShowCalendar(false)}
-                  className="w-full py-3 bg-slate-100 text-slate-700 rounded-2xl font-semibold hover:bg-slate-200 transition-all duration-200"
+                  className="w-full py-3 dark:bg-slate-700 light:bg-slate-100 dark:text-slate-300 light:text-slate-700 rounded-2xl font-semibold dark:hover:bg-slate-600 light:hover:bg-slate-200 transition-all duration-200"
                 >
                   Zamknij
                 </button>

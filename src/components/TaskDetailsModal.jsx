@@ -57,23 +57,23 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
       <div className={`bg-white shadow-2xl max-w-4xl w-full ${
         window.innerWidth < 768 ? 'modal-mobile rounded-none' : 'rounded-3xl max-h-[90vh]'
       } overflow-y-auto mobile-scroll`}>
-        <div className={window.innerWidth < 768 ? 'modal-content-mobile' : ''}>
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white text-lg md:text-xl">📋</span>
+        <div className={`${window.innerWidth < 768 ? 'modal-content-mobile' : ''} dark:bg-slate-800 light:bg-white`}>
+        <div className="p-8 dark:bg-slate-800 light:bg-white">
+          <div className="flex items-center justify-between mb-6 dark:bg-slate-800 light:bg-white">
+            <div className="flex items-center gap-4 dark:bg-slate-800 light:bg-white">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg dark:bg-slate-800 light:bg-white">
+                <span className="text-white text-lg md:text-xl dark:text-white light:text-white">📋</span>
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-slate-800">Szczegóły zadania</h2>
-                <p className="text-slate-600 text-sm">ID: #{task._id?.slice(-6) || 'N/A'}</p>
+                <h2 className="text-xl md:text-2xl font-bold dark:text-white light:text-slate-800">Szczegóły zadania</h2>
+                <p className="dark:text-slate-400 light:text-slate-600 text-sm">ID: #{task._id?.slice(-6) || 'N/A'}</p>
               </div>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-200"
+              className="p-2 dark:hover:bg-slate-700 light:hover:bg-slate-100 rounded-xl transition-all duration-200"
             >
-              <span className="text-xl md:text-2xl text-slate-400">×</span>
+              <span className="text-xl md:text-2xl dark:text-slate-400 light:text-slate-500">×</span>
             </button>
           </div>
 
