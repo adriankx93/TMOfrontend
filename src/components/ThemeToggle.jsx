@@ -33,9 +33,9 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
-                dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white
-                light:bg-white light:hover:bg-gray-100 light:text-slate-800"
+      className="p-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 
+                dark:focus:ring-blue-400 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white
+                light:bg-white light:hover:bg-gray-100 light:text-slate-800 light:shadow-md"
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       {theme === "dark" ? (

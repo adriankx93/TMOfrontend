@@ -89,33 +89,35 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside className={`
-        ${isMobile ? 'fixed' : 'static'} inset-y-0 left-0 z-50 w-56 md:w-72 bg-gradient-to-br from-[#1b2433] via-[#222e44] to-[#212b3b] border-r border-slate-700/30 
+        ${isMobile ? 'fixed' : 'static'} inset-y-0 left-0 z-50 w-56 md:w-72 border-r
         min-h-screen flex flex-col shadow-2xl transform transition-all duration-300
         ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
         ${isMobile ? 'animate-slide-in-left' : ''}
-        backdrop-blur-xl bg-opacity-95
+        backdrop-blur-xl 
+        dark:bg-gradient-to-br dark:from-[#1b2433] dark:via-[#222e44] dark:to-[#212b3b] dark:border-slate-700/30
+        light:bg-gradient-to-br light:from-white light:via-blue-50/80 light:to-white light:border-slate-200/30
       `}>
         {/* Header */}
-        <div className="p-3 md:p-6 border-b border-slate-700/50">
+        <div className="p-3 md:p-6 border-b dark:border-slate-700/50 light:border-slate-200/50">
           <div className="flex items-center gap-2 md:gap-4 mb-3 md:mb-5">
             <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg md:rounded-2xl flex items-center justify-center font-bold text-white shadow-lg">
               <span className="text-xl md:text-2xl">T</span>
             </div>
             <div>
-              <div className="font-bold text-base md:text-xl text-white">TechSPIE</div>
-              <div className="text-xs md:text-sm text-slate-400 font-medium">
+              <div className="font-bold text-base md:text-xl dark:text-white light:text-slate-800">TechSPIE</div>
+              <div className="text-xs md:text-sm dark:text-slate-400 light:text-slate-600 font-medium">
                 CMMS/CAFM System
               </div>
             </div>
           </div>
-          <div className="p-2 md:p-3 bg-slate-800/80 rounded-lg flex items-center justify-between shadow-inner">
+          <div className="p-2 md:p-3 dark:bg-slate-800/80 light:bg-blue-50/80 rounded-lg flex items-center justify-between shadow-inner">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 dark:bg-green-400 light:bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs md:text-sm font-semibold text-slate-200">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-xs md:text-sm font-semibold dark:text-slate-200 light:text-slate-700">
                 System Online
               </span>
             </div>
-            <div className="text-xs md:text-sm text-blue-400 dark:text-blue-400 light:text-blue-600 font-bold tabular-nums tracking-widest">
+            <div className="text-xs md:text-sm dark:text-blue-400 light:text-blue-600 font-bold tabular-nums tracking-widest">
               {clock}
             </div>
           </div>
@@ -132,8 +134,8 @@ export default function Sidebar() {
                 className={({ isActive }) =>
                   `group flex items-center gap-2 md:gap-4 py-2 md:py-3 px-3 rounded-lg font-medium transition-all duration-200 no-select ${
                     isActive
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                      : "text-slate-300 hover:text-white hover:bg-slate-800/70"
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg dark:from-blue-600 dark:to-purple-600 light:from-blue-500 light:to-purple-500"
+                      : "dark:text-slate-300 light:text-slate-700 dark:hover:text-white light:hover:text-slate-900 dark:hover:bg-slate-800/70 light:hover:bg-blue-50/70"
                   }`
                 }
               >
@@ -148,29 +150,29 @@ export default function Sidebar() {
         </nav>
 
         {/* User Profile */}
-        <div className="p-4 border-t border-slate-700/50 dark:border-slate-700/50 light:border-slate-300/50 mt-auto">
+        <div className="p-4 border-t dark:border-slate-700/50 light:border-slate-300/50 mt-auto">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center font-bold text-white text-lg shadow-lg dark:text-white light:text-white">
               {user?.firstName?.[0]?.toUpperCase() || "U"}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-sm dark:text-white light:text-slate-800 truncate">
+              <div className="font-semibold text-sm truncate dark:text-white light:text-slate-800">
                 {user?.firstName} {user?.lastName}
               </div>
-              <div className="text-xs dark:text-slate-400 light:text-slate-600 truncate">{user?.role}</div>
+              <div className="text-xs truncate dark:text-slate-400 light:text-slate-600">{user?.role}</div>
             </div>
           </div>
           <div className="flex gap-2 mb-3">
             <button 
               onClick={handleLogout}
-              className="flex-1 py-2 px-3 bg-slate-700/60 dark:bg-slate-700/60 light:bg-slate-200/60 rounded-lg text-sm text-slate-300 dark:text-slate-300 light:text-slate-700 text-center hover:bg-slate-600/70 dark:hover:bg-slate-600/70 light:hover:bg-slate-300/70 transition-all duration-200"
+              className="flex-1 py-2 px-3 rounded-lg text-sm text-center transition-all duration-200 dark:bg-slate-700/60 dark:text-slate-300 dark:hover:bg-slate-600/70 light:bg-slate-200/60 light:text-slate-700 light:hover:bg-slate-300/70"
             >
               <span>🔒</span>
               <span className="ml-2">Wyloguj się</span>
             </button>
             <ThemeToggle />
           </div>
-          <div className="text-slate-500 dark:text-slate-500 light:text-slate-400 text-xs text-center">
+          <div className="text-xs text-center dark:text-slate-500 light:text-slate-400">
             © {new Date().getFullYear()} TechSPIE v1.0
           </div>
         </div>

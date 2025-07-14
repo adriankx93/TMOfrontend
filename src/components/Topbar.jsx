@@ -19,10 +19,10 @@ export default function Topbar({ title, subtitle, action }) {
         {/* Title Section - Added min-w-0 to prevent overflow */}
         <div className="flex items-center gap-1 md:gap-6 flex-1 min-w-0">
           <div>
-            <h1 className="text-xs md:text-3xl font-bold dark:text-white light:text-slate-800 mb-0 md:mb-1 truncate">
+            <h1 className="text-xs md:text-3xl font-bold mb-0 md:mb-1 truncate dark:text-white light:text-slate-800">
               {title}
             </h1>
-            <p className="dark:text-slate-400 light:text-slate-600 mobile-micro-text md:text-lg font-medium hidden md:block truncate">
+            <p className="mobile-micro-text md:text-lg font-medium hidden md:block truncate dark:text-slate-400 light:text-slate-600">
               {subtitle}
             </p>
           </div>
@@ -32,8 +32,12 @@ export default function Topbar({ title, subtitle, action }) {
         <div className="flex flex-nowrap gap-1 md:gap-6 items-center">
           {/* Time and Date */}
           <div className="hidden md:block text-right">
-            <div className="text-xl md:text-2xl font-bold dark:text-white light:text-slate-800">{currentTime}</div>
-            <div className="text-sm dark:text-slate-400 light:text-slate-600 capitalize">{currentDate}</div>
+            <div className="text-xl md:text-2xl font-bold dark:text-white light:text-slate-800">
+              {currentTime}
+            </div>
+            <div className="text-sm capitalize dark:text-slate-400 light:text-slate-600">
+              {currentDate}
+            </div>
           </div>
 
           {/* Action Button */}
@@ -42,16 +46,18 @@ export default function Topbar({ title, subtitle, action }) {
           {/* Search */}
           <div className="relative hidden lg:block">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span className="dark:text-slate-400 light:text-slate-500">🔍</span>
+              <span className="dark:text-slate-400 light:text-slate-500">
+                🔍
+              </span>
             </div>
             <input
-              className="input-field pl-12 pr-4 py-3 w-80 dark:placeholder-slate-400 light:placeholder-slate-500"
+              className="input-field pl-12 pr-4 py-3 w-80 dark:placeholder-slate-400 light:placeholder-slate-500 dark:bg-slate-800/80 light:bg-white"
               placeholder="Szukaj w systemie..."
             />
           </div>
 
           {/* Notifications */}
-          <button className="relative p-0.5 md:p-3 glass-card-light hover:bg-slate-600/30 dark:hover:bg-slate-600/30 light:hover:bg-slate-300/30 transition-all duration-200 group">
+          <button className="relative p-0.5 md:p-3 glass-card-light transition-all duration-200 group dark:hover:bg-slate-600/30 light:hover:bg-blue-100/50">
             <span className="text-sm md:text-xl group-hover:scale-110 transition-transform duration-200">N</span>
             <div className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 w-2 h-2 md:w-5 md:h-5 bg-red-500 rounded-full flex items-center justify-center glow-red">
               <span className="text-white mobile-micro-text md:text-xs font-bold">3</span>
@@ -59,7 +65,7 @@ export default function Topbar({ title, subtitle, action }) {
           </button>
 
           {/* Quick Actions */}
-          <button className="p-0.5 md:p-3 glass-card-light hover:bg-slate-600/30 dark:hover:bg-slate-600/30 light:hover:bg-slate-300/30 transition-all duration-200 group hidden lg:block">
+          <button className="p-0.5 md:p-3 glass-card-light transition-all duration-200 group hidden lg:block dark:hover:bg-slate-600/30 light:hover:bg-blue-100/50">
             <span className="text-xl group-hover:scale-110 transition-transform duration-200">U</span>
           </button>
           

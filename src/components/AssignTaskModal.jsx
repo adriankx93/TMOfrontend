@@ -133,11 +133,11 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 dark:bg-black/50 light:bg-black/30">
-      <div className="dark:bg-slate-800 light:bg-white rounded-3xl shadow-2xl max-w-lg w-full relative">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="rounded-3xl shadow-2xl max-w-lg w-full relative dark:bg-slate-800 light:bg-white">
         {/* Loading overlay */}
         {loading && (
-          <div className="absolute inset-0 dark:bg-slate-800/70 light:bg-white/70 z-20 flex items-center justify-center rounded-3xl">
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl dark:bg-slate-800/70 light:bg-white/70">
             <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
           </div>
         )}
@@ -146,7 +146,7 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg dark:text-white light:text-white">
-                <User className="w-7 h-7 text-white" />
+                <User className="w-7 h-7 text-white dark:text-white light:text-white" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold dark:text-white light:text-slate-800">Przypisz zadanie</h2>
@@ -163,7 +163,7 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
           </div>
 
           {/* Task Info */}
-          <div className="mb-6 p-4 dark:bg-slate-700 light:bg-slate-50 rounded-2xl">
+          <div className="mb-6 p-4 rounded-2xl dark:bg-slate-700 light:bg-slate-50">
             <h3 className="font-semibold dark:text-white light:text-slate-800 mb-2">{task.title}</h3>
             <div className="text-sm dark:text-slate-300 light:text-slate-600 space-y-1">
               <div>📍 {task.location}</div>
@@ -177,14 +177,14 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
 
           {/* Success Message */}
           {assignmentSuccess && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-2xl">
+            <div className="mb-6 p-4 rounded-2xl dark:bg-green-900/30 dark:border-green-700 dark:text-green-300 light:bg-green-50 light:border-green-200 light:text-green-800 border">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center dark:bg-green-800 dark:text-green-300 light:bg-green-100 light:text-green-600">
                   <CheckCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-green-800 font-medium">Zadanie przypisane!</div>
-                  <div className="text-green-600 text-sm">
+                  <div className="font-medium dark:text-green-300 light:text-green-800">Zadanie przypisane!</div>
+                  <div className="text-sm dark:text-green-400 light:text-green-600">
                     Przypisano do: <strong>{assignedTechnicianName}</strong>
                   </div>
                 </div>

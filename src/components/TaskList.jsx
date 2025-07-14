@@ -299,11 +299,11 @@ export default function TaskList({ type }) {
                 <div className="flex items-start justify-between mb-1 md:mb-4">
                   <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-3 mb-1 md:mb-3">
-                      <h4 className="font-semibold dark:text-white light:text-slate-800 text-xs md:text-base line-clamp-1 md:line-clamp-2">{task.title}</h4>
+                      <h4 className="font-semibold text-xs md:text-base line-clamp-1 md:line-clamp-2">{task.title}</h4>
                       {getPriorityBadge(task.priority)}
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:flex lg:items-center gap-0.5 md:gap-4 mobile-micro-text md:text-sm dark:text-slate-300 light:text-slate-600 mb-1 md:mb-3">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:flex lg:items-center gap-0.5 md:gap-4 mobile-micro-text md:text-sm mb-1 md:mb-3">
                       <div className="truncate flex items-center gap-1">
                         <User className="w-4 h-4 text-blue-400" />
                         {getTechnicianName(task.assignedTo)}
@@ -326,22 +326,22 @@ export default function TaskList({ type }) {
                     </div>
                     
                     {task.description && (
-                      <p className="mobile-micro-text md:text-sm dark:text-slate-400 light:text-slate-500 mb-1 md:mb-3 line-clamp-1 md:line-clamp-2">{task.description}</p>
+                      <p className="mobile-micro-text md:text-sm text-slate-500 mb-1 md:mb-3 line-clamp-1 md:line-clamp-2">{task.description}</p>
                     )}
 
                     {/* Nowoczesny PROGRESS BAR */}
                     <div className="mb-1 md:mb-3">
-                      <div className="flex justify-between items-center mobile-micro-text md:text-sm dark:text-slate-300 light:text-slate-600 mb-1 md:mb-2">
+                      <div className="flex justify-between items-center mobile-micro-text md:text-sm mb-1 md:mb-2">
                         <span className="inline-flex items-center gap-1">
                           <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
                           Postęp
                         </span>
-                        <span className="inline-flex items-center gap-1 font-semibold dark:text-white light:text-slate-800">
-                          <Sliders className="w-4 h-4 dark:text-slate-300 light:text-slate-500" />
+                        <span className="inline-flex items-center gap-1 font-semibold">
+                          <Sliders className="w-4 h-4" />
                           {localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%
                         </span>
                       </div>
-                      <div className="relative w-full h-3 rounded-lg overflow-hidden dark:bg-slate-700 light:bg-slate-200 shadow-inner">
+                      <div className="relative w-full h-3 rounded-lg overflow-hidden shadow-inner dark:bg-slate-700 light:bg-slate-200">
                         <div
                           className="h-full transition-all duration-700 bg-gradient-to-r from-blue-400 via-emerald-400 to-emerald-600"
                           style={{
@@ -358,7 +358,7 @@ export default function TaskList({ type }) {
                           disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
                         />
                       </div>
-                      <div className="mt-1 mobile-micro-text md:text-xs dark:text-slate-400 light:text-slate-500">
+                      <div className="mt-1 mobile-micro-text md:text-xs text-slate-500">
                         {getProgressComment(localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0))}
                       </div>
                     </div>
@@ -372,7 +372,7 @@ export default function TaskList({ type }) {
                     )}
 
                     {task.createdBy && (
-                      <div className="mobile-micro-text md:text-xs dark:text-slate-500 light:text-slate-600 hidden lg:block">
+                      <div className="mobile-micro-text md:text-xs text-slate-500 hidden lg:block">
                         Utworzone przez: {task.createdBy} • {new Date(task.createdAt).toLocaleString('pl-PL')}
                       </div>
                     )}
@@ -384,7 +384,7 @@ export default function TaskList({ type }) {
                 </div>
 
                 {/* Akcje */}
-                <div className="flex flex-nowrap overflow-x-auto w-full gap-0.5 md:gap-2 pt-1 md:pt-4 border-t dark:border-slate-600 light:border-slate-300">
+                <div className="flex flex-nowrap overflow-x-auto w-full gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-300 dark:border-slate-600">
                   <button 
                     onClick={() => openDetailsModal(task)}
                     className="btn-compact md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-md md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium whitespace-nowrap"
