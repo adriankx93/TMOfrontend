@@ -24,12 +24,12 @@
   /* Light theme */
   --bg-primary: #f0f9ff; 
   --bg-secondary: #f8fafc; 
-  --text-primary: #0f172a; 
-  --text-secondary: #334155; 
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(226, 232, 240, 0.9);
-  --card-bg-light: rgba(255, 255, 255, 0.7);
-  --card-border-light: rgba(226, 232, 240, 0.7);
+  --text-primary: #1e293b; 
+  --text-secondary: #475569; 
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(226, 232, 240, 1);
+  --card-bg-light: rgba(255, 255, 255, 0.85);
+  --card-border-light: rgba(226, 232, 240, 0.9);
   --accent-primary: #2563eb; 
   --accent-secondary: #4338ca; 
   --success: #059669;
@@ -159,7 +159,8 @@
   
   /* Light theme specific overrides */
   .light .glass-card, .light .glass-card-light {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    color: var(--text-primary) !important;
   }
   
   .light .btn-primary {
@@ -168,6 +169,33 @@
   
   .light .input-field {
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Fix for glass card text in light mode */
+  .light .glass-card-light {
+    color: var(--text-primary) !important;
+  }
+  
+  .light .glass-card-light span,
+  .light .glass-card-light div,
+  .light .glass-card-light p,
+  .light .glass-card-light h1,
+  .light .glass-card-light h2,
+  .light .glass-card-light h3,
+  .light .glass-card-light h4 {
+    color: var(--text-primary);
+  }
+  
+  .light .glass-card-light .text-white,
+  .light .glass-card .text-white {
+    color: var(--text-primary) !important;
+  }
+  
+  .light .glass-card-light .text-slate-300,
+  .light .glass-card .text-slate-300,
+  .light .glass-card-light .text-slate-400,
+  .light .glass-card .text-slate-400 {
+    color: var(--text-secondary) !important;
   }
   
   /* Dark theme specific overrides */

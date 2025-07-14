@@ -94,11 +94,11 @@ export default function Sidebar() {
         ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
         ${isMobile ? 'animate-slide-in-left' : ''}
         backdrop-blur-xl 
-        dark:bg-gradient-to-br dark:from-[#1b2433] dark:via-[#222e44] dark:to-[#212b3b] dark:border-slate-700/30
-        light:bg-gradient-to-br light:from-white light:via-blue-50/80 light:to-white light:border-slate-200/30
+        dark:bg-gradient-to-br dark:from-[#1b2433] dark:via-[#222e44] dark:to-[#212b3b] dark:border-slate-700/30 dark:text-white
+        light:bg-gradient-to-br light:from-white light:via-blue-50/80 light:to-white light:border-slate-200/30 light:text-slate-800
       `}>
         {/* Header */}
-        <div className="p-3 md:p-6 border-b dark:border-slate-700/50 light:border-slate-200/50">
+        <div className="p-3 md:p-6 border-b dark:border-slate-700/50 light:border-slate-300/80">
           <div className="flex items-center gap-2 md:gap-4 mb-3 md:mb-5">
             <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg md:rounded-2xl flex items-center justify-center font-bold text-white shadow-lg">
               <span className="text-xl md:text-2xl">T</span>

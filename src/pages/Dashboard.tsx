@@ -485,9 +485,9 @@ export default function Dashboard() {
             <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className={`status-indicator ${dbStatus.connected ? "bg-green-400" : "bg-red-400"}`}></div>
-                <span className="font-semibold text-white text-sm md:text-base">Baza danych</span>
+                <span className="font-semibold dark:text-white light:text-slate-800 text-sm md:text-base">Baza danych</span>
               </div>
-              <span className={`text-xs md:text-sm font-medium truncate ${dbStatus.connected ? "text-green-400" : "text-red-400"}`}>
+              <span className={`text-xs md:text-sm font-medium truncate ${dbStatus.connected ? "dark:text-green-400 light:text-green-600" : "dark:text-red-400 light:text-red-600"}`}>
                 {dbStatus.message}
               </span>
             </div>
@@ -495,25 +495,25 @@ export default function Dashboard() {
             <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="status-indicator bg-green-400"></div>
-                <span className="font-semibold text-white text-sm md:text-base">Google Sheets API</span>
+                <span className="font-semibold dark:text-white light:text-slate-800 text-sm md:text-base">Google Sheets API</span>
               </div>
-              <span className="text-green-400 text-xs md:text-sm font-medium">Synchronizacja aktywna</span>
+              <span className="dark:text-green-400 light:text-green-600 text-xs md:text-sm font-medium">Synchronizacja aktywna</span>
             </div>
 
             <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="status-indicator bg-amber-400"></div>
-                <span className="font-semibold text-white text-sm md:text-base">Powiadomienia</span>
+                <span className="font-semibold dark:text-white light:text-slate-800 text-sm md:text-base">Powiadomienia</span>
               </div>
-              <span className="text-amber-400 text-xs md:text-sm font-medium">Częściowo aktywne</span>
+              <span className="dark:text-amber-400 light:text-amber-600 text-xs md:text-sm font-medium">Częściowo aktywne</span>
             </div>
 
             <div className="flex items-center justify-between p-3 md:p-4 glass-card-light rounded-xl">
               <div className="flex items-center gap-3">
                 <div className="status-indicator bg-green-400"></div>
-                <span className="font-semibold text-white text-sm md:text-base">Monitoring</span>
+                <span className="font-semibold dark:text-white light:text-slate-800 text-sm md:text-base">Monitoring</span>
               </div>
-              <span className="text-green-400 text-xs md:text-sm font-medium">Online</span>
+              <span className="dark:text-green-400 light:text-green-600 text-xs md:text-sm font-medium">Online</span>
             </div>
           </div>
         </div>
