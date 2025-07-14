@@ -62,20 +62,7 @@ export default function Dashboard() {
   }
 };
 
-  const fetchTodayShift = async () => {
-    try {
-      setLoading(true);
-      const data = await sheetsService.getCurrentMonthData();
-      const today = new Date();
-      const todayDay = today.getDate();
-      const shift = data.shifts.find(shift => shift.dayNumber === todayDay);
-      setTodayShift(shift || null);
-    } catch (error) {
-      setTodayShift(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+ 
 
   const calculateStats = () => {
     const activeTechnicians = todayShift ? todayShift.totalWorking : 0;
