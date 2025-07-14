@@ -157,16 +157,35 @@ export const sheetsService = {
       .filter((tech): tech is Technician => tech !== null);
   },
 
-  parseShifts: (technicians: Technician[], dates: any[], shiftsData: any[][], year: number, monthIndex: number): Shift[] => {
+  // ---- POPRAWIONA FUNKCJA! ----
+  parseShifts: (technicians, dates, shiftsData, year, monthIndex) => {
     if (!technicians.length || !dates.length || !shiftsData.length) return [];
+
+    // Excel serial date epoch: 1899-12-30
+    const excelEpoch = new Date(Date.UTC(1899, 11, 30));
 
     return dates
       .map((cell, idx) => {
-        const dayNumber = idx + 1;
-        const date = new Date(year, monthIndex, dayNumber);
+        let date;
+        let dayNumber;
 
-        const shift: Shift = {
-          date: date.toISOString().split('T')[0],
+        // Obsługa dat w różnych formatach
+        if (typeof cell === "string" && cell.includes("-")) {
+          // Tekst w stylu "2025-07-14"
+          date = new Date(cell);
+          dayNumber = date.getDate();
+        } else if (!isNaN(cell) && cell !== "") {
+          // Numer seryjny Excela/Sheets (np. 45132)
+          date = new Date(excelEpoch.getTime() + (Number(cell) * 24 * 60 * 60 * 1000));
+          dayNumber = date.getUTCDate();
+        } else {
+          // fallback: liczba porządkowa (rzadko)
+          date = new Date(year, monthIndex, idx + 1);
+          dayNumber = idx + 1;
+        }
+
+        const shift = {
+          date: date.toISOString().split("T")[0],
           dayNumber,
           dayTechnicians: [],
           nightTechnicians: [],
@@ -175,32 +194,32 @@ export const sheetsService = {
           l4Technicians: []
         };
 
-        technicians.forEach(tech => {
+        technicians.forEach((tech) => {
           const row = shiftsData[tech.shiftRowIndex] || [];
-          const rawValue = (row[idx] || '').toString().trim().toLowerCase();
-          const tokens = rawValue.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
+          const rawValue = (row[idx] || "").toString().trim().toLowerCase();
+          const tokens = rawValue.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
 
-          tokens.forEach(token => {
-            if (token === CONFIG.shiftCodes.fullDay) {
+          tokens.forEach((token) => {
+            if (token === "24") {
               shift.dayTechnicians.push(tech.fullName);
               shift.nightTechnicians.push(tech.fullName);
               return;
             }
 
             switch (token) {
-              case CONFIG.shiftCodes.firstShift:
+              case "1":
                 shift.firstShiftTechnicians.push(tech.fullName);
                 break;
-              case CONFIG.shiftCodes.day:
+              case "d":
                 shift.dayTechnicians.push(tech.fullName);
                 break;
-              case CONFIG.shiftCodes.night:
+              case "n":
                 shift.nightTechnicians.push(tech.fullName);
                 break;
-              case CONFIG.shiftCodes.vacation:
+              case "u":
                 shift.vacationTechnicians.push(tech.fullName);
                 break;
-              case CONFIG.shiftCodes.sickLeave:
+              case "l4":
                 shift.l4Technicians.push(tech.fullName);
                 break;
             }
@@ -214,7 +233,7 @@ export const sheetsService = {
 
         return shift;
       })
-      .filter((shift): shift is Shift => shift !== null)
+      .filter((shift) => shift !== null)
       .sort((a, b) => a.dayNumber - b.dayNumber);
   },
 };
