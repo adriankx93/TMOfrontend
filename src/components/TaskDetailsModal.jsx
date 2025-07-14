@@ -61,8 +61,8 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
         <div className="p-8 dark:bg-slate-800 light:bg-white">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white text-lg md:text-xl">📋</span>
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg dark:text-white light:text-white">
+                <span className="text-lg md:text-xl">📋</span>
               </div>
               <div>
                 <h2 className="text-xl md:text-2xl font-bold dark:text-white light:text-slate-800">Szczegóły zadania</h2>
@@ -81,7 +81,7 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
             {/* Main Info */}
             <div className="lg:col-span-2 space-y-6">
               {/* Title and Status */}
-              <div>
+              <div className="dark:text-white light:text-slate-800">
                 <div className="flex items-start justify-between mb-4">
                   <h3 className="text-lg md:text-xl font-bold text-slate-800 flex-1 mr-2">{task.title}</h3>
                   <div className="flex flex-col md:flex-row gap-2">
@@ -95,38 +95,38 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
                 </div>
                 
                 {task.description && (
-                  <p className="text-slate-600 bg-slate-50 p-3 md:p-4 rounded-xl text-sm md:text-base">{task.description}</p>
+                  <p className="dark:text-slate-300 light:text-slate-600 dark:bg-slate-700/50 light:bg-slate-50 p-3 md:p-4 rounded-xl text-sm md:text-base">{task.description}</p>
                 )}
               </div>
 
               {/* Task Details Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 dark:text-white light:text-slate-800">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Lokalizacja</label>
-                    <div className="p-3 bg-slate-50 rounded-xl text-slate-800 text-sm md:text-base break-words">{task.location}</div>
+                    <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-1">Lokalizacja</label>
+                    <div className="p-3 dark:bg-slate-700/50 light:bg-slate-50 rounded-xl dark:text-slate-300 light:text-slate-800 text-sm md:text-base break-words">{task.location}</div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Przypisany technik</label>
-                    <div className="p-3 bg-slate-50 rounded-xl text-slate-800 text-sm md:text-base">{getTechnicianName(task.assignedTo)}</div>
+                    <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-1">Przypisany technik</label>
+                    <div className="p-3 dark:bg-slate-700/50 light:bg-slate-50 rounded-xl dark:text-slate-300 light:text-slate-800 text-sm md:text-base">{getTechnicianName(task.assignedTo)}</div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Zmiana</label>
-                    <div className="p-3 bg-slate-50 rounded-xl text-slate-800 text-sm md:text-base">{task.shift || task.assignedShift || 'Brak zmiany'}</div>
+                    <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-1">Zmiana</label>
+                    <div className="p-3 dark:bg-slate-700/50 light:bg-slate-50 rounded-xl dark:text-slate-300 light:text-slate-800 text-sm md:text-base">{task.shift || task.assignedShift || 'Brak zmiany'}</div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Szacowany czas</label>
-                    <div className="p-3 bg-slate-50 rounded-xl text-slate-800 text-sm md:text-base">{task.estimatedDuration} minut</div>
+                    <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-1">Szacowany czas</label>
+                    <div className="p-3 dark:bg-slate-700/50 light:bg-slate-50 rounded-xl dark:text-slate-300 light:text-slate-800 text-sm md:text-base">{task.estimatedDuration} minut</div>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Termin wykonania</label>
-                    <div className="p-3 bg-slate-50 rounded-xl text-slate-800 text-sm md:text-base">
+                    <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-1">Termin wykonania</label>
+                    <div className="p-3 dark:bg-slate-700/50 light:bg-slate-50 rounded-xl dark:text-slate-300 light:text-slate-800 text-sm md:text-base">
                       {task.dueDate 
                         ? new Date(task.dueDate).toLocaleDateString('pl-PL')
                         : 'Bez terminu'
@@ -135,8 +135,8 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Data utworzenia</label>
-                    <div className="p-3 bg-slate-50 rounded-xl text-slate-800 text-sm md:text-base">
+                    <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-1">Data utworzenia</label>
+                    <div className="p-3 dark:bg-slate-700/50 light:bg-slate-50 rounded-xl dark:text-slate-300 light:text-slate-800 text-sm md:text-base">
                       {new Date(task.createdAt).toLocaleString('pl-PL')}
                     </div>
                   </div>
@@ -146,13 +146,13 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
               {/* Progress Bar */}
               {task.progress !== undefined && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Postęp wykonania</label>
-                  <div className="bg-slate-50 p-4 rounded-xl">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-slate-600">Ukończono</span>
-                      <span className="font-semibold text-slate-800">{task.progress || 0}%</span>
+                  <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-2">Postęp wykonania</label>
+                  <div className="dark:bg-slate-700/50 light:bg-slate-50 p-4 rounded-xl">
+                    <div className="flex justify-between text-sm mb-2 dark:text-slate-300 light:text-slate-700">
+                      <span className="dark:text-slate-300 light:text-slate-600">Ukończono</span>
+                      <span className="font-semibold dark:text-white light:text-slate-800">{task.progress || 0}%</span>
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-3">
+                    <div className="w-full dark:bg-slate-600 light:bg-slate-200 rounded-full h-3">
                       <div 
                         className="bg-gradient-to-r from-orange-500 to-red-600 h-3 rounded-full transition-all duration-300"
                         style={{ width: `${task.progress || 0}%` }}
@@ -165,18 +165,18 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
               {/* Special Status Info */}
               {task.status === 'completed' && task.completedAt && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Szczegóły wykonania</label>
-                  <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
-                    <div className="text-sm text-emerald-800 mb-2">
+                  <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-2">Szczegóły wykonania</label>
+                  <div className="dark:bg-emerald-900/30 light:bg-emerald-50 dark:border-emerald-700/50 light:border-emerald-200 border p-4 rounded-xl">
+                    <div className="text-sm dark:text-emerald-300 light:text-emerald-800 mb-2">
                       <strong>Zakończono:</strong> {new Date(task.completedAt).toLocaleString('pl-PL')}
                     </div>
                     {task.completedBy && (
-                      <div className="text-sm text-emerald-800 mb-2">
+                      <div className="text-sm dark:text-emerald-300 light:text-emerald-800 mb-2">
                         <strong>Przez:</strong> {task.completedBy}
                       </div>
                     )}
                     {task.notes && (
-                      <div className="text-sm text-emerald-700">
+                      <div className="text-sm dark:text-emerald-400 light:text-emerald-700">
                         <strong>Notatki:</strong> {task.notes}
                       </div>
                     )}
@@ -186,16 +186,16 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
 
               {task.status === 'pool' && (task.poolReason || task.missingMaterials) && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">Powód przeniesienia do puli</label>
-                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                    <div className="text-sm text-amber-800">{task.poolReason}</div>
+                  <label className="block text-sm font-semibold dark:text-slate-300 light:text-slate-700 mb-2">Powód przeniesienia do puli</label>
+                  <div className="dark:bg-amber-900/30 light:bg-amber-50 dark:border-amber-700/50 light:border-amber-200 border p-4 rounded-xl">
+                    <div className="text-sm dark:text-amber-300 light:text-amber-800">{task.poolReason}</div>
                     {task.missingMaterials && (
-                      <div className="text-sm text-amber-700 mt-2">
+                      <div className="text-sm dark:text-amber-400 light:text-amber-700 mt-2">
                         <strong>Brakujące materiały:</strong> {task.missingMaterials}
                       </div>
                     )}
                     {task.movedToPoolAt && (
-                      <div className="text-xs text-amber-600 mt-2">
+                      <div className="text-xs dark:text-amber-500 light:text-amber-600 mt-2">
                         Przeniesiono: {new Date(task.movedToPoolAt).toLocaleString('pl-PL')}
                         {task.movedToPoolBy && ` przez ${task.movedToPoolBy}`}
                       </div>
@@ -206,22 +206,22 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
             </div>
 
             {/* History Sidebar */}
-            <div className="space-y-6">
-              <div className="bg-slate-50 rounded-2xl p-4 md:p-6">
-                <h3 className="text-lg font-bold text-slate-800 mb-4">Historia zmian</h3>
+            <div className="space-y-6 dark:text-white light:text-slate-800">
+              <div className="dark:bg-slate-700/50 light:bg-slate-50 rounded-2xl p-4 md:p-6">
+                <h3 className="text-lg font-bold dark:text-white light:text-slate-800 mb-4">Historia zmian</h3>
                 
                 {task.history && task.history.length > 0 ? (
                   <div className="space-y-3 max-h-64 md:max-h-96 overflow-y-auto">
                     {task.history.slice().reverse().map((entry, index) => (
-                      <div key={index} className="bg-white p-3 rounded-xl border border-slate-200">
-                        <div className="flex items-center gap-2 mb-1">
+                      <div key={index} className="dark:bg-slate-800 light:bg-white p-3 rounded-xl dark:border-slate-600 light:border-slate-200 border">
+                        <div className="flex items-center gap-2 mb-1 dark:text-white light:text-slate-800">
                           <span className="text-xs md:text-sm">{getActionLabel(entry.action)}</span>
                         </div>
-                        <div className="text-xs text-slate-600 mb-2 font-medium">
+                        <div className="text-xs dark:text-slate-400 light:text-slate-600 mb-2 font-medium">
                           {entry.user} • {new Date(entry.timestamp).toLocaleString('pl-PL')}
                         </div>
                         {entry.details && (
-                          <div className="text-xs text-slate-700 break-words bg-slate-50 p-2 rounded border-l-2 border-blue-200">
+                          <div className="text-xs dark:text-slate-300 light:text-slate-700 break-words dark:bg-slate-700/50 light:bg-slate-50 p-2 rounded dark:border-blue-700 light:border-blue-200 border-l-2">
                             {entry.details}
                           </div>
                         )}
@@ -229,7 +229,7 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-4 text-slate-500">
+                  <div className="text-center py-4 dark:text-slate-400 light:text-slate-500">
                     Brak historii zmian
                   </div>
                 )}
@@ -237,16 +237,16 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
 
               {/* Creator Info */}
               {task.createdBy && (
-                <div className="bg-slate-50 rounded-2xl p-4 md:p-6">
-                  <h3 className="text-lg font-bold text-slate-800 mb-4">Informacje o zadaniu</h3>
-                  <div className="space-y-2 text-sm">
-                    <div><strong>Utworzone przez:</strong> {task.createdBy}</div>
-                    <div className="break-words"><strong>Data utworzenia:</strong> {new Date(task.createdAt).toLocaleString('pl-PL')}</div>
+                <div className="dark:bg-slate-700/50 light:bg-slate-50 rounded-2xl p-4 md:p-6">
+                  <h3 className="text-lg font-bold dark:text-white light:text-slate-800 mb-4">Informacje o zadaniu</h3>
+                  <div className="space-y-2 text-sm dark:text-slate-300 light:text-slate-700">
+                    <div><strong className="dark:text-white light:text-slate-800">Utworzone przez:</strong> {task.createdBy}</div>
+                    <div className="break-words"><strong className="dark:text-white light:text-slate-800">Data utworzenia:</strong> {new Date(task.createdAt).toLocaleString('pl-PL')}</div>
                     {task.lastModified && (
                       <>
-                        <div className="break-words"><strong>Ostatnia modyfikacja:</strong> {new Date(task.lastModified).toLocaleString('pl-PL')}</div>
+                        <div className="break-words"><strong className="dark:text-white light:text-slate-800">Ostatnia modyfikacja:</strong> {new Date(task.lastModified).toLocaleString('pl-PL')}</div>
                         {task.lastModifiedBy && (
-                          <div><strong>Przez:</strong> {task.lastModifiedBy}</div>
+                          <div><strong className="dark:text-white light:text-slate-800">Przez:</strong> {task.lastModifiedBy}</div>
                         )}
                       </>
                     )}
@@ -256,10 +256,10 @@ export default function TaskDetailsModal({ task, technicians, onClose }) {
             </div>
           </div>
 
-          <div className="flex gap-4 pt-6 border-t border-slate-200 mt-8">
+          <div className="flex gap-4 pt-6 dark:border-slate-700 light:border-slate-200 border-t mt-8">
             <button
               onClick={onClose}
-              className="flex-1 py-3 md:py-4 bg-slate-100 text-slate-700 rounded-2xl font-semibold hover:bg-slate-200 transition-all duration-200"
+              className="flex-1 py-3 md:py-4 dark:bg-slate-700 light:bg-slate-100 dark:text-slate-300 light:text-slate-700 rounded-2xl font-semibold dark:hover:bg-slate-600 light:hover:bg-slate-200 transition-all duration-200"
             >
               Zamknij
             </button>

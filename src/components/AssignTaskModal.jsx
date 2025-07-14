@@ -134,10 +134,10 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="rounded-3xl shadow-2xl max-w-lg w-full relative dark:bg-slate-800 light:bg-white">
+      <div className="rounded-3xl shadow-2xl max-w-lg w-full relative dark:bg-slate-800 light:bg-white border dark:border-slate-700 light:border-slate-200">
         {/* Loading overlay */}
         {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl dark:bg-slate-800/70 light:bg-white/70">
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-3xl dark:bg-slate-800/70 light:bg-white/70 backdrop-blur-sm">
             <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
           </div>
         )}
@@ -163,7 +163,7 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
           </div>
 
           {/* Task Info */}
-          <div className="mb-6 p-4 rounded-2xl dark:bg-slate-700 light:bg-slate-50">
+          <div className="mb-6 p-4 rounded-2xl dark:bg-slate-700 light:bg-slate-50 dark:text-white light:text-slate-800">
             <h3 className="font-semibold dark:text-white light:text-slate-800 mb-2">{task.title}</h3>
             <div className="text-sm dark:text-slate-300 light:text-slate-600 space-y-1">
               <div>📍 {task.location}</div>
@@ -212,9 +212,9 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                 <div className="space-y-3">
                   {availableTechnicians.map((tech) => (
                     <label 
-                      key={tech._id} 
+                      key={tech._id || tech.id} 
                       className={`flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all duration-200 relative ${
-                        selectedTechnician === tech._id 
+                        selectedTechnician === (tech._id || tech.id) 
                           ? 'dark:border-green-500 light:border-green-500 dark:bg-green-900/30 light:bg-green-50 dark:ring-green-700 light:ring-green-200 ring-2'
                           : 'dark:border-slate-600 light:border-slate-200 dark:hover:border-slate-500 light:hover:border-slate-300'
                       }`}
@@ -222,8 +222,8 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                       <input
                         type="radio"
                         name="technician"
-                        value={tech._id}
-                        checked={selectedTechnician === tech._id}
+                        value={tech._id || tech.id}
+                        checked={selectedTechnician === (tech._id || tech.id)}
                         onChange={(e) => setSelectedTechnician(e.target.value)}
                         className="sr-only"
                         disabled={loading}
@@ -232,18 +232,19 @@ export default function AssignTaskModal({ task, onClose, onAssigned }) {
                       <div className="flex items-center gap-3 flex-1">
                         <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold relative">
                           <span>
-                            {tech.firstName?.[0]}{tech.lastName?.[0]}
+                            {tech.firstName?.[0] || tech.fullName?.split(' ')?.[0]?.[0] || '?'}
+                            {tech.lastName?.[0] || tech.fullName?.split(' ')?.[1]?.[0] || '?'}
                           </span>
                           <span className="absolute -top-1 -right-2 text-xs">
                             {tech.shift === 'Nocna' ? '🌙' : tech.shift === 'Dzienna' ? '☀️' : ''}
                           </span>
                         </div>
                         <div>
-                          <div className="font-semibold dark:text-white light:text-slate-800">
-                            {tech.firstName} {tech.lastName}
+                          <div className="font-semibold dark:text-white light:text-slate-800 line-clamp-1">
+                            {tech.firstName && tech.lastName ? `${tech.firstName} ${tech.lastName}` : tech.fullName || 'Nieznany technik'}
                           </div>
-                          <div className="text-sm dark:text-slate-400 light:text-slate-600 flex flex-col">
-                            <span>{tech.specialization} • {tech.shift}</span>
+                          <div className="text-sm dark:text-slate-400 light:text-slate-700 flex flex-col">
+                            <span>{tech.specialization || 'Ogólne'} • {tech.shift || 'Nieznana zmiana'}</span>
                             <span className="text-xs text-blue-600">{tech.currentTasks || 0} zadań</span>
                           </div>
                         </div>

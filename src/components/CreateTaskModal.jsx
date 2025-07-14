@@ -150,12 +150,12 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 md:w-12 md:h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue">
-                <span className="text-white text-lg md:text-xl">📋</span>
+              <div className="w-10 h-10 md:w-12 md:h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg glow-blue dark:text-white light:text-white">
+                <span className="text-lg md:text-xl">📋</span>
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-white">Nowe zadanie</h2>
-                <p className="text-slate-400 text-sm">Utwórz zadanie dla zespołu technicznego</p>
+                <h2 className="text-xl md:text-2xl font-bold dark:text-white light:text-slate-800">Nowe zadanie</h2>
+                <p className="text-sm dark:text-slate-400 light:text-slate-600">Utwórz zadanie dla zespołu technicznego</p>
               </div>
             </div>
             <button 
@@ -169,7 +169,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
 
           {error && (
             <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-2xl">
-              <div className="text-red-400 font-medium">{error}</div>
+              <div className="dark:text-red-400 light:text-red-600 font-medium">{error}</div>
             </div>
           )}
 
@@ -177,7 +177,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
             {/* Podstawowe informacje */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                <label className="block text-sm font-semibold dark:text-slate-200 light:text-slate-700 mb-2">
                   Tytuł zadania *
                 </label>
                 <input
@@ -193,7 +193,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                <label className="block text-sm font-semibold dark:text-slate-200 light:text-slate-700 mb-2">
                   Opis zadania
                 </label>
                 <textarea
@@ -208,7 +208,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                <label className="block text-sm font-semibold dark:text-slate-200 light:text-slate-700 mb-2">
                   Priorytet *
                 </label>
                 <select
@@ -227,7 +227,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-200 mb-2">
+                <label className="block text-sm font-semibold dark:text-slate-200 light:text-slate-700 mb-2">
                   Lokalizacja
                 </label>
                 <select
@@ -259,8 +259,8 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
             </div>
 
             {/* Szybkie przypisanie */}
-            <div className="p-3 md:p-4 bg-blue-500/20 rounded-2xl border border-blue-500/30">
-              <h3 className="font-semibold text-blue-300 mb-3">⚡ Szybkie przypisanie</h3>
+            <div className="p-3 md:p-4 dark:bg-blue-500/20 light:bg-blue-50 rounded-2xl dark:border-blue-500/30 light:border-blue-200">
+              <h3 className="font-semibold dark:text-blue-300 light:text-blue-700 mb-3">⚡ Szybkie przypisanie</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -295,11 +295,11 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
             {/* Zaawansowane przypisanie */}
             {!formData.quickShift && (
               <div className="space-y-4">
-                <h3 className="font-semibold text-slate-200">📅 Zaawansowane przypisanie</h3>
+                <h3 className="font-semibold dark:text-slate-200 light:text-slate-700">📅 Zaawansowane przypisanie</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-200 mb-2">
+                    <label className="block text-sm font-semibold dark:text-slate-200 light:text-slate-700 mb-2">
                       Data wykonania
                     </label>
                     <input
@@ -314,7 +314,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-slate-200 mb-2">
+                    <label className="block text-sm font-semibold dark:text-slate-200 light:text-slate-700 mb-2">
                       Zmiana
                     </label>
                     <select
@@ -331,7 +331,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-200 mb-2">
+                  <label className="block text-sm font-semibold dark:text-slate-200 light:text-slate-700 mb-2">
                     Typ przypisania
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -367,7 +367,7 @@ export default function CreateTaskModal({ onClose, onTaskCreated }) {
 
                 {formData.assignmentType === "technician" && (
                   <div>
-                    <label className="block text-sm font-semibold text-slate-200 mb-2">
+                    <label className="block text-sm font-semibold dark:text-slate-200 light:text-slate-700 mb-2">
                       Wybierz technika
                     </label>
                     <select

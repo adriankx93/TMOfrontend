@@ -286,62 +286,62 @@ export default function TaskList({ type }) {
   return (
     <>
       <div className="glass-card p-2 md:p-8">
-        <div className="space-y-4">
+        <div className="space-y-4 dark:text-white light:text-slate-800">
           {filteredTasks.length === 0 ? (
-            <div className="text-center py-6 md:py-12 text-slate-400">
-              <div className="text-3xl md:text-6xl mb-2 md:mb-4">📋</div>
-              <h3 className="text-sm md:text-xl font-semibold text-slate-300 mb-1 md:mb-2">Brak zadań</h3>
-              <p className="text-xs md:text-base text-slate-400">W tej kategorii nie ma jeszcze żadnych zadań.</p>
+            <div className="text-center py-6 md:py-12 dark:text-slate-400 light:text-slate-500">
+              <div className="text-3xl md:text-6xl mb-2 md:mb-4 dark:text-slate-400 light:text-slate-500">📋</div>
+              <h3 className="text-sm md:text-xl font-semibold dark:text-slate-300 light:text-slate-600 mb-1 md:mb-2">Brak zadań</h3>
+              <p className="text-xs md:text-base dark:text-slate-400 light:text-slate-500">W tej kategorii nie ma jeszcze żadnych zadań.</p>
             </div>
           ) : (
             filteredTasks.map((task) => (
-              <div key={task._id} className="p-1.5 md:p-6 glass-card-light rounded-md md:rounded-2xl hover:bg-slate-600/30 transition-all duration-200">
+              <div key={task._id} className="p-1.5 md:p-6 glass-card-light rounded-md md:rounded-2xl dark:hover:bg-slate-600/30 light:hover:bg-blue-50/80 transition-all duration-200">
                 <div className="flex items-start justify-between mb-1 md:mb-4">
                   <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-3 mb-1 md:mb-3">
-                      <h4 className="font-semibold text-xs md:text-base line-clamp-1 md:line-clamp-2">{task.title}</h4>
+                      <h4 className="font-semibold text-xs md:text-base line-clamp-1 md:line-clamp-2 dark:text-white light:text-slate-800">{task.title}</h4>
                       {getPriorityBadge(task.priority)}
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:flex lg:items-center gap-0.5 md:gap-4 mobile-micro-text md:text-sm mb-1 md:mb-3">
-                      <div className="truncate flex items-center gap-1">
-                        <User className="w-4 h-4 text-blue-400" />
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:flex lg:items-center gap-0.5 md:gap-4 mobile-micro-text md:text-sm mb-1 md:mb-3 dark:text-slate-300 light:text-slate-700">
+                      <div className="truncate flex items-center gap-1 dark:text-slate-300 light:text-slate-700">
+                        <User className="w-4 h-4 dark:text-blue-400 light:text-blue-600" />
                         {getTechnicianName(task.assignedTo)}
                       </div>
-                      <div className="truncate flex items-center gap-1">
-                        <ClipboardList className="w-4 h-4 text-purple-400" />
+                      <div className="truncate flex items-center gap-1 dark:text-slate-300 light:text-slate-700">
+                        <ClipboardList className="w-4 h-4 dark:text-purple-400 light:text-purple-600" />
                         {task.location}
                       </div>
-                      <div className="text-mobile-xs md:text-sm flex items-center gap-1">
-                        <PauseCircle className="w-4 h-4 text-amber-400" />
+                      <div className="text-mobile-xs md:text-sm flex items-center gap-1 dark:text-slate-300 light:text-slate-700">
+                        <PauseCircle className="w-4 h-4 dark:text-amber-400 light:text-amber-600" />
                         {task.dueDate 
                           ? new Date(task.dueDate).toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' })
                           : 'Bez terminu'
                         }
                       </div>
-                      <div className="hidden md:block flex items-center gap-1">
-                        <ClipboardList className="w-4 h-4 text-slate-400" />
+                      <div className="hidden md:flex items-center gap-1 dark:text-slate-300 light:text-slate-700">
+                        <ClipboardList className="w-4 h-4 dark:text-slate-400 light:text-slate-600" />
                         {task.category}
                       </div>
                     </div>
                     
                     {task.description && (
-                      <p className="mobile-micro-text md:text-sm text-slate-500 mb-1 md:mb-3 line-clamp-1 md:line-clamp-2">{task.description}</p>
+                      <p className="mobile-micro-text md:text-sm dark:text-slate-500 light:text-slate-600 mb-1 md:mb-3 line-clamp-1 md:line-clamp-2">{task.description}</p>
                     )}
 
                     {/* Nowoczesny PROGRESS BAR */}
                     <div className="mb-1 md:mb-3">
-                      <div className="flex justify-between items-center mobile-micro-text md:text-sm mb-1 md:mb-2">
-                        <span className="inline-flex items-center gap-1">
-                          <Loader2 className="w-3 h-3 animate-spin text-blue-400" />
-                          Postęp
+                      <div className="flex justify-between items-center mobile-micro-text md:text-sm mb-1 md:mb-2 dark:text-slate-300 light:text-slate-700">
+                        <span className="inline-flex items-center gap-1 dark:text-slate-300 light:text-slate-700">
+                          <Loader2 className="w-3 h-3 animate-spin dark:text-blue-400 light:text-blue-600" />
+                          <span className="dark:text-slate-300 light:text-slate-700">Postęp</span>
                         </span>
-                        <span className="inline-flex items-center gap-1 font-semibold">
+                        <span className="inline-flex items-center gap-1 font-semibold dark:text-slate-300 light:text-slate-700">
                           <Sliders className="w-4 h-4" />
                           {localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0)}%
                         </span>
                       </div>
-                      <div className="relative w-full h-3 rounded-lg overflow-hidden shadow-inner dark:bg-slate-700 light:bg-slate-200">
+                      <div className="relative w-full h-3 rounded-lg overflow-hidden shadow-inner dark:bg-slate-700 light:bg-slate-200/80">
                         <div
                           className="h-full transition-all duration-700 bg-gradient-to-r from-blue-400 via-emerald-400 to-emerald-600"
                           style={{
@@ -358,21 +358,21 @@ export default function TaskList({ type }) {
                           disabled={loading || !['assigned', 'in_progress'].includes(task.status)}
                         />
                       </div>
-                      <div className="mt-1 mobile-micro-text md:text-xs text-slate-500">
+                      <div className="mt-1 mobile-micro-text md:text-xs dark:text-slate-500 light:text-slate-600">
                         {getProgressComment(localProgress[task._id] !== undefined ? localProgress[task._id] : (task.progress || 0))}
                       </div>
                     </div>
 
                     {task.status === "handover" && (task.handoverNotes || task.handoverDate || task.handoverTechnician) && (
-                      <div className="bg-cyan-50 text-cyan-700 px-3 py-2 rounded-md border border-cyan-200 text-xs mb-2 mt-1">
+                      <div className="bg-cyan-50 text-cyan-700 px-3 py-2 rounded-md border border-cyan-200 text-xs mb-2 mt-1 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-700/50">
                         <b>Przekazane:</b> {task.handoverDate && <>do {new Date(task.handoverDate).toLocaleDateString('pl-PL')}</>}
                         {task.handoverTechnician && <> dla: <b>{getTechnicianName(task.handoverTechnician)}</b></>}
-                        {task.handoverNotes && <div className="mt-1 text-cyan-900">{task.handoverNotes}</div>}
+                        {task.handoverNotes && <div className="mt-1 dark:text-cyan-300 light:text-cyan-900">{task.handoverNotes}</div>}
                       </div>
                     )}
 
                     {task.createdBy && (
-                      <div className="mobile-micro-text md:text-xs text-slate-500 hidden lg:block">
+                      <div className="mobile-micro-text md:text-xs dark:text-slate-500 light:text-slate-600 hidden lg:block">
                         Utworzone przez: {task.createdBy} • {new Date(task.createdAt).toLocaleString('pl-PL')}
                       </div>
                     )}
@@ -387,14 +387,14 @@ export default function TaskList({ type }) {
                 <div className="flex flex-nowrap overflow-x-auto w-full gap-0.5 md:gap-2 pt-1 md:pt-4 border-t border-slate-300 dark:border-slate-600">
                   <button 
                     onClick={() => openDetailsModal(task)}
-                    className="btn-compact md:px-4 md:py-2 bg-blue-500/20 text-blue-400 rounded-md md:rounded-xl hover:bg-blue-500/30 transition-all duration-200 font-medium whitespace-nowrap"
+                    className="btn-compact md:px-4 md:py-2 dark:bg-blue-500/20 light:bg-blue-100 dark:text-blue-400 light:text-blue-700 rounded-md md:rounded-xl dark:hover:bg-blue-500/30 light:hover:bg-blue-200 transition-all duration-200 font-medium whitespace-nowrap"
                   >
                     <span className="md:hidden text-xs">S</span>
                     <span className="hidden md:inline text-sm">Szczegóły</span>
                   </button>
                   <button 
                     onClick={() => openEditModal(task)}
-                    className="btn-compact md:px-4 md:py-2 bg-purple-500/20 text-purple-400 rounded-md md:rounded-xl hover:bg-purple-500/30 transition-all duration-200 font-medium whitespace-nowrap"
+                    className="btn-compact md:px-4 md:py-2 dark:bg-purple-500/20 light:bg-purple-100 dark:text-purple-400 light:text-purple-700 rounded-md md:rounded-xl dark:hover:bg-purple-500/30 light:hover:bg-purple-200 transition-all duration-200 font-medium whitespace-nowrap"
                   >
                     <span className="md:hidden text-xs">E</span>
                     <span className="hidden md:inline text-sm">Edytuj</span>
