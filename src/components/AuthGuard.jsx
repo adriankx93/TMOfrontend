@@ -3,26 +3,22 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { authService } from "../services/authService";
 
 export default function AuthGuard({ children }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const token = authService.getToken();
-    setIsLoading(false);
+    const publicPaths = ["/login", "/register", "/reset-password"];
 
-    // Jeśli nie ma tokena, przekieruj do login
-    if (
-      !token &&
-      !location.pathname.includes("/login") &&
-      !location.pathname.includes("/register")
-    ) {
-      navigate("/login", { state: { from: location.pathname } });
+    if (!token && !publicPaths.some((p) => location.pathname.startsWith(p))) {
+      navigate("/login", { replace: true, state: { from: location.pathname } });
+    } else {
+      setChecked(true);
     }
-    // jeśli masz token, nic nie rób
   }, [location.pathname, navigate]);
 
-  if (isLoading) {
+  if (!checked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500"></div>
@@ -30,16 +26,5 @@ export default function AuthGuard({ children }) {
     );
   }
 
-  // Jeżeli jesteś na login/register lub masz token, pokaż dzieci
-  const token = authService.getToken();
-  if (
-    location.pathname.includes("/login") ||
-    location.pathname.includes("/register") ||
-    token
-  ) {
-    return children;
-  }
-
-  // (Teoretycznie już przekierowało)
-  return null;
+  return children;
 }
