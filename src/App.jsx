@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import AppLayout from "./layouts/AppLayout";
@@ -26,6 +26,7 @@ import NotebookPage from "./pages/NotebookPage";
 import TrendAnalysisPage from "./pages/TrendAnalysisPage";
 import ProtokolGenerator from "./components/ProtokolGenerator";
 import LoginPage from "./pages/LoginPage";
+// import RegisterPage from "./pages/RegisterPage"; // Jeśli nie masz rejestracji, zakomentuj
 
 export default function App() {
   const [isMobile, setIsMobile] = useState(false);
@@ -43,7 +44,7 @@ export default function App() {
     <div className="bg-slate-900 min-h-screen w-full overflow-x-hidden">
       <Routes>
         {/* Layout Z SIDEBAR */}
-        <Route element={<AppLayout><Outlet /></AppLayout>}>
+        <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/zadania" element={<TasksPage />} />
           <Route path="/budynki" element={<BuildingsPage />} />
@@ -68,9 +69,9 @@ export default function App() {
         </Route>
 
         {/* Layout BEZ SIDEBAR */}
-        <Route element={<AuthLayout><Outlet /></AuthLayout>}>
+        <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          {/* <Route path="/register" element={<RegisterPage />} /> */}
         </Route>
       </Routes>
     </div>
