@@ -19,6 +19,17 @@ export default function Dashboard() {
     poolTasks: 0
   });
 
+  const checkDatabaseStatus = async () => {
+    try {
+      // Simulate database connection check
+      // In a real app, this would make an actual API call to check DB status
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setDbStatus({ connected: true, message: "Połączono" });
+    } catch (error) {
+      setDbStatus({ connected: false, message: "Błąd połączenia" });
+    }
+  };
+
   useEffect(() => {
     fetchTodayShift();
     fetchWeatherData();
