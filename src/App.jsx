@@ -1,6 +1,5 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
-
 import AppLayout from "./layouts/AppLayout";
 import AuthLayout from "./layouts/AuthLayout";
 
@@ -26,7 +25,7 @@ import NotebookPage from "./pages/NotebookPage";
 import TrendAnalysisPage from "./pages/TrendAnalysisPage";
 import ProtokolGenerator from "./components/ProtokolGenerator";
 import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+// import RegisterPage from "./pages/RegisterPage";
 
 export default function App() {
   const [isMobile, setIsMobile] = useState(false);
@@ -71,7 +70,7 @@ export default function App() {
         {/* Layout BEZ SIDEBAR */}
         <Route element={<AuthLayout><Outlet /></AuthLayout>}>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          {/* <Route path="/register" element={<RegisterPage />} /> */}
         </Route>
       </Routes>
     </div>

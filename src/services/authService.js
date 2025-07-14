@@ -1,90 +1,40 @@
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
 export const authService = {
-  login: async (email, password) => {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/auth/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+  async login(email, password) {
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
+        email,
+        password,
+      });
+      const { token, user } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      return user;
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        throw new Error(err.response.data.message);
       }
-    );
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Błąd logowania");
+      throw new Error("Błąd logowania.");
     }
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    return data.user;
   },
 
-  register: async (userData) => {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/auth/register`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      }
-    );
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Błąd rejestracji");
-    }
-    return data;
-  },
-
-  logout: () => {
+  logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   },
 
-  getCurrentUser: () => {
-    const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+  getToken() {
+    return localStorage.getItem("token");
   },
 
-  isAuthenticated: () => {
-    return !!localStorage.getItem("token");
-  },
-
-  updateProfile: async (userData) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/auth/profile`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(userData),
-      }
-    );
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Błąd aktualizacji profilu");
+  getUser() {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
     }
-    localStorage.setItem("user", JSON.stringify(data));
-    return data;
-  },
-
-  changePassword: async (oldPassword, newPassword) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/auth/profile/password`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ oldPassword, newPassword }),
-      }
-    );
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Błąd zmiany hasła");
-    }
-    return data;
   },
 };
