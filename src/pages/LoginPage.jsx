@@ -28,18 +28,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 overflow-hidden">
-      {/* Dynamic background gradient blob */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-10%] right-[-15%] w-[420px] h-[420px] rounded-full bg-gradient-to-br from-orange-500 via-red-600 to-purple-700 blur-3xl opacity-30 animate-spin-slow" />
-        <div className="absolute bottom-[-18%] left-[-12%] w-[350px] h-[350px] rounded-full bg-gradient-to-br from-blue-500 via-sky-400 to-cyan-400 blur-3xl opacity-25 animate-spin-slow" />
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-[#10151f] via-[#182338] to-[#242b3d] overflow-hidden">
+      {/* --- Efekt glass grid --- */}
+      <svg className="absolute inset-0 w-full h-full opacity-15 pointer-events-none select-none z-0" viewBox="0 0 1920 1080">
+        <defs>
+          <pattern id="tinyGrid" width="32" height="32" patternUnits="userSpaceOnUse">
+            <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#60a5fa" strokeWidth="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#tinyGrid)" />
+      </svg>
+      {/* --- Glow Blobs --- */}
+      <div className="absolute z-0">
+        <div className="absolute left-[-8%] top-[-12%] w-[460px] h-[400px] rounded-full bg-gradient-to-br from-blue-500 via-indigo-700 to-purple-700 blur-[120px] opacity-45 animate-glow1" />
+        <div className="absolute right-[-10%] bottom-[-8%] w-[330px] h-[300px] rounded-full bg-gradient-to-br from-orange-500 via-red-500 to-purple-600 blur-[100px] opacity-35 animate-glow2" />
       </div>
-
       <main className="relative z-10 w-full max-w-md px-4 sm:px-0">
-        <div className="bg-slate-900/80 backdrop-blur-2xl border border-slate-700 shadow-2xl rounded-3xl px-8 py-10 sm:py-12 flex flex-col items-center animate-fade-in-up drop-shadow-2xl">
+        <div className="bg-slate-900/80 backdrop-blur-2xl border border-slate-700 shadow-xl rounded-3xl px-8 py-10 sm:py-12 flex flex-col items-center animate-fade-in-up">
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center gap-2">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-orange-500 via-red-600 to-purple-700 flex items-center justify-center mb-3 shadow-xl animate-bounce-slow ring-4 ring-blue-400/30">
+            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-orange-500 via-red-600 to-purple-700 flex items-center justify-center mb-3 shadow-2xl animate-bounce-slow ring-4 ring-blue-400/40">
               <span className="text-white text-5xl font-black drop-shadow-lg select-none">T</span>
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-700 bg-clip-text text-transparent drop-shadow tracking-tight">
@@ -52,14 +60,13 @@ export default function LoginPage() {
 
           {/* Error */}
           {error && (
-            <div className="w-full mb-6 p-3 bg-red-950/70 border border-red-500/40 rounded-xl text-red-300 text-center font-semibold shadow">
+            <div className="w-full mb-6 p-3 bg-red-950/80 border border-red-400/40 rounded-xl text-red-300 text-center font-semibold shadow">
               {error}
             </div>
           )}
 
           {/* FORM */}
           <form onSubmit={handleSubmit} className="w-full space-y-6">
-            {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2">Login</label>
               <div className="flex items-center bg-slate-800/90 rounded-xl border-2 border-slate-700 focus-within:border-blue-500 shadow-inner transition-all">
@@ -80,7 +87,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2">Hasło</label>
               <div className="flex items-center bg-slate-800/90 rounded-xl border-2 border-slate-700 focus-within:border-blue-500 shadow-inner transition-all">
@@ -114,7 +120,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Login button */}
             <button
               type="submit"
               disabled={loading}
@@ -142,34 +147,41 @@ export default function LoginPage() {
               <div>Hasło: <strong className="font-bold text-white">test1234</strong></div>
             </div>
           </div>
-
-          {/* Footer */}
           <div className="mt-6 text-center text-xs text-slate-500 tracking-wider">
-            © {new Date().getFullYear()} TECH SPIE Polska. Wszystkie prawa zastrzeżone.
-            <br />
+            © {new Date().getFullYear()} TECH SPIE Polska. Wszystkie prawa zastrzeżone.<br />
             Designed & developed by Adrian Kicior
           </div>
         </div>
       </main>
-
-      {/* Animacje (Tailwind custom) */}
+      {/* Custom Animacje */}
       <style>{`
         .animate-fade-in-up {
-          animation: fadeInUp 0.8s cubic-bezier(0.17, 0.67, 0.6, 1.3);
+          animation: fadeInUp 0.85s cubic-bezier(0.22, 0.7, 0.6, 1.1);
         }
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(48px) scale(0.98);}
+          from { opacity: 0; transform: translateY(54px) scale(0.96);}
           to { opacity: 1; transform: translateY(0) scale(1);}
         }
-        .animate-spin-slow {
-          animation: spin 18s linear infinite;
-        }
         .animate-bounce-slow {
-          animation: bounce-slow 2.2s infinite alternate;
+          animation: bounce-slow 2.5s infinite alternate;
         }
         @keyframes bounce-slow {
           from { transform: translateY(0);}
-          to   { transform: translateY(-14px);}
+          to   { transform: translateY(-16px);}
+        }
+        .animate-glow1 {
+          animation: glowMove1 10s ease-in-out infinite alternate;
+        }
+        .animate-glow2 {
+          animation: glowMove2 13s ease-in-out infinite alternate;
+        }
+        @keyframes glowMove1 {
+          from { transform: scale(1) translateY(0); opacity: 0.42;}
+          to { transform: scale(1.09) translateY(12px); opacity: 0.51;}
+        }
+        @keyframes glowMove2 {
+          from { transform: scale(1.04) translateX(0); opacity: 0.35;}
+          to { transform: scale(1.14) translateX(22px); opacity: 0.42;}
         }
       `}</style>
     </div>
