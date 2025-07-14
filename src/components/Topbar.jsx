@@ -19,10 +19,10 @@ export default function Topbar({ title, subtitle, action }) {
         {/* Title Section - Added min-w-0 to prevent overflow */}
         <div className="flex items-center gap-1 md:gap-6 flex-1 min-w-0">
           <div>
-            <h1 className="text-xs md:text-3xl font-bold text-white mb-0 md:mb-1 truncate">
+            <h1 className="text-xs md:text-3xl font-bold dark:text-white light:text-slate-800 mb-0 md:mb-1 truncate">
               {title}
             </h1>
-            <p className="text-slate-400 mobile-micro-text md:text-lg font-medium hidden md:block truncate">
+            <p className="dark:text-slate-400 light:text-slate-600 mobile-micro-text md:text-lg font-medium hidden md:block truncate">
               {subtitle}
             </p>
           </div>
@@ -32,8 +32,8 @@ export default function Topbar({ title, subtitle, action }) {
         <div className="flex flex-nowrap gap-1 md:gap-6 items-center">
           {/* Time and Date */}
           <div className="hidden md:block text-right">
-            <div className="text-xl md:text-2xl font-bold text-white">{currentTime}</div>
-            <div className="text-sm text-slate-400 capitalize">{currentDate}</div>
+            <div className="text-xl md:text-2xl font-bold dark:text-white light:text-slate-800">{currentTime}</div>
+            <div className="text-sm dark:text-slate-400 light:text-slate-600 capitalize">{currentDate}</div>
           </div>
 
           {/* Action Button */}
@@ -42,10 +42,10 @@ export default function Topbar({ title, subtitle, action }) {
           {/* Search */}
           <div className="relative hidden lg:block">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span className="text-slate-400">🔍</span>
+              <span className="dark:text-slate-400 light:text-slate-500">🔍</span>
             </div>
             <input
-              className="input-field pl-12 pr-4 py-3 w-80 placeholder-slate-400"
+              className="input-field pl-12 pr-4 py-3 w-80 dark:placeholder-slate-400 light:placeholder-slate-500"
               placeholder="Szukaj w systemie..."
             />
           </div>

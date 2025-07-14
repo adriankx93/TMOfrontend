@@ -90,7 +90,7 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside className={`
         ${isMobile ? 'fixed' : 'static'} inset-y-0 left-0 z-50 w-56 md:w-72 bg-gradient-to-br from-[#1b2433] via-[#222e44] to-[#212b3b] border-r border-slate-700/30 
-        min-h-screen flex flex-col shadow-2xl transform transition-transform duration-300
+        min-h-screen flex flex-col shadow-2xl transform transition-all duration-300
         ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
         ${isMobile ? 'animate-slide-in-left' : ''}
         backdrop-blur-xl bg-opacity-95
@@ -150,14 +150,14 @@ export default function Sidebar() {
         {/* User Profile */}
         <div className="p-4 border-t border-slate-700/50 dark:border-slate-700/50 light:border-slate-300/50 mt-auto">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center font-bold text-white text-lg shadow-lg">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center font-bold text-white text-lg shadow-lg dark:text-white light:text-white">
               {user?.firstName?.[0]?.toUpperCase() || "U"}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-sm text-white truncate">
+              <div className="font-semibold text-sm dark:text-white light:text-slate-800 truncate">
                 {user?.firstName} {user?.lastName}
               </div>
-              <div className="text-xs text-slate-400 truncate">{user?.role}</div>
+              <div className="text-xs dark:text-slate-400 light:text-slate-600 truncate">{user?.role}</div>
             </div>
           </div>
           <div className="flex gap-2 mb-3">
