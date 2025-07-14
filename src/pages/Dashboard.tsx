@@ -47,19 +47,20 @@ export default function Dashboard() {
     setWeather(mockWeather);
   };
 
-  const checkDatabaseStatus = async () => {
-    try {
-      const hasTasksData = tasks.length > 0;
-      const hasTechniciansData = technicians.length > 0;
-      if (hasTasksData || hasTechniciansData) {
-        setDbStatus({ connected: true, message: "Operacyjna" });
-      } else {
-        setDbStatus({ connected: true, message: "Połączono (brak danych)" });
-      }
-    } catch (error) {
-      setDbStatus({ connected: false, message: "Problem z połączeniem" });
-    }
-  };
+  const fetchTodayShift = async () => {
+  try {
+    setLoading(true);
+    const data = await sheetsService.getCurrentMonthData();
+    const today = new Date();
+    const todayISO = today.toISOString().split("T")[0];
+    const shift = data.shifts.find(shift => shift.date === todayISO);
+    setTodayShift(shift || null);
+  } catch (error) {
+    console.error('Error fetching today shift:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchTodayShift = async () => {
     try {
