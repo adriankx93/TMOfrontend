@@ -26,7 +26,6 @@ import NotebookPage from "./pages/NotebookPage";
 import TrendAnalysisPage from "./pages/TrendAnalysisPage";
 import ProtokolGenerator from "./components/ProtokolGenerator";
 import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
 
 export default function App() {
   const [isMobile, setIsMobile] = useState(false);
