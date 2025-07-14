@@ -28,23 +28,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-[#10151f] via-[#182338] to-[#242b3d] overflow-hidden">
-      {/* --- Efekt glass grid --- */}
-      <svg className="absolute inset-0 w-full h-full opacity-15 pointer-events-none select-none z-0" viewBox="0 0 1920 1080">
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#202942] to-[#242b3d]">
+      {/* --- Glow grid --- */}
+      <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none select-none z-0" viewBox="0 0 1920 1080">
         <defs>
-          <pattern id="tinyGrid" width="32" height="32" patternUnits="userSpaceOnUse">
-            <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#60a5fa" strokeWidth="0.5" />
+          <pattern id="tinyGrid" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#93c5fd" strokeWidth="0.4" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#tinyGrid)" />
       </svg>
-      {/* --- Glow Blobs --- */}
-      <div className="absolute z-0">
-        <div className="absolute left-[-8%] top-[-12%] w-[460px] h-[400px] rounded-full bg-gradient-to-br from-blue-500 via-indigo-700 to-purple-700 blur-[120px] opacity-45 animate-glow1" />
-        <div className="absolute right-[-10%] bottom-[-8%] w-[330px] h-[300px] rounded-full bg-gradient-to-br from-orange-500 via-red-500 to-purple-600 blur-[100px] opacity-35 animate-glow2" />
+
+      {/* --- Gradient blobs & radial light --- */}
+      <div className="absolute z-0 w-full h-full">
+        <div className="absolute left-[-17vw] top-[-20vh] w-[620px] h-[540px] rounded-full bg-gradient-to-br from-blue-400 via-indigo-600 to-purple-700 blur-[150px] opacity-55 animate-glow1" />
+        <div className="absolute right-[-13vw] bottom-[-14vh] w-[500px] h-[420px] rounded-full bg-gradient-to-br from-orange-500 via-red-500 to-purple-600 blur-[120px] opacity-45 animate-glow2" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-700/30 via-transparent to-transparent blur-2xl opacity-40 pointer-events-none z-0" />
       </div>
+
       <main className="relative z-10 w-full max-w-md px-4 sm:px-0">
-        <div className="bg-slate-900/80 backdrop-blur-2xl border border-slate-700 shadow-xl rounded-3xl px-8 py-10 sm:py-12 flex flex-col items-center animate-fade-in-up">
+        <div className="bg-white/10 backdrop-blur-2xl border border-blue-400/20 shadow-2xl rounded-3xl px-8 py-12 flex flex-col items-center animate-fade-in-up"
+          style={{
+            boxShadow: "0 4px 64px 0 rgba(24,34,67,0.15), 0 0px 6px 0 rgba(60,130,255,0.09)"
+          }}
+        >
           {/* Logo */}
           <div className="mb-8 flex flex-col items-center gap-2">
             <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-orange-500 via-red-600 to-purple-700 flex items-center justify-center mb-3 shadow-2xl animate-bounce-slow ring-4 ring-blue-400/40">
@@ -60,7 +67,7 @@ export default function LoginPage() {
 
           {/* Error */}
           {error && (
-            <div className="w-full mb-6 p-3 bg-red-950/80 border border-red-400/40 rounded-xl text-red-300 text-center font-semibold shadow">
+            <div className="w-full mb-6 p-3 bg-red-950/90 border border-red-400/40 rounded-xl text-red-300 text-center font-semibold shadow">
               {error}
             </div>
           )}
@@ -86,7 +93,6 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2">Hasło</label>
               <div className="flex items-center bg-slate-800/90 rounded-xl border-2 border-slate-700 focus-within:border-blue-500 shadow-inner transition-all">
@@ -119,7 +125,6 @@ export default function LoginPage() {
                 </Link>
               </div>
             </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -156,32 +161,32 @@ export default function LoginPage() {
       {/* Custom Animacje */}
       <style>{`
         .animate-fade-in-up {
-          animation: fadeInUp 0.85s cubic-bezier(0.22, 0.7, 0.6, 1.1);
+          animation: fadeInUp 0.95s cubic-bezier(0.21,0.7,0.6,1.13);
         }
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(54px) scale(0.96);}
+          from { opacity: 0; transform: translateY(40px) scale(0.98);}
           to { opacity: 1; transform: translateY(0) scale(1);}
         }
         .animate-bounce-slow {
-          animation: bounce-slow 2.5s infinite alternate;
+          animation: bounce-slow 2.2s infinite alternate;
         }
         @keyframes bounce-slow {
           from { transform: translateY(0);}
           to   { transform: translateY(-16px);}
         }
         .animate-glow1 {
-          animation: glowMove1 10s ease-in-out infinite alternate;
+          animation: glowMove1 15s ease-in-out infinite alternate;
         }
         .animate-glow2 {
-          animation: glowMove2 13s ease-in-out infinite alternate;
+          animation: glowMove2 17s ease-in-out infinite alternate;
         }
         @keyframes glowMove1 {
-          from { transform: scale(1) translateY(0); opacity: 0.42;}
-          to { transform: scale(1.09) translateY(12px); opacity: 0.51;}
+          from { transform: scale(1) translateY(0) rotate(0deg); opacity: 0.42;}
+          to { transform: scale(1.12) translateY(22px) rotate(14deg); opacity: 0.54;}
         }
         @keyframes glowMove2 {
-          from { transform: scale(1.04) translateX(0); opacity: 0.35;}
-          to { transform: scale(1.14) translateX(22px); opacity: 0.42;}
+          from { transform: scale(1.04) translateX(0) rotate(0deg); opacity: 0.39;}
+          to { transform: scale(1.18) translateX(32px) rotate(-10deg); opacity: 0.47;}
         }
       `}</style>
     </div>
