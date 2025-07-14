@@ -3,27 +3,24 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { authService } from "../services/authService";
 
 export default function AuthGuard({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    checkAuth();
-  }, [location.pathname]);
-
-  const checkAuth = () => {
-    const isAuth = authService.isAuthenticated();
-    setIsAuthenticated(isAuth);
+    const token = authService.getToken();
     setIsLoading(false);
 
-    // Redirect to login if not authenticated and not already on login or register page
-    if (!isAuth && 
-        !location.pathname.includes('/login') && 
-        !location.pathname.includes('/register')) {
-      navigate('/login', { state: { from: location.pathname } });
+    // Jeśli nie ma tokena, przekieruj do login
+    if (
+      !token &&
+      !location.pathname.includes("/login") &&
+      !location.pathname.includes("/register")
+    ) {
+      navigate("/login", { state: { from: location.pathname } });
     }
-  };
+    // jeśli masz token, nic nie rób
+  }, [location.pathname, navigate]);
 
   if (isLoading) {
     return (
@@ -33,13 +30,16 @@ export default function AuthGuard({ children }) {
     );
   }
 
-  // If on login or register page, or if authenticated, render children
-  if (location.pathname.includes('/login') || 
-      location.pathname.includes('/register') || 
-      isAuthenticated) {
+  // Jeżeli jesteś na login/register lub masz token, pokaż dzieci
+  const token = authService.getToken();
+  if (
+    location.pathname.includes("/login") ||
+    location.pathname.includes("/register") ||
+    token
+  ) {
     return children;
   }
 
-  // This should not be reached due to the redirect in checkAuth
+  // (Teoretycznie już przekierowało)
   return null;
 }
