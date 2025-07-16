@@ -8,9 +8,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { tasks } = useTasks();
   const { technicians } = useTechnicians();
-  const [todayShift, setTodayShift] = useState(null);
+  const [todayShift, setTodayShift] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [weather, setWeather] = useState(null);
+  const [weather, setWeather] = useState<any>(null);
   const [dbStatus, setDbStatus] = useState({ connected: false, message: "Sprawdzanie..." });
   const [dashboardStats, setDashboardStats] = useState({
     activeTechnicians: 0,
@@ -20,7 +20,7 @@ export default function Dashboard() {
   });
 
   // Helper: oblicza czas do kolejnej godziny zmiany
-  const getTimeUntil = (targetHour) => {
+  const getTimeUntil = (targetHour: number) => {
     const now = new Date();
     const target = new Date(now);
     target.setHours(targetHour, 0, 0, 0);
@@ -38,13 +38,16 @@ export default function Dashboard() {
     fetchWeatherData();
     checkDatabaseStatus();
     calculateStats();
+
     const interval = setInterval(() => {
       fetchTodayShift();
       fetchWeatherData();
       checkDatabaseStatus();
+      calculateStats();
     }, 10 * 60 * 1000);
+
     return () => clearInterval(interval);
-  }, [tasks, technicians]);
+  }, [tasks, technicians, todayShift]);
 
   const fetchWeatherData = async () => {
     const mockWeather = {
@@ -80,7 +83,7 @@ export default function Dashboard() {
       const data = await sheetsService.getCurrentMonthData();
       const today = new Date();
       const todayDay = today.getDate();
-      const shift = data.shifts.find(s => s.dayNumber === todayDay);
+      const shift = data.shifts.find((s: any) => s.dayNumber === todayDay);
       setTodayShift(shift || null);
     } catch (error) {
       console.error('Error fetching today shift:', error);
@@ -115,22 +118,20 @@ export default function Dashboard() {
     return isDay ? todayShift.nightTechnicians : todayShift.dayTechnicians;
   };
 
-  const getCurrentShiftName = () => isDay ? "Zmiana dzienna" : "Zmiana nocna";
-  const getNextShiftName = () => isDay ? "Zmiana nocna" : "Zmiana dzienna";
-  const getCurrentShiftTime = () => isDay ? "07:00 - 19:00" : "19:00 - 07:00";
-  const getNextShiftTime = () => isDay ? "19:00 - 07:00" : "07:00 - 19:00";
+  const getCurrentShiftName = () => (isDay ? "Zmiana dzienna" : "Zmiana nocna");
+  const getNextShiftName = () => (isDay ? "Zmiana nocna" : "Zmiana dzienna");
+  const getCurrentShiftTime = () => (isDay ? "07:00 - 19:00" : "19:00 - 07:00");
+  const getNextShiftTime = () => (isDay ? "19:00 - 07:00" : "07:00 - 19:00");
 
   const currentShiftTechnicians = getCurrentShiftTechnicians();
   const nextShiftTechnicians = getNextShiftTechnicians();
 
   const getCurrentShiftTasks = () => {
-    const currentShift = isDay ? "Dzienna" : "Nocna";
+    const shiftName = isDay ? "Dzienna" : "Nocna";
     return tasks.filter(task =>
-      task.shift === currentShift &&
-      ['assigned', 'in_progress'].includes(task.status)
+      task.shift === shiftName && ['assigned', 'in_progress'].includes(task.status)
     );
   };
-
   const currentShiftTasks = getCurrentShiftTasks();
 
   return (
@@ -145,9 +146,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">TechSPIE Dashboard</h1>
-                <p className="text-slate-300 text-sm md:text-lg">
-                  Technical Facility Management System - Miasteczko Orange
-                </p>
+                <p className="text-slate-300 text-sm md:text-lg">Technical Facility Management System - Miasteczko Orange</p>
               </div>
             </div>
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-slate-300">
@@ -156,19 +155,13 @@ export default function Dashboard() {
                 <span className="text-sm font-medium">System Online</span>
               </div>
               <div className="text-xs md:text-sm font-medium">
-                {new Date().toLocaleDateString('pl-PL', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+                {new Date().toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}
               </div>
               <div className="text-base md:text-lg font-bold text-white">
                 {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           </div>
-          {/* Weather Widget */}
           {weather && (
             <div className="glass-card-light p-4 md:p-6 min-w-[200px] md:min-w-[280px] hidden lg:block">
               <div className="flex items-center justify-between mb-4">
@@ -203,6 +196,5 @@ export default function Dashboard() {
 
       {/* Current Shift Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 w-full">
-        {/* Current Shift */}
         <div className="lg:col-span-2 glass-card overflow-hidden">
           <div className={`${isDay ? 'gradient-warning' : 'gradient-primary'} px-4 md:px-8 py-4 md:py-6`}>
