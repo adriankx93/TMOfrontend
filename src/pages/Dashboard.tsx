@@ -158,6 +158,53 @@ export default function Dashboard() {
     if (currentHour >= 7 && currentHour < 19) return "19:00 - 07:00";
     return "07:00 - 19:00";
   };
+  
+  const getTimeUntilNextShift = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+    
+    let hoursRemaining = 0;
+    let minutesRemaining = 0;
+    
+    if (currentHour >= 7 && currentHour < 19) {
+      // During day shift, calculate time until 19:00
+      hoursRemaining = 18 - currentHour;
+      minutesRemaining = 60 - currentMinutes;
+      
+      if (minutesRemaining === 60) {
+        minutesRemaining = 0;
+      } else {
+        // If we have minutes remaining, we need to subtract 1 from hours
+        if (minutesRemaining > 0 && hoursRemaining > 0) {
+          hoursRemaining -= 1;
+        }
+      }
+    } else {
+      // During night shift, calculate time until 07:00
+      if (currentHour >= 19) {
+        hoursRemaining = 24 - currentHour + 7;
+      } else {
+        hoursRemaining = 7 - currentHour;
+      }
+      
+      minutesRemaining = 60 - currentMinutes;
+      
+      if (minutesRemaining === 60) {
+        minutesRemaining = 0;
+      } else {
+        // If we have minutes remaining, we need to subtract 1 from hours
+        if (minutesRemaining > 0 && hoursRemaining > 0) {
+          hoursRemaining -= 1;
+        }
+      }
+    }
+    
+    return {
+      hours: hoursRemaining,
+      minutes: minutesRemaining
+    };
+  };
 
   const currentShiftTechnicians = getCurrentShiftTechnicians();
   const nextShiftTechnicians = getNextShiftTechnicians();
@@ -383,10 +430,17 @@ export default function Dashboard() {
               <div className="text-sm text-slate-400 text-center">
                 <div className="font-semibold text-white">Zmiana za:</div>
                 <div className="text-base md:text-lg font-bold text-orange-400">
-                  {isDay 
-                    ? `${19 - currentHour}h ${60 - new Date().getMinutes()}min`
-                    : `${7 + (24 - currentHour)}h ${60 - new Date().getMinutes()}min`
-                  }
+                  {(() => {
+                    const { hours, minutes } = getTimeUntilNextShift();
+                    return (
+                      <span className="flex items-center justify-center gap-1">
+                        <span className="bg-orange-500/20 px-2 py-1 rounded-md">{hours}</span>
+                        <span>h</span>
+                        <span className="bg-orange-500/20 px-2 py-1 rounded-md">{minutes}</span>
+                        <span>min</span>
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
