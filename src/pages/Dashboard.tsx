@@ -447,7 +447,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-blue-500 text-white text-xs rounded-full shadow-lg">
-                            {!isDay ? '☀️ Dzienna' : '🌙 Nocna'}
+                            {!isDay ? '☀️ Dzienna' : 'Nocna'}
                           </div>
                         </div>
                       </div>
