@@ -429,18 +429,36 @@ export default function Dashboard() {
             <div className="mt-4 md:mt-6 pt-3 md:pt-4 border-t border-slate-600">
               <div className="text-sm text-slate-400 text-center">
                 <div className="font-semibold text-white">Zmiana za:</div>
-                <div className="text-base md:text-lg font-bold text-orange-400">
+                <div className="mt-2 mb-1">
                   {(() => {
                     const { hours, minutes } = getTimeUntilNextShift();
                     return (
-                      <span className="flex items-center justify-center gap-1">
-                        <span className="bg-orange-500/20 px-2 py-1 rounded-md">{hours}</span>
-                        <span>h</span>
-                        <span className="bg-orange-500/20 px-2 py-1 rounded-md">{minutes}</span>
-                        <span>min</span>
-                      </span>
+                      <div className="flex items-center justify-center">
+                        <div className="relative">
+                          <div className="flex items-center justify-center gap-1">
+                            <div className="flex flex-col items-center">
+                              <div className="bg-gradient-to-b from-orange-500 to-red-600 text-white text-xl md:text-2xl font-bold w-12 h-12 rounded-lg flex items-center justify-center shadow-lg">{hours}</div>
+                              <span className="text-xs mt-1 text-slate-400">godzin</span>
+                            </div>
+                            <div className="text-orange-400 text-xl font-bold px-1">:</div>
+                            <div className="flex flex-col items-center">
+                              <div className="bg-gradient-to-b from-orange-500 to-red-600 text-white text-xl md:text-2xl font-bold w-12 h-12 rounded-lg flex items-center justify-center shadow-lg">{minutes}</div>
+                              <span className="text-xs mt-1 text-slate-400">minut</span>
+                            </div>
+                          </div>
+                          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-blue-500 text-white text-xs rounded-full shadow-lg">
+                            {!isDay ? '☀️ Dzienna' : '🌙 Nocna'}
+                          </div>
+                        </div>
+                      </div>
                     );
                   })()}
+                </div>
+                <div className="text-xs text-slate-500 mt-2">
+                  {isDay 
+                    ? `Zmiana o 19:00 (${new Date().toLocaleDateString('pl-PL')})`
+                    : `Zmiana o 07:00 (${new Date(Date.now() + 24*60*60*1000).toLocaleDateString('pl-PL')})`
+                  }
                 </div>
               </div>
             </div>
