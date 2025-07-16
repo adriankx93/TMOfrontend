@@ -1,12 +1,51 @@
 import ThemeToggle from "./ThemeToggle";
+import { useState, useEffect } from "react";
 
 export default function Topbar({ title, subtitle, action }) {
-  const currentTime = new Date().toLocaleTimeString('pl-PL', { 
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  useEffect(() => {
+    // Initial time sync
+    syncTimeWithServer();
+    
+    // Update time every second
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    
+    // Sync with server every 10 minutes
+    const syncInterval = setInterval(syncTimeWithServer, 10 * 60 * 1000);
+    
+    return () => {
+      clearInterval(timeInterval);
+      clearInterval(syncInterval);
+    };
+  }, []);
+  
+  const syncTimeWithServer = async () => {
+    try {
+      // Fetch time from WorldTimeAPI for Warsaw
+      const response = await fetch('https://worldtimeapi.org/api/timezone/Europe/Warsaw');
+      const data = await response.json();
+      
+      if (data && data.datetime) {
+        // Parse the datetime string to get a Date object
+        const serverTime = new Date(data.datetime);
+        setCurrentTime(serverTime);
+      }
+    } catch (error) {
+      console.error('Error fetching time:', error);
+      // Fallback to local time if API fails
+      setCurrentTime(new Date());
+    }
+  };
+  
+  const formattedTime = currentTime.toLocaleTimeString('pl-PL', { 
     hour: '2-digit', 
     minute: '2-digit' 
   });
   
-  const currentDate = new Date().toLocaleDateString('pl-PL', {
+  const currentDate = currentTime.toLocaleDateString('pl-PL', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -33,7 +72,7 @@ export default function Topbar({ title, subtitle, action }) {
           {/* Time and Date */}
           <div className="hidden md:block text-right">
             <div className="text-xl md:text-2xl font-bold dark:text-white light:text-slate-800">
-              {currentTime}
+              {formattedTime}
             </div>
             <div className="text-sm capitalize dark:text-slate-400 light:text-slate-600">
               {currentDate}

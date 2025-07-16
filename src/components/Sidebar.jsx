@@ -36,12 +36,37 @@ export default function Sidebar() {
   // Live clock (odświeżanie co sekundę)
   useEffect(() => {
     const interval = setInterval(() => {
-      setClock(
-        new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
-      );
+      syncTimeWithServer();
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+  
+  const syncTimeWithServer = async () => {
+    try {
+      // Try to fetch time from WorldTimeAPI for Warsaw
+      const response = await fetch('https://worldtimeapi.org/api/timezone/Europe/Warsaw');
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.datetime) {
+          // Parse the datetime string to get a Date object
+          const serverTime = new Date(data.datetime);
+          setClock(
+            serverTime.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+          );
+          return;
+        }
+      }
+      // Fallback to local time if API fails
+      setClock(
+        new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+      );
+    } catch (error) {
+      // Fallback to local time if API fails
+      setClock(
+        new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+      );
+    }
+  };
 
   const handleLogout = () => {
     authService.logout();

@@ -18,20 +18,47 @@ export default function Dashboard() {
     completedToday: 0,
     poolTasks: 0
   });
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     fetchTodayShift();
     fetchWeatherData();
     checkDatabaseStatus();
     calculateStats();
+    syncTimeWithServer();
     
     const interval = setInterval(() => {
       fetchTodayShift();
       fetchWeatherData();
       checkDatabaseStatus();
+      syncTimeWithServer();
     }, 10 * 60 * 1000);
+    
+    // Update time every second
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    
     return () => clearInterval(interval);
   }, [tasks, technicians]);
+  
+  const syncTimeWithServer = async () => {
+    try {
+      // Fetch time from WorldTimeAPI for Warsaw
+      const response = await fetch('https://worldtimeapi.org/api/timezone/Europe/Warsaw');
+      const data = await response.json();
+      
+      if (data && data.datetime) {
+        // Parse the datetime string to get a Date object
+        const serverTime = new Date(data.datetime);
+        setCurrentTime(serverTime);
+      }
+    } catch (error) {
+      console.error('Error fetching time:', error);
+      // Fallback to local time if API fails
+      setCurrentTime(new Date());
+    }
+  };
 
   const fetchWeatherData = async () => {
     // Mock weather data - w rzeczywistej aplikacji można użyć API pogodowego
@@ -159,8 +186,7 @@ export default function Dashboard() {
     return "07:00 - 19:00";
   };
   
-  const getTimeUntilNextShift = () => {
-    const now = new Date();
+  const getTimeUntilNextShift = (now) => {
     const currentHour = now.getHours();
     const currentMinutes = now.getMinutes();
     
@@ -169,7 +195,7 @@ export default function Dashboard() {
     
     if (currentHour >= 7 && currentHour < 19) {
       // During day shift, calculate time until 19:00
-      hoursRemaining = 18 - currentHour;
+      hoursRemaining = 19 - currentHour - 1;
       minutesRemaining = 60 - currentMinutes;
       
       if (minutesRemaining === 60) {
@@ -177,7 +203,7 @@ export default function Dashboard() {
       } else {
         // If we have minutes remaining, we need to subtract 1 from hours
         if (minutesRemaining > 0 && hoursRemaining > 0) {
-          hoursRemaining -= 1;
+          // Hour already subtracted above
         }
       }
     } else {
@@ -193,7 +219,7 @@ export default function Dashboard() {
       if (minutesRemaining === 60) {
         minutesRemaining = 0;
       } else {
-        // If we have minutes remaining, we need to subtract 1 from hours
+        // If we have minutes remaining, we've already subtracted 1 from hours
         if (minutesRemaining > 0 && hoursRemaining > 0) {
           hoursRemaining -= 1;
         }
@@ -251,7 +277,7 @@ export default function Dashboard() {
                 })}
               </div>
               <div className="text-base md:text-lg font-bold text-white">
-                {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
+                {currentTime.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           </div>
@@ -430,34 +456,33 @@ export default function Dashboard() {
               <div className="text-sm text-slate-400 text-center">
                 <div className="font-semibold text-white">Zmiana za:</div>
                 <div className="mt-2 mb-1">
-                  {(() => {
-                    const { hours, minutes } = getTimeUntilNextShift();
-                    return (
-                      <div className="flex items-center justify-center">
-                        <div className="relative">
-                          <div className="flex items-center justify-center gap-1">
-                            <div className="flex flex-col items-center">
-                              <div className="bg-gradient-to-b from-orange-500 to-red-600 text-white text-xl md:text-2xl font-bold w-12 h-12 rounded-lg flex items-center justify-center shadow-lg">{hours}</div>
-                              <span className="text-xs mt-1 text-slate-400">godzin</span>
-                            </div>
-                            <div className="text-orange-400 text-xl font-bold px-1">:</div>
-                            <div className="flex flex-col items-center">
-                              <div className="bg-gradient-to-b from-orange-500 to-red-600 text-white text-xl md:text-2xl font-bold w-12 h-12 rounded-lg flex items-center justify-center shadow-lg">{minutes}</div>
-                              <span className="text-xs mt-1 text-slate-400">minut</span>
-                            </div>
+                  <div className="flex items-center justify-center">
+                    <div className="relative">
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="flex flex-col items-center">
+                          <div className="bg-gradient-to-b from-orange-500 to-red-600 text-white text-xl md:text-2xl font-bold w-12 h-12 rounded-lg flex items-center justify-center shadow-lg">
+                            {getTimeUntilNextShift(currentTime).hours}
                           </div>
-                          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-blue-500 text-white text-xs rounded-full shadow-lg">
-                            {!isDay ? '☀️ Dzienna' : 'Nocna'}
+                          <span className="text-xs mt-1 text-slate-400">godzin</span>
+                        </div>
+                        <div className="text-orange-400 text-xl font-bold px-1">:</div>
+                        <div className="flex flex-col items-center">
+                          <div className="bg-gradient-to-b from-orange-500 to-red-600 text-white text-xl md:text-2xl font-bold w-12 h-12 rounded-lg flex items-center justify-center shadow-lg">
+                            {getTimeUntilNextShift(currentTime).minutes}
                           </div>
+                          <span className="text-xs mt-1 text-slate-400">minut</span>
                         </div>
                       </div>
-                    );
-                  })()}
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-blue-500 text-white text-xs rounded-full shadow-lg">
+                        {!isDay ? '☀️ Dzienna' : 'Nocna'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="text-xs text-slate-500 mt-2">
                   {isDay 
-                    ? `Zmiana o 19:00 (${new Date().toLocaleDateString('pl-PL')})`
-                    : `Zmiana o 07:00 (${new Date(Date.now() + 24*60*60*1000).toLocaleDateString('pl-PL')})`
+                    ? `Zmiana o 19:00 (${currentTime.toLocaleDateString('pl-PL')})`
+                    : `Zmiana o 07:00 (${new Date(currentTime.getTime() + (currentTime.getHours() < 7 ? 0 : 24)*60*60*1000).toLocaleDateString('pl-PL')})`
                   }
                 </div>
               </div>
